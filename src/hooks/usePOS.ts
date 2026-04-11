@@ -249,11 +249,18 @@ export const usePOS = (session: any) => {
     try {
       const res = await fetch("/api/branches")
       const data = await res.json()
-      if (data.success) setBranches(data.data)
+      if (data.success) {
+        setBranches(data.data)
+        // Si no hay sede seleccionada, seleccionar la principal o la primera
+        if (!selectedBranch && data.data.length > 0) {
+          const main = data.data.find((b: any) => b.isMain) || data.data[0]
+          setSelectedBranch(main.id)
+        }
+      }
     } catch (error) {
       console.error("Error fetching branches:", error)
     }
-  }, [session])
+  }, [session, selectedBranch])
 
   const fetchUsers = useCallback(async () => {
     if (!session?.user?.tenantId) return
