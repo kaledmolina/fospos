@@ -81,6 +81,9 @@ export const POSView = ({
         onTabChangeWithEffects={(tab) => pos.setPosTab(tab)}
         showConfetti={pos.showConfetti}
         onSignOut={onSignOut}
+        branches={pos.branches}
+        selectedBranch={pos.selectedBranch}
+        onBranchChange={pos.setSelectedBranch}
       >
         <AnimatePresence mode="wait">
           {pos.posTab === "dashboard" && (

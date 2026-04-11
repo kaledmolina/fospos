@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get("type") // "stats" | "list"
     const customerId = searchParams.get("customerId")
+    const branchId = searchParams.get("branchId")
 
     if (type === "stats") {
       // Estadísticas del dashboard
@@ -28,10 +29,15 @@ export async function GET(request: NextRequest) {
       const monthStart = startOfMonth(today)
       const monthEnd = endOfMonth(today)
 
+      const whereBase: any = {
+        tenantId: session.user.tenantId,
+        ...(branchId ? { branchId } : {})
+      }
+
       // Ventas de hoy
       const todaySales = await db.sale.aggregate({
         where: {
-          tenantId: session.user.tenantId,
+          ...whereBase,
           createdAt: { gte: todayStart, lte: todayEnd }
         },
         _sum: { total: true },
@@ -41,7 +47,7 @@ export async function GET(request: NextRequest) {
       // Ventas del mes
       const monthSales = await db.sale.aggregate({
         where: {
-          tenantId: session.user.tenantId,
+          ...whereBase,
           createdAt: { gte: monthStart, lte: monthEnd }
         },
         _sum: { total: true },
@@ -52,7 +58,10 @@ export async function GET(request: NextRequest) {
       const topProductsRaw = await db.saleItem.groupBy({
         by: ["productId", "productName", "productCode"],
         where: {
-          sale: { tenantId: session.user.tenantId }
+          sale: { 
+            tenantId: session.user.tenantId,
+            ...(branchId ? { branchId } : {})
+          }
         },
         _sum: {
           quantity: true,
@@ -74,7 +83,7 @@ export async function GET(request: NextRequest) {
 
       // Ventas recientes
       const recentSales = await db.sale.findMany({
-        where: { tenantId: session.user.tenantId },
+        where: whereBase,
         include: {
           customer: true,
           items: true,
@@ -98,54 +107,65 @@ export async function GET(request: NextRequest) {
       // Créditos pendientes
       const pendingCredits = await db.credit.aggregate({
         where: {
-          tenantId: session.user.tenantId,
+          ...whereBase,
           status: { in: ["PENDING", "PARTIAL"] }
         },
         _sum: { balance: true }
       })
 
+      // Stock bajo y Vencimiento (Filtrado por sucursal si aplica)
       const products = await db.product.findMany({
-        where: { tenantId: session.user.tenantId, isActive: true }
+        where: { tenantId: session.user.tenantId, isActive: true },
+        include: {
+          stockByBranch: branchId ? { where: { branchId } } : true
+        }
       })
-      const lowStockProducts = products.filter(p => p.stock < p.minStock).length
+
+      // Calcular stock real según sucursal
+      const mappedProducts = products.map(p => {
+        let stock = p.stock
+        let minStock = p.minStock
+        if (branchId) {
+          const bs = p.stockByBranch.find(s => s.branchId === branchId)
+          stock = bs?.stock || 0
+          minStock = bs?.minStock || p.minStock
+        }
+        return { ...p, currentStock: stock, currentMinStock: minStock }
+      })
+
+      const lowStockProducts = mappedProducts.filter(p => p.currentStock < p.currentMinStock).length
 
       // Productos vencidos y por vencer (7 días)
       const now = new Date()
       const sevenDaysFromNow = new Date()
       sevenDaysFromNow.setDate(now.getDate() + 7)
 
-      const expiredCount = products.filter(p => p.expiryDate && new Date(p.expiryDate) < now).length
-      const nearExpiryCount = products.filter(p => 
+      const expiredCount = mappedProducts.filter(p => p.expiryDate && new Date(p.expiryDate) < now).length
+      const nearExpiryCount = mappedProducts.filter(p => 
         p.expiryDate && 
         new Date(p.expiryDate) >= now && 
         new Date(p.expiryDate) <= sevenDaysFromNow
       ).length
 
-      // Obtener meta de la sucursal del usuario o de la principal como fallback
-      const user = await db.user.findUnique({
-        where: { id: session.user.id },
-        include: { branch: true }
-      })
-
-      let monthlyGoal = user?.branch?.monthlyGoal || 0
-
-      // Si el usuario no tiene sucursal o no tiene meta, buscar la principal
-      if (monthlyGoal === 0) {
-        const mainBranch = await db.branch.findFirst({
-          where: { 
-            tenantId: session.user.tenantId,
-            isMain: true 
-          }
+      // Obtener meta: Priorizar branchId de la query, luego branch del usuario, luego principal
+      let targetMonthlyGoal = 0
+      
+      if (branchId) {
+        const selectedBranch = await db.branch.findUnique({ where: { id: branchId } })
+        targetMonthlyGoal = selectedBranch?.monthlyGoal || 0
+      } else {
+        const user = await db.user.findUnique({
+          where: { id: session.user.id },
+          include: { branch: true }
         })
-        monthlyGoal = mainBranch?.monthlyGoal || 0
-      }
-
-      // Si aún es 0, usar cualquier sucursal disponible para este tenant
-      if (monthlyGoal === 0) {
-        const anyBranch = await db.branch.findFirst({
-          where: { tenantId: session.user.tenantId }
-        })
-        monthlyGoal = anyBranch?.monthlyGoal || 0
+        targetMonthlyGoal = user?.branch?.monthlyGoal || 0
+        
+        if (targetMonthlyGoal === 0) {
+          const mainBranch = await db.branch.findFirst({
+            where: { tenantId: session.user.tenantId, isMain: true }
+          })
+          targetMonthlyGoal = mainBranch?.monthlyGoal || 0
+        }
       }
 
       return NextResponse.json({
@@ -161,18 +181,16 @@ export async function GET(request: NextRequest) {
           lowStockProducts,
           expiredCount,
           nearExpiryCount,
-          monthlyGoal
+          monthlyGoal: targetMonthlyGoal
         }
       })
     }
 
-    // Listar ventas
-    const where: Record<string, unknown> = {
-      tenantId: session.user.tenantId
-    }
-
-    if (customerId) {
-      where.customerId = customerId
+    // LISTADO DE VENTAS
+    const where: any = {
+      tenantId: session.user.tenantId,
+      ...(branchId ? { branchId } : {}),
+      ...(customerId ? { customerId } : {})
     }
 
     const sales = await db.sale.findMany({

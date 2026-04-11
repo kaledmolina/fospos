@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 
 // GET - Obtener caja actual
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
@@ -15,10 +15,18 @@ export async function GET() {
       )
     }
 
+    const { searchParams } = new URL(request.url)
+    const branchId = searchParams.get("branchId")
+
+    const where: any = {
+      tenantId: session.user.tenantId,
+      ...(branchId ? { branchId } : {})
+    }
+
     // Buscar caja abierta
     const openCash = await db.cashRegister.findFirst({
       where: {
-        tenantId: session.user.tenantId,
+        ...where,
         status: "OPEN"
       },
       orderBy: { openedAt: "desc" }
@@ -34,7 +42,7 @@ export async function GET() {
     // Si no hay caja abierta, mostrar la última cerrada
     const lastCash = await db.cashRegister.findFirst({
       where: {
-        tenantId: session.user.tenantId,
+        ...where,
         status: "CLOSED"
       },
       orderBy: { closedAt: "desc" }

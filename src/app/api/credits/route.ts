@@ -18,9 +18,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
     const customerId = searchParams.get("customerId")
+    const branchId = searchParams.get("branchId")
 
-    const where: Record<string, unknown> = {
-      tenantId: session.user.tenantId
+    const where: any = {
+      tenantId: session.user.tenantId,
+      ...(branchId ? { branchId } : {})
     }
 
     if (status && status !== "all") {

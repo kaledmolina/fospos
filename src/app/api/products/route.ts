@@ -19,8 +19,9 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search")
     const categoryId = searchParams.get("categoryId")
     const lowStock = searchParams.get("lowStock")
+    const branchId = searchParams.get("branchId")
 
-    const where: Record<string, unknown> = {
+    const where: any = {
       tenantId: session.user.tenantId
     }
 
@@ -36,28 +37,43 @@ export async function GET(request: NextRequest) {
       where.categoryId = categoryId
     }
 
-    if (lowStock === "true") {
-      // Productos con stock menor al mínimo
-      where.stock = { lt: db.product.fields.minStock }
-    }
-
     const products = await db.product.findMany({
       where,
       include: {
-        category: true
+        category: true,
+        stockByBranch: branchId ? {
+          where: { branchId }
+        } : true
       },
       orderBy: { name: "asc" }
     })
 
-    // Filtrar productos con stock bajo en memoria (SQLite no soporta comparación de campos)
-    let filteredProducts = products
+    // Mapear stock según la sucursal seleccionada
+    let mappedProducts = products.map(p => {
+      let currentStock = p.stock
+      let currentMinStock = p.minStock
+
+      if (branchId) {
+        const branchStock = p.stockByBranch.find(s => s.branchId === branchId)
+        currentStock = branchStock?.stock || 0
+        currentMinStock = branchStock?.minStock || p.minStock
+      }
+
+      return {
+        ...p,
+        stock: currentStock,
+        minStock: currentMinStock
+      }
+    })
+
+    // Filtrar productos con stock bajo
     if (lowStock === "true") {
-      filteredProducts = products.filter(p => p.stock < p.minStock)
+      mappedProducts = mappedProducts.filter(p => p.stock < p.minStock)
     }
 
     return NextResponse.json({
       success: true,
-      data: filteredProducts
+      data: mappedProducts
     })
   } catch (error) {
     console.error("Error fetching products:", error)

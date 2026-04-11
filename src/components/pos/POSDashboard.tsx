@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Store, X, LogOut, Menu, Bell, Package, AlertCircle, 
   Clock, BarChart3, ShoppingBag, Users, CreditCard, 
-  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen
+  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe
 } from "lucide-react"
+import { BranchSelector } from "./shared/BranchSelector"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -27,10 +28,11 @@ interface POSDashboardProps {
   onClearNotifications: () => void
   showConfetti: boolean
   onSignOut: () => void
-  // Children or Tabs will be rendered here
-  children: React.ReactNode
-  // Tab change handlers for specific side effects
   onTabChangeWithEffects: (tab: string) => void
+  branches: any[]
+  selectedBranch: string | null
+  onBranchChange: (branchId: string | null) => void
+  children: React.ReactNode
 }
 
 export const POSDashboard = ({
@@ -47,7 +49,10 @@ export const POSDashboard = ({
   showConfetti,
   onSignOut,
   children,
-  onTabChangeWithEffects
+  onTabChangeWithEffects,
+  branches,
+  selectedBranch,
+  onBranchChange
 }: POSDashboardProps) => {
   return (
     <div className="min-h-screen flex bg-background text-foreground transition-colors duration-300">
@@ -247,6 +252,12 @@ export const POSDashboard = ({
               </ScrollArea>
             </PopoverContent>
           </Popover>
+          <BranchSelector 
+            branches={branches}
+            selectedBranch={selectedBranch}
+            onBranchChange={onBranchChange}
+            isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
+          />
         </div>
 
         <div className="p-4 md:p-6 lg:pr-32 pb-24 lg:pb-6">

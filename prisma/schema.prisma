@@ -88,6 +88,8 @@ model Branch {
   sales         Sale[]
   inventoryMovements InventoryMovement[]
   users         User[]
+  credits       Credit[]
+  expenses      Expense[]
   
   @@unique([tenantId, name])
   @@map("branches")
@@ -420,6 +422,9 @@ model Credit {
   saleId        String?  @unique // Venta origen (si aplica)
   sale          Sale?    @relation(fields: [saleId], references: [id], onDelete: SetNull)
   
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  
   // Montos
   totalAmount   Float    // Monto total del crédito
   paidAmount    Float    @default(0) // Monto pagado
@@ -521,6 +526,9 @@ model Expense {
   id            String   @id @default(cuid())
   tenantId      String
   tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
   
   // Información del gasto
   category      String   // "Servicios", "Nomina", "Alquiler", "Insumos", etc.

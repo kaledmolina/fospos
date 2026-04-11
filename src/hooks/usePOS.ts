@@ -40,7 +40,7 @@ export const usePOS = (session: any) => {
   
   const [expenses, setExpenses] = useState<ExpenseData[]>([])
   const [branches, setBranches] = useState<BranchData[]>([])
-  const [selectedBranch, setSelectedBranch] = useState<string | null>(null)
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(session?.user?.branchId || null)
   const [creditFilter, setCreditFilter] = useState<string>("all")
   const [tenantUsers, setTenantUsers] = useState<TenantUserData[]>([])
   const [sales, setSales] = useState<any[]>([])
@@ -157,13 +157,16 @@ export const usePOS = (session: any) => {
   const fetchPOSData = useCallback(async () => {
     if (!session?.user?.tenantId) return
     try {
+      const query = selectedBranch ? `?branchId=${selectedBranch}` : ""
+      const statsQuery = selectedBranch ? `?type=stats&branchId=${selectedBranch}` : "?type=stats"
+      
       const [productsRes, categoriesRes, customersRes, statsRes, cashRes, creditsRes] = await Promise.all([
-        fetch("/api/products"),
-        fetch("/api/categories"),
-        fetch("/api/customers"),
-        fetch("/api/sales?type=stats"),
-        fetch("/api/cash"),
-        fetch("/api/credits")
+        fetch(`/api/products${query}`),
+        fetch(`/api/categories`),
+        fetch(`/api/customers`),
+        fetch(`/api/sales${statsQuery}`),
+        fetch(`/api/cash${query}`),
+        fetch(`/api/credits${query}`)
       ])
       
       if (productsRes.ok) setProducts((await productsRes.json()).data)
@@ -175,7 +178,7 @@ export const usePOS = (session: any) => {
     } catch (error) {
       console.error("Error fetching POS data:", error)
     }
-  }, [session])
+  }, [session, selectedBranch])
 
   const fetchNotifications = useCallback(async () => {
     if (!session?.user?.tenantId) return
@@ -220,24 +223,26 @@ export const usePOS = (session: any) => {
   const fetchSales = useCallback(async () => {
     if (!session?.user?.tenantId) return
     try {
-      const res = await fetch("/api/sales?type=list")
+      const query = selectedBranch ? `?type=list&branchId=${selectedBranch}` : "?type=list"
+      const res = await fetch(`/api/sales${query}`)
       const data = await res.json()
       if (data.success) setSales(data.data)
     } catch (error) {
       console.error("Error fetching sales:", error)
     }
-  }, [session])
+  }, [session, selectedBranch])
 
   const fetchExpenses = useCallback(async () => {
     if (!session?.user?.tenantId) return
     try {
-      const res = await fetch("/api/expenses")
+      const query = selectedBranch ? `?branchId=${selectedBranch}` : ""
+      const res = await fetch(`/api/expenses${query}`)
       const data = await res.json()
       if (data.success) setExpenses(data.data)
     } catch (error) {
       console.error("Error fetching expenses:", error)
     }
-  }, [session])
+  }, [session, selectedBranch])
 
   const fetchBranches = useCallback(async () => {
     if (!session?.user?.tenantId) return
@@ -1097,6 +1102,7 @@ export const usePOS = (session: any) => {
     lastSale, setLastSale, receiptDialog, setReceiptDialog,
     cashReportDialog, setCashReportDialog, cashReceived, setCashReceived,
     change, setChange,
+    branches, selectedBranch, setSelectedBranch,
     editingCategory, setEditingCategory, handleUpdateCategory, handleDeleteCategory,
     unreadNotifications, filteredCredits, fileInputRef,
     overdueCredits: credits.filter(c => c.status === "OVERDUE" || (c.dueDate && new Date(c.dueDate) < new Date() && c.status !== "PAID")),

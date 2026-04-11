@@ -19,9 +19,11 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category")
     const from = searchParams.get("from")
     const to = searchParams.get("to")
+    const branchId = searchParams.get("branchId")
 
-    const where: Record<string, unknown> = {
-      tenantId: session.user.tenantId
+    const where: any = {
+      tenantId: session.user.tenantId,
+      ...(branchId ? { branchId } : {})
     }
 
     if (category) {
