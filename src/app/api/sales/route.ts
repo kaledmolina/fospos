@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
         targetMonthlyGoal = selectedBranch?.monthlyGoal || 0
       } else {
         const user = await db.user.findUnique({
-          where: { id: session.user.id },
+          where: { id: session.user.id } || {},
           include: { branch: true }
         })
         targetMonthlyGoal = user?.branch?.monthlyGoal || 0
@@ -166,6 +166,30 @@ export async function GET(request: NextRequest) {
           })
           targetMonthlyGoal = mainBranch?.monthlyGoal || 0
         }
+      }
+
+      // Ventas últimos 7 días (Tendencia)
+      const weeklySales = []
+      const days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
+      
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date()
+        d.setDate(d.getDate() - i)
+        const start = startOfDay(d)
+        const end = endOfDay(d)
+        
+        const daySales = await db.sale.aggregate({
+          where: {
+            ...whereBase,
+            createdAt: { gte: start, lte: end }
+          },
+          _sum: { total: true }
+        })
+        
+        weeklySales.push({
+          name: days[d.getDay()],
+          total: daySales._sum.total || 0
+        })
       }
 
       return NextResponse.json({
@@ -181,7 +205,8 @@ export async function GET(request: NextRequest) {
           lowStockProducts,
           expiredCount,
           nearExpiryCount,
-          monthlyGoal: targetMonthlyGoal
+          monthlyGoal: targetMonthlyGoal,
+          weeklySales
         }
       })
     }

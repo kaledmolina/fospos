@@ -20,15 +20,7 @@ export const usePOS = (session: any) => {
   const [dashboardStats, setDashboardStats] = useState<any>({
     todaySales: 0, todayTransactions: 0, monthSales: 0, pendingCredits: 0,
     lowStockProducts: 0, dailyGoal: 1000000, monthlyGoal: 0,
-    weeklySales: [
-      { name: "Lun", total: 400000 },
-      { name: "Mar", total: 300000 },
-      { name: "Mie", total: 600000 },
-      { name: "Jue", total: 800000 },
-      { name: "Vie", total: 500000 },
-      { name: "Sab", total: 900000 },
-      { name: "Dom", total: 200000 }
-    ],
+    weeklySales: [],
     topProducts: [],
     recentSales: []
   })
