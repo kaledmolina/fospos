@@ -96,16 +96,16 @@ export const DashboardTab = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-emerald-100 text-sm mb-1">Meta Mensual</p>
-                <p className="text-2xl font-bold">{formatCurrency(dashboardStats?.monthSales || 0)} / {formatCurrency(dashboardStats?.monthlyGoal || 10000000)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(dashboardStats?.monthSales || 0)} / {formatCurrency(dashboardStats?.monthlyGoal || 0)}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
                     <motion.div
                       className="h-full bg-white rounded-full"
                       initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(((dashboardStats?.monthSales || 0) / (dashboardStats?.monthlyGoal || 10000000)) * 100, 100)}%` }}
+                      animate={{ width: `${Math.min(((dashboardStats?.monthSales || 0) / (dashboardStats?.monthlyGoal || 1)) * 100, 100)}%` }}
                     />
                   </div>
-                  <span className="text-sm font-medium">{Math.min(Math.round(((dashboardStats?.monthSales || 0) / (dashboardStats?.monthlyGoal || 10000000)) * 100), 100)}%</span>
+                  <span className="text-sm font-medium">{Math.min(Math.round(((dashboardStats?.monthSales || 0) / (dashboardStats?.monthlyGoal || 1)) * 100), 100)}%</span>
                 </div>
               </div>
               <Target className="w-16 h-16 text-white/20" />
