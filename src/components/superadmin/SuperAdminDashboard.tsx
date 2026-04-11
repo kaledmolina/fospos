@@ -6,7 +6,8 @@ import {
   Store, BarChart3, X, LogOut, Menu, CheckCircle, 
   Eye, DollarSign, Package, Trash2, ShieldCheck, 
   Users, TrendingUp, ArrowRight, Building2, MapPin, 
-  Search, Filter, Globe, Zap, Database, DownloadCloud, RotateCcw
+  Search, Filter, Globe, Zap, Database, DownloadCloud, RotateCcw,
+  KeyRound, Settings2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,6 +43,10 @@ export const SuperAdminDashboard = ({
   const [selectedTenant, setSelectedTenant] = useState<TenantData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [globalUsers, setGlobalUsers] = useState<any[]>([])
+  const [selectedUser, setSelectedUser] = useState<any | null>(null)
+  const [userFilter, setUserFilter] = useState({ tenantId: "all", searchQuery: "" })
+  const [isUpdatingUser, setIsUpdatingUser] = useState(false)
 
   const fetchStats = useCallback(async () => {
     try {
@@ -82,11 +87,25 @@ export const SuperAdminDashboard = ({
     }
   }, [])
 
+  const fetchGlobalUsers = useCallback(async () => {
+    try {
+      const query = userFilter.tenantId !== "all" ? `?tenantId=${userFilter.tenantId}` : ""
+      const res = await fetch(`/api/admin/users${query}`)
+      const data = await res.json()
+      if (data.success) {
+        setGlobalUsers(data.data)
+      }
+    } catch (error) {
+      console.error("Error al cargar usuarios globales")
+    }
+  }, [userFilter.tenantId])
+
   useEffect(() => {
     fetchTenants()
     fetchStats()
     fetchCodes()
-  }, [fetchTenants, fetchStats, fetchCodes])
+    fetchGlobalUsers()
+  }, [fetchTenants, fetchStats, fetchCodes, fetchGlobalUsers])
 
   const generateCode = async () => {
     try {
@@ -186,6 +205,7 @@ export const SuperAdminDashboard = ({
           {[
             { id: "hub", icon: Zap, label: "Panel Central" },
             { id: "tenants", icon: Building2, label: "Red de Negocios" },
+            { id: "users", icon: Users, label: "Usuarios Globales" },
             { id: "codes", icon: ShieldCheck, label: "Códigos de Activación" },
             { id: "stats", icon: BarChart3, label: "Análisis Global" },
             { id: "maintenance", icon: Database, label: "Mantenimiento" }
@@ -238,7 +258,7 @@ export const SuperAdminDashboard = ({
           
           <div className="hidden lg:block">
              <h2 className="text-3xl font-black tracking-tighter uppercase italic text-foreground/90">
-                {saTab === "hub" ? "Hub del Sistema" : saTab === "tenants" ? "Red de Negocios" : saTab === "codes" ? "Llaves de Activación" : saTab === "stats" ? "Análisis Global" : "Mantenimiento de Red"}
+                {saTab === "hub" ? "Hub del Sistema" : saTab === "tenants" ? "Red de Negocios" : saTab === "users" ? "Auditoría de Usuarios" : saTab === "codes" ? "Llaves de Activación" : saTab === "stats" ? "Análisis Global" : "Mantenimiento de Red"}
              </h2>
              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em] mt-1">
                 Última Sincronización: {new Date().toLocaleTimeString()}
@@ -656,9 +676,206 @@ export const SuperAdminDashboard = ({
                 </Card>
               </motion.div>
             )}
+            {saTab === "users" && (
+              <motion.div key="users" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div>
+                    <h1 className="text-4xl font-black tracking-tighter italic uppercase">Usuarios Globales</h1>
+                    <p className="text-[11px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-1">Gestión Centralizada de Operadores y Administradores</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <select 
+                      value={userFilter.tenantId}
+                      onChange={(e) => setUserFilter({ ...userFilter, tenantId: e.target.value })}
+                      className="h-12 bg-muted/30 border border-border rounded-xl text-[10px] font-black uppercase tracking-widest px-4 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                    >
+                      <option value="all">TODOS LOS NEGOCIOS</option>
+                      {tenants.map(t => (
+                        <option key={t.id} value={t.id}>{t.businessName.toUpperCase()}</option>
+                      ))}
+                    </select>
+                    <div className="relative">
+                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                       <Input 
+                         placeholder="Buscar por nombre o email..." 
+                         value={userFilter.searchQuery}
+                         onChange={(e) => setUserFilter({ ...userFilter, searchQuery: e.target.value })}
+                         className="h-12 w-64 pl-10 bg-muted/30 border-border rounded-xl text-xs font-medium focus:border-emerald-500 transition-all"
+                       />
+                    </div>
+                  </div>
+                </div>
+
+                <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-2xl">
+                  <div className="p-0 overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/30">
+                          <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Usuario</th>
+                          <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Negocio / Sede</th>
+                          <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Rol</th>
+                          <th className="text-left p-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Estado</th>
+                          <th className="text-right p-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Operaciones</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {globalUsers.filter(u => 
+                          u.name.toLowerCase().includes(userFilter.searchQuery.toLowerCase()) ||
+                          u.email.toLowerCase().includes(userFilter.searchQuery.toLowerCase())
+                        ).map(user => (
+                          <tr key={user.id} className="hover:bg-accent/30 transition-colors group">
+                            <td className="p-6">
+                               <div className="flex items-center gap-4">
+                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${user.isActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-gray-500/10 text-gray-500'}`}>
+                                     {user.name[0]}
+                                  </div>
+                                  <div>
+                                    <p className="font-black text-sm tracking-tight uppercase leading-none mb-1">{user.name}</p>
+                                    <p className="text-[10px] text-gray-500 font-bold tracking-widest select-all">{user.email}</p>
+                                  </div>
+                               </div>
+                            </td>
+                            <td className="p-6">
+                               <div className="space-y-1">
+                                  <p className="text-[10px] font-black uppercase text-foreground/80">{user.tenant?.businessName || 'SISTEMA CENTRAL'}</p>
+                                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                                     <MapPin className="w-2.5 h-2.5" /> {user.branch?.name || 'ADMINISTRACIÓN'}
+                                  </p>
+                               </div>
+                            </td>
+                            <td className="p-6">
+                               <Badge variant="outline" className="text-[9px] font-black tracking-widest uppercase border-border">
+                                  {user.role}
+                               </Badge>
+                            </td>
+                            <td className="p-6">
+                               <Badge className={`text-[9px] font-black tracking-widest uppercase border-transparent ${user.isActive ? 'bg-emerald-500/20 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
+                                  {user.isActive ? 'ACTIVO' : 'INACTIVO'}
+                               </Badge>
+                            </td>
+                            <td className="p-6 text-right">
+                               <div className="flex items-center justify-end gap-2">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="w-9 h-9 border border-border hover:bg-emerald-500/10 hover:border-emerald-500/20 rounded-xl cursor-pointer"
+                                    onClick={async () => {
+                                       try {
+                                          const res = await fetch(`/api/admin/users/${user.id}`, {
+                                             method: "PATCH",
+                                             headers: { "Content-Type": "application/json" },
+                                             body: JSON.stringify({ isActive: !user.isActive })
+                                          })
+                                          if (res.ok) {
+                                             toast.success(`Usuario ${user.isActive ? 'Desactivado' : 'Activado'}`)
+                                             fetchGlobalUsers()
+                                          }
+                                       } catch (error) {
+                                          toast.error("Error al cambiar estado")
+                                       }
+                                    }}
+                                  >
+                                    <Zap className={`w-4 h-4 ${user.isActive ? 'text-emerald-500' : 'text-gray-400'}`} />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="w-9 h-9 border border-border hover:bg-accent rounded-xl cursor-pointer"
+                                    onClick={() => setSelectedUser(user)}
+                                  >
+                                    <KeyRound className="w-4 h-4 text-muted-foreground" />
+                                  </Button>
+                               </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Edit User Dialog (Password Reset) */}
+      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+        <DialogContent className="max-w-md bg-background border-border p-0 overflow-hidden text-foreground rounded-[2.5rem]">
+          {selectedUser && (
+            <div className="flex flex-col">
+               <div className="bg-gradient-to-br from-slate-900 to-slate-950 p-8 border-b border-border">
+                  <div className="flex items-center gap-4">
+                     <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                        <KeyRound className="w-7 h-7 text-emerald-500" />
+                     </div>
+                     <div>
+                        <h2 className="text-2xl font-black tracking-tighter uppercase italic text-white">Seguridad de Usuario</h2>
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{selectedUser.name}</p>
+                     </div>
+                  </div>
+               </div>
+               
+               <form onSubmit={async (e) => {
+                  e.preventDefault()
+                  setIsUpdatingUser(true)
+                  const formData = new FormData(e.currentTarget)
+                  const password = formData.get("password") as string
+                  const role = formData.get("role") as string
+                  const name = formData.get("name") as string
+
+                  try {
+                     const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, role, password: password || undefined })
+                     })
+                     const data = await res.json()
+                     if (data.success) {
+                        toast.success("Usuario actualizado correctamente")
+                        setSelectedUser(null)
+                        fetchGlobalUsers()
+                     } else {
+                        toast.error(data.error)
+                     }
+                  } catch (error) {
+                     toast.error("Error de servidor")
+                  } finally {
+                     setIsUpdatingUser(false)
+                  }
+               }} className="p-8 space-y-6">
+                  <div className="space-y-4">
+                     <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Nombre Completo</label>
+                        <Input name="name" defaultValue={selectedUser.name} className="h-12 bg-muted/40 border-border rounded-xl mt-1 font-bold" />
+                     </div>
+                     <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Rol del Sistema</label>
+                        <select name="role" defaultValue={selectedUser.role} className="w-full h-12 bg-muted/40 border border-border rounded-xl mt-1 px-4 font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all">
+                           <option value="TENANT_ADMIN">ADMINISTRADOR DE NEGOCIO</option>
+                           <option value="CASHIER">CAJERO EXCLUSIVO</option>
+                           <option value="WAREHOUSE">GESTIÓN DE BODEGA</option>
+                           <option value="SUPER_ADMIN">SUPER ADMIN (SISTEMA)</option>
+                        </select>
+                     </div>
+                     <div className="pt-4 border-t border-border">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500 ml-1">Nueva Contraseña (Opcional)</label>
+                        <Input name="password" type="password" placeholder="Dejar vacío para no cambiar" className="h-12 bg-emerald-500/5 border-emerald-500/20 rounded-xl mt-1 font-mono" />
+                        <p className="text-[8px] font-bold text-gray-500 uppercase mt-2 ml-1 tracking-widest">El cambio de contraseña es instantáneo tras guardar.</p>
+                     </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                     <Button type="button" variant="ghost" className="flex-1 h-12 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer" onClick={() => setSelectedUser(null)}>Cancelar</Button>
+                     <Button type="submit" disabled={isUpdatingUser} className="flex-1 h-12 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black uppercase text-xs tracking-widest rounded-xl shadow-lg shadow-emerald-500/20 cursor-pointer">
+                        {isUpdatingUser ? "Guardando..." : "Guardar Cambios"}
+                     </Button>
+                  </div>
+               </form>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       
       {/* Enhanced Tenant Details Dialog */}
       <Dialog open={!!selectedTenant} onOpenChange={() => setSelectedTenant(null)}>
