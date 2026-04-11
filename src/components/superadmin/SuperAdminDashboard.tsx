@@ -6,7 +6,7 @@ import {
   Store, BarChart3, X, LogOut, Menu, CheckCircle, 
   Eye, DollarSign, Package, Trash2, ShieldCheck, 
   Users, TrendingUp, ArrowRight, Building2, MapPin, 
-  Search, Filter, Globe, Zap
+  Search, Filter, Globe, Zap, Database, DownloadCloud, RotateCcw
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -187,7 +187,8 @@ export const SuperAdminDashboard = ({
             { id: "hub", icon: Zap, label: "Panel Central" },
             { id: "tenants", icon: Building2, label: "Red de Negocios" },
             { id: "codes", icon: ShieldCheck, label: "Códigos de Activación" },
-            { id: "stats", icon: BarChart3, label: "Análisis Global" }
+            { id: "stats", icon: BarChart3, label: "Análisis Global" },
+            { id: "maintenance", icon: Database, label: "Mantenimiento" }
           ].map(item => (
             <Button
               key={item.id}
@@ -237,7 +238,7 @@ export const SuperAdminDashboard = ({
           
           <div className="hidden lg:block">
              <h2 className="text-3xl font-black tracking-tighter uppercase italic text-foreground/90">
-                {saTab === "hub" ? "Hub del Sistema" : saTab === "tenants" ? "Red de Negocios" : saTab === "codes" ? "Llaves de Activación" : "Análisis Global"}
+                {saTab === "hub" ? "Hub del Sistema" : saTab === "tenants" ? "Red de Negocios" : saTab === "codes" ? "Llaves de Activación" : saTab === "stats" ? "Análisis Global" : "Mantenimiento de Red"}
              </h2>
              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em] mt-1">
                 Última Sincronización: {new Date().toLocaleTimeString()}
@@ -556,6 +557,103 @@ export const SuperAdminDashboard = ({
                       <GlobalSalesChart data={chartData} />
                   </Card>
                 </div>
+              </motion.div>
+            )}
+            {saTab === "maintenance" && (
+              <motion.div key="maintenance" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-10">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-4xl font-black tracking-tighter italic uppercase text-foreground">Mantenimiento de Sistema</h1>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Backup Card */}
+                  <Card className="bg-card border-border p-8 rounded-[2rem] relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full group-hover:bg-emerald-500/10 transition-all" />
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500">
+                        <DownloadCloud className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black tracking-tighter uppercase italic">Copia de Seguridad</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">Descargar base de datos actual</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-8">
+                      Genera un archivo comprimido de la base de datos actual. Este archivo contiene todos los clientes, ventas y configuraciones del sistema.
+                    </p>
+                    <Button 
+                      onClick={() => window.open("/api/admin/backup/download", "_blank")}
+                      className="w-full h-14 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black uppercase text-xs tracking-[0.2em] rounded-2xl shadow-xl shadow-emerald-500/20 transition-all cursor-pointer"
+                    >
+                      Descargar Backup (.db)
+                    </Button>
+                  </Card>
+
+                  {/* Restore Card */}
+                  <Card className="bg-card border-border p-8 rounded-[2rem] relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full group-hover:bg-amber-500/10 transition-all" />
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-500">
+                        <RotateCcw className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black tracking-tighter uppercase italic">Restaurar Sistema</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">Cargar copia de seguridad</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Sube un archivo de backup para restaurar el sistema. <span className="text-amber-500 font-bold">¡CUIDADO!</span> Esto reemplazará todos los datos actuales.
+                    </p>
+                    
+                    <div className="space-y-4">
+                      <Input 
+                        type="file" 
+                        accept=".db"
+                        className="bg-muted border-border cursor-pointer h-12 pt-3"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          
+                          if (!confirm("⚠️ ¿ESTÁS SEGURO? Esta acción sobrescribirá TODA la base de datos actual. No se puede deshacer.")) return
+
+                          const formData = new FormData()
+                          formData.append("file", file)
+
+                          const loadingToast = toast.loading("Restaurando base de datos...")
+                          
+                          try {
+                            const res = await fetch("/api/admin/backup/restore", {
+                              method: "POST",
+                              body: formData
+                            })
+                            const data = await res.json()
+                            if (data.success) {
+                              toast.success(data.message, { id: loadingToast })
+                              setTimeout(() => window.location.reload(), 2000)
+                            } else {
+                              toast.error(data.error, { id: loadingToast })
+                            }
+                          } catch (error) {
+                            toast.error("Error al restaurar", { id: loadingToast })
+                          }
+                        }}
+                      />
+                      <p className="text-[9px] font-bold text-amber-500/70 uppercase tracking-widest text-center">Solo archivos con extensión .db</p>
+                    </div>
+                  </Card>
+                </div>
+
+                <Card className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+                  <div className="flex gap-4">
+                    <ShieldCheck className="w-6 h-6 text-amber-500 shrink-0" />
+                    <div className="space-y-1">
+                      <p className="text-xs font-black uppercase text-amber-500">Protocolo de Emergencia</p>
+                      <p className="text-[10px] text-amber-500/80 font-medium">
+                        Se recomienda realizar una copia de seguridad antes de cualquier restauración. FostPOS utiliza SQLite como motor de base de datos; asegúrate de que el archivo que subes sea un respaldo legítimo generado por esta herramienta.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               </motion.div>
             )}
           </AnimatePresence>
