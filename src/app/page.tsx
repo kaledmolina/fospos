@@ -44,13 +44,17 @@ export default function Home() {
         if (data.needsSetup) {
           setNeedsSetup(true)
           setView("setup")
+          // Si hay una sesión fantasma (cookies viejas), limpiarla
+          if (status === "authenticated") {
+            signOut({ redirect: false })
+          }
         }
       } catch (error) {
         console.error("Setup check failed:", error)
       }
     }
     checkSetup()
-  }, [])
+  }, [status])
 
   // View logic
   useEffect(() => {
