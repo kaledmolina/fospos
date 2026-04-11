@@ -121,12 +121,32 @@ export async function GET(request: NextRequest) {
         new Date(p.expiryDate) <= sevenDaysFromNow
       ).length
 
-      // Obtener meta de la sucursal del usuario
+      // Obtener meta de la sucursal del usuario o de la principal como fallback
       const user = await db.user.findUnique({
         where: { id: session.user.id },
         include: { branch: true }
       })
-      const monthlyGoal = user?.branch?.monthlyGoal || 0
+
+      let monthlyGoal = user?.branch?.monthlyGoal || 0
+
+      // Si el usuario no tiene sucursal o no tiene meta, buscar la principal
+      if (monthlyGoal === 0) {
+        const mainBranch = await db.branch.findFirst({
+          where: { 
+            tenantId: session.user.tenantId,
+            isMain: true 
+          }
+        })
+        monthlyGoal = mainBranch?.monthlyGoal || 0
+      }
+
+      // Si aún es 0, usar cualquier sucursal disponible para este tenant
+      if (monthlyGoal === 0) {
+        const anyBranch = await db.branch.findFirst({
+          where: { tenantId: session.user.tenantId }
+        })
+        monthlyGoal = anyBranch?.monthlyGoal || 0
+      }
 
       return NextResponse.json({
         success: true,
