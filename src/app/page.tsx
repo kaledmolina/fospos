@@ -19,6 +19,7 @@ export default function Home() {
   const [authTab, setAuthTab] = useState<"login" | "register">("login")
   const [view, setView] = useState<"auth" | "pos" | "superadmin" | "setup">("auth")
   const [needsSetup, setNeedsSetup] = useState(false)
+  const [loadingSetup, setLoadingSetup] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
   // Auth state
@@ -44,13 +45,16 @@ export default function Home() {
         if (data.needsSetup) {
           setNeedsSetup(true)
           setView("setup")
-          // Si hay una sesión fantasma (cookies viejas), limpiarla
+          // Si hay una sesión fantasma (cookies viejas), limpiarla forzosamente
           if (status === "authenticated") {
-            signOut({ redirect: false })
+            await signOut({ redirect: false })
+            window.location.reload() // Recarga para limpiar estado de NextAuth
           }
         }
       } catch (error) {
         console.error("Setup check failed:", error)
+      } finally {
+        setLoadingSetup(false)
       }
     }
     checkSetup()
@@ -58,6 +62,8 @@ export default function Home() {
 
   // View logic
   useEffect(() => {
+    if (loadingSetup) return
+
     if (needsSetup) {
       setView("setup")
       setShowLanding(false)
@@ -74,7 +80,7 @@ export default function Home() {
     } else if (status === "unauthenticated") {
       setView("auth")
     }
-  }, [status, session, needsSetup])
+  }, [status, session, needsSetup, loadingSetup])
 
   // Handlers
   const handleLogin = async (e: React.FormEvent) => {

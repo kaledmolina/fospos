@@ -169,6 +169,12 @@ export const usePOS = (session: any) => {
         fetch(`/api/credits${query}`)
       ])
       
+      // Si detectamos 401 (No autorizado) tras un reinicio de base de datos, forzar recarga
+      if ([productsRes, categoriesRes, customersRes, statsRes, cashRes, creditsRes].some(r => r.status === 401)) {
+        window.location.reload()
+        return
+      }
+      
       if (productsRes.ok) setProducts((await productsRes.json()).data)
       if (categoriesRes.ok) setCategories((await categoriesRes.json()).data)
       if (customersRes.ok) setCustomers((await customersRes.json()).data)
