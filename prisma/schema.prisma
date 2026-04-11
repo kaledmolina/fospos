@@ -1,0 +1,775 @@
+// SaaS POS Multi-Tenant - Colombia
+// Arquitectura: Un tenant por negocio con aislamiento de datos
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== TENANCY ====================
+
+/// Negocio/Tienda - Cada tenant es un negocio independiente
+model Tenant {
+  id              String   @id @default(cuid())
+  businessName    String   // Nombre del negocio
+  nit             String   @unique // NIT o Cédula del representante
+  ownerName       String   // Nombre del dueño
+  phone           String   // Teléfono de contacto
+  email           String   // Email del negocio
+  city            String   // Ciudad
+  address         String?  // Dirección
+  status          TenantStatus @default(PENDING) // Estado: pendiente de activación
+  
+  // Configuración del negocio
+  currency        String   @default("COP") // Moneda: Pesos Colombianos
+  taxRate         Float    @default(19.0)  // IVA por defecto (19%)
+  invoicePrefix   String   @default("FAC") // Prefijo de facturas
+  invoiceNumber   Int      @default(1)     // Consecutivo de facturas
+  logoUrl         String?  // Logo del negocio
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  activatedAt     DateTime? // Fecha de activación
+  
+  // Relaciones - Todos los datos aislados por tenant
+  users           User[]
+  branches        Branch[]
+  categories      Category[]
+  products        Product[]
+  customers       Customer[]
+  sales           Sale[]
+  credits         Credit[]
+  cashRegisters   CashRegister[]
+  expenses        Expense[]
+  suppliers       Supplier[]
+  notifications   Notification[]
+  inventoryMovements InventoryMovement[]
+  subscriptionServices SubscriptionService[]
+  subscriptions   CustomerSubscription[]
+  pointConfig     PointConfig?
+  coupons         Coupon[]
+  activationCode  ActivationCode?
+  
+  @@map("tenants")
+}
+
+enum TenantStatus {
+  PENDING    // Recién registrado, esperando aprobación
+  ACTIVE     // Activo y operativo
+  SUSPENDED  // Suspendido por el Super Admin
+}
+
+// ==================== BRANCHES (SUCURSALES) ====================
+
+/// Sucursal del negocio
+model Branch {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name          String   // Nombre de la sucursal
+  address       String?  // Dirección
+  phone         String?  // Teléfono
+  city          String?  // Ciudad
+  isActive      Boolean  @default(true)
+  isMain        Boolean  @default(false) // Sucursal principal
+  monthlyGoal   Float    @default(0)     // Meta de ventas mensual
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  productStock  ProductStock[]
+  cashRegisters CashRegister[]
+  sales         Sale[]
+  inventoryMovements InventoryMovement[]
+  users         User[]
+  
+  @@unique([tenantId, name])
+  @@map("branches")
+}
+
+// ==================== USERS ====================
+
+/// Usuario del sistema (Super Admin o usuario de negocio)
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String   // Hash de la contraseña
+  name          String
+  role          UserRole @default(CASHIER)
+  
+  // Relación con tenant (null para Super Admin)
+  tenantId      String?
+  tenant        Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Sucursal asignada (para cajeros y usuarios de sucursal)
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  
+  // Estado del usuario
+  isActive      Boolean  @default(true)
+  phone         String?
+  theme         String   @default("light") // Preferencia de tema: light o dark
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastLogin     DateTime?
+  
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN  // Administrador global del SaaS
+  TENANT_ADMIN // Administrador del negocio (dueño)
+  CASHIER      // Cajero - asignado a una sucursal específica
+  WAREHOUSE    // Bodeguero - gestión de inventario
+}
+
+// ==================== SUPPLIERS ====================
+
+/// Proveedor de productos
+model Supplier {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name          String   // Nombre del proveedor
+  nit           String?  // NIT
+  phone         String?  // Teléfono
+  email         String?  // Email
+  address       String?  // Dirección
+  notes         String?  // Notas
+  
+  isActive      Boolean  @default(true)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  inventoryMovements InventoryMovement[]
+  
+  @@unique([tenantId, name])
+  @@map("suppliers")
+}
+
+// ==================== PRODUCTS & INVENTORY ====================
+
+/// Categoría de productos
+model Category {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name        String   // Nombre de la categoría
+  description String?
+  color       String?  // Color para identificación visual
+  icon        String?  // Emoji o icono
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  products    Product[]
+  subscriptionServices SubscriptionService[]
+  
+  @@unique([tenantId, name]) // Una categoría por nombre por tenant
+  @@map("categories")
+}
+
+/// Producto del inventario
+model Product {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  // Información del producto
+  code          String?  // Código de barras
+  sku           String?  // Código SKU interno
+  name          String
+  description   String?
+  imageUrl      String?
+  
+  // Precios
+  costPrice     Float    @default(0)  // Precio de costo
+  salePrice     Float               // Precio de venta
+  wholesalePrice Float?  // Precio mayoreo (opcional)
+  
+  // Stock total (para compatibilidad)
+  stock         Int      @default(0)
+  minStock      Int      @default(5)  // Stock mínimo para alertas
+  maxStock      Int      @default(100) // Stock máximo
+  
+  // Unidad de medida
+  unit          String   @default("unidad") // unidad, kg, litro, etc.
+  
+  // Estado y Vencimiento
+  isActive      Boolean  @default(true)
+  expiryDate    DateTime? // Fecha de vencimiento
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  saleItems     SaleItem[]
+  stockByBranch ProductStock[]
+  movements     InventoryMovement[]
+  
+  @@unique([tenantId, code]) // Código de barras único por tenant
+  @@unique([tenantId, sku])  // SKU único por tenant
+  @@map("products")
+}
+
+/// Stock por sucursal
+model ProductStock {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  
+  stock       Int      @default(0)  // Cantidad en esta sucursal
+  minStock    Int      @default(5)  // Mínimo para esta sucursal
+  
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([productId, branchId])
+  @@map("product_stock")
+}
+
+/// Movimientos de inventario
+model InventoryMovement {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId      String
+  branch        Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  
+  type          MovementType
+  quantity      Int         // Cantidad movida (positivo para entradas, negativo para salidas)
+  previousStock Int         // Stock anterior
+  newStock      Int         // Stock nuevo
+  
+  // Origen del movimiento
+  referenceType String?    // "sale", "purchase", "adjustment", "transfer"
+  referenceId   String?    // ID de la venta, compra, etc.
+  
+  // Proveedor (si es compra)
+  supplierId    String?
+  supplier      Supplier?  @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  
+  // Costo del movimiento
+  unitCost      Float?     @default(0)
+  totalCost     Float?     @default(0)
+  
+  notes         String?
+  createdBy     String     // ID del usuario
+  
+  createdAt     DateTime   @default(now())
+  
+  @@map("inventory_movements")
+}
+
+enum MovementType {
+  IN          // Entrada (compra, devolución)
+  OUT         // Salida (venta, merma)
+  ADJUSTMENT  // Ajuste de inventario
+  TRANSFER    // Transferencia entre sucursales
+}
+
+// ==================== CUSTOMERS ====================
+
+/// Cliente del negocio
+model Customer {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Información del cliente
+  documentType  String?  @default("CC") // CC, CE, NIT
+  document      String?  // Número de documento
+  name          String
+  phone         String?
+  email         String?
+  address       String?
+  notes         String?  // Notas sobre el cliente
+  
+  // Crédito
+  creditLimit   Float    @default(0)
+  totalPurchases Float   @default(0)  // Total histórico de compras
+  points        Int      @default(0)  // Puntos de fidelización
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  sales         Sale[]
+  credits       Credit[]
+  subscriptions CustomerSubscription[]
+  
+  @@unique([tenantId, document])
+  @@map("customers")
+}
+
+// ==================== SALES ====================
+
+/// Venta/Transacción
+model Sale {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  // Información de la venta
+  invoiceNumber String   @default("") // Número de factura
+  items         SaleItem[]
+  
+  // Montos
+  subtotal      Float    @default(0)
+  tax           Float    @default(0)   // IVA
+  discount      Float    @default(0)
+  pointsRedeemed Int      @default(0)   // Puntos redimidos en esta venta
+  pointsEarned   Int      @default(0)   // Puntos ganados en esta venta
+  pointsValue    Float    @default(0)   // Valor monetario de los puntos redimidos
+  total         Float               // Total final
+  
+  // Costos
+  totalCost     Float    @default(0)  // Costo total de los productos
+  
+  // Pago
+  paymentMethod PaymentMethod @default(CASH)
+  paymentStatus PaymentStatus @default(PAID)
+  cashReceived  Float?   // Efectivo recibido
+  change        Float?   // Cambio
+  
+  // Si es a crédito
+  creditId      String?  @unique
+  credit        Credit?
+  
+  // Caja
+  cashRegisterId String?
+  
+  // Notas
+  notes         String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  
+  @@unique([tenantId, invoiceNumber])
+  @@map("sales")
+}
+
+/// Item de una venta
+model SaleItem {
+  id            String   @id @default(cuid())
+  saleId        String
+  sale          Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  productId     String?
+  product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  
+  // Snapshot del producto al momento de la venta
+  productName   String
+  productCode   String?
+  unitPrice     Float    // Precio unitario al momento de la venta
+  costPrice     Float    @default(0) // Costo unitario
+  quantity      Float    // Cantidad
+  unit          String   @default("unidad")
+  discount      Float    @default(0)
+  subtotal      Float    // unitPrice * quantity - discount
+  
+  @@map("sale_items")
+}
+
+enum PaymentMethod {
+  CASH       // Efectivo
+  CARD       // Tarjeta débito/crédito
+  TRANSFER   // Transferencia
+  CREDIT     // Fiado/Crédito
+  MIXED      // Pago mixto
+}
+
+enum PaymentStatus {
+  PENDING    // Pendiente de pago
+  PARTIAL    // Pago parcial
+  PAID       // Pagado completamente
+  CANCELLED  // Cancelado
+}
+
+// ==================== CREDITS (FIADOS) ====================
+
+/// Crédito/Fiado de cliente
+model Credit {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  // Información del crédito
+  saleId        String?  @unique // Venta origen (si aplica)
+  sale          Sale?    @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  
+  // Montos
+  totalAmount   Float    // Monto total del crédito
+  paidAmount    Float    @default(0) // Monto pagado
+  balance       Float    // Saldo pendiente (totalAmount - paidAmount)
+  
+  // Estado
+  status        CreditStatus @default(PENDING)
+  dueDate       DateTime? // Fecha límite de pago
+  
+  // Abonos
+  payments      CreditPayment[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("credits")
+}
+
+/// Abono a un crédito
+model CreditPayment {
+  id            String   @id @default(cuid())
+  creditId      String
+  credit        Credit   @relation(fields: [creditId], references: [id], onDelete: Cascade)
+  
+  amount        Float    // Monto del abono
+  paymentMethod PaymentMethod @default(CASH)
+  notes         String?
+  
+  // Para impresión de recibo
+  receiptNumber String?  @default("")
+  
+  createdAt     DateTime @default(now())
+  
+  @@map("credit_payments")
+}
+
+enum CreditStatus {
+  PENDING    // Pendiente de pago
+  PARTIAL    // Pago parcial
+  PAID       // Pagado completamente
+  OVERDUE    // Vencido
+}
+
+// ==================== CASH REGISTER ====================
+
+/// Caja registradora
+model CashRegister {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  
+  // Nombre de la caja
+  name          String   @default("Caja Principal")
+  
+  // Información de apertura
+  openedAt      DateTime @default(now())
+  openedBy      String   // ID del usuario que abrió
+  initialCash   Float    @default(0) // Efectivo inicial en caja
+  closedAt      DateTime?
+  closedBy      String?  // ID del usuario que cerró
+  finalCash     Float?   // Efectivo final contado
+  
+  // Estado
+  status        CashRegisterStatus @default(OPEN)
+  
+  // Resumen del día
+  totalSales     Float   @default(0)
+  totalCash      Float   @default(0)
+  totalCard      Float   @default(0)
+  totalTransfer  Float   @default(0)
+  totalCredit    Float   @default(0)
+  
+  // Gastos de caja
+  totalExpenses  Float   @default(0)
+  
+  // Diferencia en arqueo
+  difference     Float?  // Diferencia entre sistema y efectivo real
+  
+  notes          String?
+  
+  @@map("cash_registers")
+}
+
+enum CashRegisterStatus {
+  OPEN       // Caja abierta
+  CLOSED     // Caja cerrada
+}
+
+// ==================== EXPENSES ====================
+
+/// Gasto del negocio
+model Expense {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Información del gasto
+  category      String   // "Servicios", "Nomina", "Alquiler", "Insumos", etc.
+  description   String
+  amount        Float
+  date          DateTime @default(now())
+  
+  // Comprobante
+  receiptUrl    String?
+  
+  // Caja relacionada
+  cashRegisterId String?
+  
+  // Usuario que registró
+  createdBy     String
+  
+  notes         String?
+  
+  createdAt     DateTime @default(now())
+  
+  @@map("expenses")
+}
+
+// ==================== NOTIFICATIONS ====================
+
+/// Notificación del sistema
+model Notification {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  type          NotificationType
+  title         String
+  message       String
+  
+  // Referencia al objeto relacionado
+  referenceType String?  // "product", "credit", "sale"
+  referenceId   String?
+  
+  isRead        Boolean  @default(false)
+  
+  createdAt     DateTime @default(now())
+  
+  @@map("notifications")
+}
+
+enum NotificationType {
+  LOW_STOCK      // Stock bajo
+  CREDIT_DUE     // Crédito por vencer
+  CREDIT_OVERDUE // Crédito vencido
+  NEW_SALE       // Nueva venta
+  DAILY_SUMMARY  // Resumen diario
+  SYSTEM         // Sistema
+}
+
+// ==================== SUBSCRIPTION SERVICES ====================
+
+/// Servicio de suscripción (sin stock) - Gimnasios, Membresías, Streaming, etc.
+model SubscriptionService {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  // Información del servicio
+  code          String?  // Código interno
+  name          String
+  description   String?
+  imageUrl      String?
+  
+  // Precios
+  price         Float    // Precio del período
+  setupFee      Float    @default(0) // Tarifa de instalación/registro
+  
+  // Configuración del período
+  billingCycle  BillingCycle @default(MONTHLY) // Ciclo de facturación
+  billingDays   Int      @default(30) // Días del ciclo (para ciclos personalizados)
+  
+  // Duración del servicio
+  durationMonths Int?    // Duración en meses (null = indefinido)
+  
+  // Estado
+  isActive      Boolean  @default(true)
+  
+  // Límites
+  maxFreezes    Int      @default(0) // Máximo de congelaciones permitidas
+  freezeDaysMax Int      @default(0) // Días máximos por congelación
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  subscriptions CustomerSubscription[]
+  
+  @@unique([tenantId, code])
+  @@map("subscription_services")
+}
+
+enum BillingCycle {
+  DAILY      // Diario
+  WEEKLY     // Semanal
+  BIWEEKLY   // Quincenal
+  MONTHLY    // Mensual
+  QUARTERLY  // Trimestral
+  SEMIANNUAL // Semestral
+  YEARLY     // Anual
+  CUSTOM     // Personalizado
+}
+
+/// Suscripción de cliente a un servicio
+model CustomerSubscription {
+  id                    String   @id @default(cuid())
+  tenantId              String
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerId            String
+  customer              Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  serviceId             String
+  service               SubscriptionService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  // Fechas
+  startDate             DateTime @default(now()) // Fecha de inicio
+  endDate               DateTime? // Fecha de finalización (null = renovación automática)
+  nextBillingDate       DateTime  // Próxima fecha de cobro
+  lastPaymentDate       DateTime? // Último pago
+  
+  // Estado
+  status                SubscriptionStatus @default(ACTIVE)
+  
+  // Precio al momento de la suscripción (puede ser diferente al precio actual)
+  agreedPrice           Float    // Precio acordado
+  
+  // Congelaciones
+  frozenAt              DateTime? // Fecha de congelación
+  frozenUntil           DateTime? // Fecha de descongelación
+  freezeCount           Int      @default(0) // Número de congelaciones usadas
+  
+  // Descuentos
+  discountPercent       Float    @default(0) // Descuento aplicado
+  discountReason        String?  // Razón del descuento
+  
+  // Notas
+  notes                 String?
+  
+  // Pagos
+  payments              SubscriptionPayment[]
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("customer_subscriptions")
+}
+
+enum SubscriptionStatus {
+  ACTIVE      // Activa
+  PENDING     // Pendiente de pago
+  PAUSED      // Pausada/Corcongelada
+  OVERDUE     // Vencida/Sin pago
+  CANCELLED   // Cancelada
+  COMPLETED   // Completada (fin de contrato)
+}
+
+/// Pago de suscripción
+model SubscriptionPayment {
+  id                String   @id @default(cuid())
+  subscriptionId    String
+  subscription      CustomerSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  // Información del pago
+  amount            Float    // Monto pagado
+  paymentMethod     PaymentMethod @default(CASH)
+  
+  // Período que cubre
+  periodStart       DateTime // Inicio del período pagado
+  periodEnd         DateTime // Fin del período pagado
+  
+  // Estado
+  status            PaymentStatus @default(PAID)
+  
+  // Referencia
+  receiptNumber     String?  @default("")
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  
+  @@map("subscription_payments")
+}
+
+// ==================== LOYALTY & MARKETING ====================
+
+/// Configuración de puntos de fidelización por tenant
+model PointConfig {
+  id              String   @id @default(cuid())
+  tenantId        String   @unique
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  pointsPerAmount Int      @default(1)    // Cantidad de puntos por unidad de dinero
+  amountStep      Float    @default(1000) // Unidad de dinero (p.ej. 1 punto por cada $1000)
+  redemptionValue Float    @default(10)   // Valor de un punto al redimir (p.ej. 1 punto = $10)
+  
+  minPointsToRedeem Int    @default(100)  // Mínimo de puntos para poder redimir
+  isActive        Boolean  @default(false)
+  
+  updatedAt       DateTime @updatedAt
+  
+  @@map("point_configs")
+}
+
+/// Cupones de descuento
+model Coupon {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  code            String   // Código del cupón (p.ej. PROMO10)
+  description     String?
+  type            CouponType @default(FIXED)
+  value           Float    // Valor (monto fijo o porcentaje)
+  
+  minPurchase     Float    @default(0)    // Compra mínima para aplicar
+  maxUses         Int?     // Límite de usos totales (null = ilimitado)
+  currentUses     Int      @default(0)
+  
+  startsAt        DateTime @default(now())
+  expiresAt       DateTime?
+  isActive        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([tenantId, code])
+  @@map("coupons")
+}
+
+enum CouponType {
+  FIXED      // Monto fijo (p.ej. -$5000)
+  PERCENTAGE // Porcentaje (p.ej. -10%)
+}
+// ==================== ACTIVATION CODES ====================
+
+/// Códigos de activación para registro instantáneo
+model ActivationCode {
+  id              String   @id @default(cuid())
+  code            String   @unique // Formato: FOST-XXXX-XXXX
+  
+  isUsed          Boolean  @default(false)
+  usedAt          DateTime?
+  
+  // Relación con el tenant que lo usó
+  tenantId        String?  @unique
+  tenant          Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  // Información administrativa
+  createdBy       String   // ID del Super Admin que lo generó
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("activation_codes")
+}
