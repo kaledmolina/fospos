@@ -12,6 +12,10 @@ interface PaymentDialogProps {
   selectedCredit: any
   paymentAmount: number
   onPaymentAmountChange: (amount: number) => void
+  paymentDate: string
+  onPaymentDateChange: (date: string) => void
+  paymentNotes: string
+  onPaymentNotesChange: (notes: string) => void
   onSubmit: () => void
 }
 
@@ -21,6 +25,10 @@ export const PaymentDialog = ({
   selectedCredit,
   paymentAmount,
   onPaymentAmountChange,
+  paymentDate,
+  onPaymentDateChange,
+  paymentNotes,
+  onPaymentNotesChange,
   onSubmit
 }: PaymentDialogProps) => {
   return (
@@ -33,13 +41,31 @@ export const PaymentDialog = ({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Monto del abono</Label>
+              <Input 
+                type="number" 
+                value={paymentAmount} 
+                onChange={e => onPaymentAmountChange(parseFloat(e.target.value) || 0)} 
+                max={selectedCredit?.balance} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Fecha del abono</Label>
+              <Input 
+                type="date" 
+                value={paymentDate} 
+                onChange={e => onPaymentDateChange(e.target.value)} 
+              />
+            </div>
+          </div>
           <div className="space-y-2">
-            <Label>Monto del abono</Label>
+            <Label>Notas / Observaciones</Label>
             <Input 
-              type="number" 
-              value={paymentAmount} 
-              onChange={e => onPaymentAmountChange(parseFloat(e.target.value) || 0)} 
-              max={selectedCredit?.balance} 
+              placeholder="Ej: Pago en efectivo por el cliente..."
+              value={paymentNotes}
+              onChange={e => onPaymentNotesChange(e.target.value)}
             />
           </div>
           <div className="flex gap-2">

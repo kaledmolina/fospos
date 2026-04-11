@@ -244,6 +244,7 @@ export const POSView = ({
               sales={pos.sales || []}
               onSetLastSale={pos.setLastSale}
               onSetReceiptDialog={pos.setReceiptDialog}
+              onOpenHistory={pos.handleOpenHistory}
             />
           )}
         </AnimatePresence>
@@ -374,6 +375,10 @@ export const POSView = ({
         selectedCredit={pos.selectedCredit}
         paymentAmount={pos.paymentAmount}
         onPaymentAmountChange={pos.setPaymentAmount}
+        paymentDate={pos.paymentDate}
+        onPaymentDateChange={pos.setPaymentDate}
+        paymentNotes={pos.paymentNotes}
+        onPaymentNotesChange={pos.setPaymentNotes}
         onSubmit={pos.handlePayment}
       />
       <ReceiptDialog

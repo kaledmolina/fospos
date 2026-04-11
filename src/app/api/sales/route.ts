@@ -77,7 +77,19 @@ export async function GET(request: NextRequest) {
         where: { tenantId: session.user.tenantId },
         include: {
           customer: true,
-          items: true
+          items: true,
+          credit: {
+            include: {
+              payments: {
+                include: {
+                  registeredBy: {
+                    select: { name: true }
+                  }
+                },
+                orderBy: { createdAt: "desc" }
+              }
+            }
+          }
         },
         orderBy: { createdAt: "desc" },
         take: 10
@@ -147,7 +159,19 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         customer: true,
-        items: true
+        items: true,
+        credit: {
+          include: {
+            payments: {
+              include: {
+                registeredBy: {
+                  select: { name: true }
+                }
+              },
+              orderBy: { createdAt: "desc" }
+            }
+          }
+        }
       },
       orderBy: { createdAt: "desc" },
       take: 50

@@ -14,9 +14,12 @@ interface TransactionsTabProps {
   sales: any[]
   onSetLastSale: (sale: any) => void
   onSetReceiptDialog: (open: boolean) => void
+  onOpenHistory: (items: any[], title: string, description?: string) => void
 }
 
-export const TransactionsTab = ({ sales, onSetLastSale, onSetReceiptDialog }: TransactionsTabProps) => {
+export const TransactionsTab = ({ 
+  sales, onSetLastSale, onSetReceiptDialog, onOpenHistory 
+}: TransactionsTabProps) => {
   return (
     <motion.div 
       key="transactions" 
@@ -108,20 +111,45 @@ export const TransactionsTab = ({ sales, onSetLastSale, onSetReceiptDialog }: Tr
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right font-black text-foreground">
-                        {formatCurrency(sale.total)}
+                        <div className="flex flex-col items-end">
+                          <span>{formatCurrency(sale.total)}</span>
+                          {sale.paymentMethod === "CREDIT" && sale.credit && (
+                            <span className="text-[9px] text-orange-500 font-medium">
+                              Saldo: {formatCurrency(sale.credit.balance)}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => {
-                            onSetLastSale(sale)
-                            onSetReceiptDialog(true)
-                          }}
-                        >
-                          <ArrowRight className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          {sale.paymentMethod === "CREDIT" && sale.credit && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8 rounded-full text-orange-500 hover:text-orange-600 hover:bg-orange-500/10"
+                              title="Ver historial de abonos"
+                              onClick={() => onOpenHistory(
+                                sale.credit.payments,
+                                `Abonos - Factura ${sale.invoiceNumber}`,
+                                `Historial de pagos del crédito para el cliente ${sale.customer?.name || 'General'}. Total: ${formatCurrency(sale.total)}`
+                              )}
+                            >
+                              <Calendar className="w-4 h-4" />
+                            </Button>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Ver Factura"
+                            onClick={() => {
+                              onSetLastSale(sale)
+                              onSetReceiptDialog(true)
+                            }}
+                          >
+                            <ArrowRight className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))}

@@ -81,6 +81,8 @@ export const usePOS = (session: any) => {
   const [customerForm, setCustomerForm] = useState({ name: "", document: "", phone: "", email: "", address: "", creditLimit: 0 })
   const [selectedCredit, setSelectedCredit] = useState<CreditWithDetails | null>(null)
   const [paymentAmount, setPaymentAmount] = useState(0)
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
+  const [paymentNotes, setPaymentNotes] = useState("")
   
   // New form states
   const [expenseForm, setExpenseForm] = useState({
@@ -736,12 +738,19 @@ export const usePOS = (session: any) => {
       const res = await fetch(`/api/credits/${selectedCredit.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: paymentAmount, paymentMethod: "CASH" })
+        body: JSON.stringify({ 
+          amount: paymentAmount, 
+          paymentMethod: "CASH",
+          date: paymentDate,
+          notes: paymentNotes
+        })
       })
       if ((await res.json()).success) {
         toast.success("Abono registrado")
         setPaymentDialog(false)
         setPaymentAmount(0)
+        setPaymentDate(new Date().toISOString().split('T')[0])
+        setPaymentNotes("")
         setSelectedCredit(null)
         fetchPOSData()
         fetchCredits()

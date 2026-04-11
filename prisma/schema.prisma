@@ -120,6 +120,9 @@ model User {
   updatedAt     DateTime @updatedAt
   lastLogin     DateTime?
   
+  // Créditos y Abonos registrados por este usuario
+  creditPayments CreditPayment[]
+  
   @@map("users")
 }
 
@@ -444,6 +447,10 @@ model CreditPayment {
   amount        Float    // Monto del abono
   paymentMethod PaymentMethod @default(CASH)
   notes         String?
+  
+  // Usuario que registró el abono
+  registeredById String?
+  registeredBy   User?    @relation(fields: [registeredById], references: [id], onDelete: SetNull)
   
   // Para impresión de recibo
   receiptNumber String?  @default("")

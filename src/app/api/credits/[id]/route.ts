@@ -72,7 +72,7 @@ export async function POST(
     }
 
     const body = await request.json()
-    const { amount, paymentMethod, notes } = body
+    const { amount, paymentMethod, notes, date } = body
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -105,7 +105,9 @@ export async function POST(
         creditId: id,
         amount,
         paymentMethod: paymentMethod || "CASH",
-        notes
+        notes,
+        registeredById: session.user.id,
+        createdAt: date ? new Date(date) : new Date()
       }
     })
 
