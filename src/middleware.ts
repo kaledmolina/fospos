@@ -19,6 +19,6 @@ export default withAuth(
 // Proteger todas las rutas excepto la raíz (login/registro), api/setup y api/auth
 export const config = {
   matcher: [
-    "/((?!api/setup|api/auth|_next/static|_next/image|favicon.ico|$).*)",
+    "/((?!api/setup|api/auth|api/tenants|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.svg|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp|$).*)",
   ],
 }
