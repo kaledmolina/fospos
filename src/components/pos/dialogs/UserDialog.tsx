@@ -99,7 +99,7 @@ export const UserDialog = ({
               </Select>
             </div>
           )}
-          <div className="bg-gray-50 p-4 rounded-lg text-sm">
+          <div className="bg-muted/50 dark:bg-slate-900/50 p-4 rounded-lg text-sm">
             <p className="font-medium mb-2">Permisos por rol:</p>
             <ul className="text-muted-foreground space-y-1">
               <li>• <strong>Cajero:</strong> Puede registrar ventas y ver productos. Asignado a una sucursal específica.</li>

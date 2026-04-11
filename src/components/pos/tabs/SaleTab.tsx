@@ -183,7 +183,7 @@ export const SaleTab = ({
                           >
                             <div className="flex items-center justify-between w-full">
                               <p className="font-medium text-left truncate flex-1">{service.name}</p>
-                              <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] uppercase">{service.billingCycle}</Badge>
+                              <Badge className="bg-emerald-500/10 text-emerald-500 border-none dark:bg-emerald-500/20 text-[8px] uppercase">{service.billingCycle}</Badge>
                             </div>
                             <div className="flex items-center justify-between w-full mt-1">
                               <p className="font-bold text-emerald-500">{formatCurrency(service.price)}</p>
@@ -226,13 +226,13 @@ export const SaleTab = ({
                 </Select>
                 
                 {cartCustomer && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-2 p-2 bg-emerald-500/5 rounded-md border border-emerald-500/10 flex items-center justify-between">
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-2 p-2 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-md border border-emerald-500/10 dark:border-emerald-500/20 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                        <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
                        <span className="text-sm font-medium">Puntos: {cartCustomer.points || 0}</span>
                     </div>
                     {loyaltyConfig?.isActive && (cartCustomer.points >= loyaltyConfig.minPointsToRedeem) && (
-                      <Badge className="bg-emerald-500 hover:bg-emerald-600 text-[10px] cursor-pointer" onClick={() => onSetRedeemPoints(cartCustomer.points)}>Redimir todo</Badge>
+                      <Badge className="bg-emerald-500 hover:bg-emerald-600 dark:text-slate-950 text-[10px] cursor-pointer" onClick={() => onSetRedeemPoints(cartCustomer.points)}>Redimir todo</Badge>
                     )}
                   </motion.div>
                 )}
@@ -240,7 +240,7 @@ export const SaleTab = ({
 
               {/* Loyalty Redemption */}
               {loyaltyConfig?.isActive && cartCustomer && (
-                <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div className="mb-4 p-3 bg-muted/30 dark:bg-slate-900/50 rounded-lg border border-border/50">
                   <div className="flex items-center gap-2 mb-2">
                     <Star className="w-4 h-4 text-amber-500" />
                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Redimir Puntos</Label>
@@ -249,11 +249,11 @@ export const SaleTab = ({
                     <Input 
                       type="number" 
                       placeholder="Puntos..." 
-                      className="h-8 text-sm"
+                      className="h-8 text-sm bg-background/50"
                       value={redeemPoints || ""}
                       onChange={(e) => onSetRedeemPoints(parseInt(e.target.value) || 0)}
                     />
-                    <div className="flex-1 flex items-center justify-end px-2 bg-background rounded border text-xs font-bold text-amber-600">
+                    <div className="flex-1 flex items-center justify-end px-2 bg-background/80 dark:bg-slate-800 rounded border text-xs font-bold text-amber-600 dark:text-amber-500">
                       -{formatCurrency(loyaltyDiscount)}
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export const SaleTab = ({
               )}
 
               {/* Coupons */}
-              <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-border/50">
+              <div className="mb-4 p-3 bg-muted/30 dark:bg-slate-900/50 rounded-lg border border-border/50">
                 <div className="flex items-center gap-2 mb-2">
                   <Ticket className="w-4 h-4 text-blue-500" />
                   <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cupón / Bono</Label>
@@ -269,16 +269,16 @@ export const SaleTab = ({
                 <div className="flex gap-2">
                   <Input 
                     placeholder="Escribe código..." 
-                    className="h-8 text-sm uppercase"
+                    className="h-8 text-sm uppercase bg-background/50"
                     value={couponCode}
                     onChange={(e) => onSetCouponCode(e.target.value)}
                   />
-                  <Button size="sm" variant="outline" className="h-8" onClick={onValidateCoupon}>
+                  <Button size="sm" variant="outline" className="h-8 dark:hover:bg-blue-900/20" onClick={onValidateCoupon}>
                     {appliedCoupon ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : "Validar"}
                   </Button>
                 </div>
                 {appliedCoupon && (
-                  <p className="text-[10px] text-emerald-600 mt-1 flex items-center gap-1">
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" /> 
                     Aplicado: {appliedCoupon.description || appliedCoupon.code} (-{formatCurrency(couponDiscount)})
                   </p>
@@ -366,7 +366,7 @@ export const SaleTab = ({
                           placeholder="0"
                           value={cashReceived || ""}
                           onChange={(e) => onCashReceivedChange(parseFloat(e.target.value) || 0)}
-                          className="h-8 pl-7 bg-white border-emerald-500/30 font-bold text-emerald-600" 
+                          className="h-8 pl-7 bg-background dark:bg-slate-900 border-emerald-500/30 font-bold text-emerald-600 dark:text-emerald-400" 
                         />
                       </div>
                     </div>

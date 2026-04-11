@@ -135,7 +135,7 @@ export const LoyaltyConfigTab = ({
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                  <p className="text-xs text-muted-foreground bg-muted/50 dark:bg-slate-900/50 p-2 rounded">
                     Ejemplo: Si das 1 punto por cada $1,000, una compra de $50,000 otorgará 50 puntos.
                   </p>
                 </div>
@@ -162,7 +162,7 @@ export const LoyaltyConfigTab = ({
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                  <p className="text-xs text-muted-foreground bg-muted/50 dark:bg-slate-900/50 p-2 rounded">
                     Ejemplo: Si 1 punto vale $10, 100 puntos equivalen a $1,000 de descuento.
                   </p>
                 </div>
@@ -255,7 +255,7 @@ export const LoyaltyConfigTab = ({
                     {coupons.map((coupon) => (
                       <div 
                         key={coupon.id} 
-                        className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50"
+                        className="flex items-center justify-between p-4 bg-muted/10 dark:bg-slate-900/30 rounded-lg border border-border/50"
                       >
                         <div className="flex items-start gap-4">
                           <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center">

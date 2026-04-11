@@ -75,16 +75,16 @@ export const CategoriesTab = ({
                       </p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600">
+                  <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                     {cat._count?.products || 0} Productos
                   </Badge>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-slate-100 relative z-20">
+                <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 relative z-20">
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
+                    className="h-8 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       onSetEditingCategory(cat)
@@ -105,7 +105,7 @@ export const CategoriesTab = ({
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                        className="h-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5 mr-1" />Eliminar
                       </Button>
@@ -136,10 +136,10 @@ export const CategoriesTab = ({
       </div>
 
       {categories.length === 0 && (
-        <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-          <FolderOpen className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-          <p className="text-lg font-medium text-slate-600">No tienes categorías registradas</p>
-          <p className="text-sm text-slate-400 mb-6">Comienza creando una para organizar tus productos</p>
+        <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+          <FolderOpen className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-700" />
+          <p className="text-lg font-medium text-slate-600 dark:text-slate-300">No tienes categorías registradas</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">Comienza creando una para organizar tus productos</p>
           <Button 
             className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer"
             onClick={() => onSetCategoryDialog(true)}
@@ -149,9 +149,9 @@ export const CategoriesTab = ({
         </div>
       )}
       
-      <div className="mt-8 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex gap-3 items-start">
-        <Info className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-        <div className="text-sm text-emerald-800">
+      <div className="mt-8 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/20 flex gap-3 items-start">
+        <Info className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        <div className="text-sm text-emerald-800 dark:text-emerald-200">
           <p className="font-bold mb-1">Tip de Organización</p>
           <p>Usa colores distintos para cada categoría para que tus cajeros puedan identificar los productos más rápido en la pantalla de ventas.</p>
         </div>

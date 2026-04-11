@@ -58,9 +58,9 @@ export const UsersTab = ({
         return {
           label: role,
           icon: Users,
-          bgColor: "bg-gray-500/10",
-          textColor: "text-gray-500",
-          badgeClass: "border-gray-500/20 text-gray-500 bg-gray-500/10"
+          bgColor: "bg-muted",
+          textColor: "text-muted-foreground",
+          badgeClass: "border-border text-muted-foreground bg-muted"
         }
     }
   }

@@ -42,7 +42,7 @@ export const ProductDialog = ({
                 value={productForm.code} 
                 onChange={e => onProductFormChange({ ...productForm, code: e.target.value })} 
                 placeholder="Escanea el código..." 
-                className="border-emerald-200 focus:ring-emerald-500 h-11"
+                className="border-emerald-200 dark:border-emerald-900/50 focus:ring-emerald-500 h-11"
               />
             </div>
             <div className="space-y-2">
@@ -54,7 +54,7 @@ export const ProductDialog = ({
                 value={productForm.sku} 
                 onChange={e => onProductFormChange({ ...productForm, sku: e.target.value })} 
                 placeholder="Escribe el SKU..." 
-                className="border-blue-200 focus:ring-blue-500 h-11"
+                className="border-blue-200 dark:border-blue-900/50 focus:ring-blue-500 h-11"
               />
             </div>
             <div className="space-y-2 col-span-2">
@@ -67,7 +67,7 @@ export const ProductDialog = ({
             </div>
             <div className="space-y-2">
               <Label className="text-emerald-700">Precio Venta Público *</Label>
-              <Input type="number" value={productForm.salePrice} onChange={e => onProductFormChange({ ...productForm, salePrice: parseFloat(e.target.value) || 0 })} placeholder="0" required className="border-emerald-100" />
+              <Input type="number" value={productForm.salePrice} onChange={e => onProductFormChange({ ...productForm, salePrice: parseFloat(e.target.value) || 0 })} placeholder="0" required className="border-emerald-100 dark:border-emerald-900/30" />
             </div>
             <div className="space-y-2">
               <Label>Precio Mayoreo (Opcional)</Label>

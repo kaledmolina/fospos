@@ -54,7 +54,7 @@ export const InventoryTab = ({
       
       {categories.length > 0 && (
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          <Button variant="outline" size="sm" className="bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20">Todos</Button>
+          <Button variant="outline" size="sm" className="bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20">Todos</Button>
           {categories.map(cat => (<Button key={cat.id} variant="outline" size="sm">{cat.icon && <span className="mr-1">{cat.icon}</span>}{cat.name}</Button>))}
         </div>
       )}
@@ -72,7 +72,7 @@ export const InventoryTab = ({
             whileHover={{ scale: 1.02, y: -4 }}
             transition={{ duration: 0.2 }}
           >
-            <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-emerald-200 ${!product.isActive ? "opacity-50" : ""}`}>
+            <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 ${!product.isActive ? "opacity-50" : ""}`}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -130,7 +130,7 @@ export const InventoryTab = ({
         {products.length === 0 && (
           <motion.div className="col-span-full" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="text-center py-16">
-              <FolderOpen className="w-20 h-20 mx-auto mb-4 text-muted-foreground/20" />
+              <FolderOpen className="w-20 h-20 mx-auto mb-4 text-muted-foreground/30 dark:text-muted-foreground/20" />
               <p className="text-lg font-medium text-foreground mb-2">No hay productos registrados</p>
               <p className="text-sm text-muted-foreground mb-6">Comienza agregando tu primer producto al inventario</p>
               <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer" onClick={() => onSetProductDialog(true)}>

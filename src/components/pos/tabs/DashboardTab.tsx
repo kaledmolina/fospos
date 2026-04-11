@@ -142,7 +142,7 @@ export const DashboardTab = ({
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="w-full bg-background border-red-500/20 hover:bg-red-500/10 cursor-pointer" 
+                      className="w-full bg-background/50 border-red-500/20 hover:bg-red-500/10 cursor-pointer text-red-600 dark:text-red-400" 
                       onClick={() => onPosTabChange("products")}
                     >
                       Sacar de Inventario
@@ -163,7 +163,7 @@ export const DashboardTab = ({
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="w-full bg-background border-orange-500/20 hover:bg-orange-500/10 cursor-pointer" 
+                      className="w-full bg-background/50 border-orange-500/20 hover:bg-orange-500/10 cursor-pointer text-orange-600 dark:text-orange-400" 
                       onClick={() => onPosTabChange("products")}
                     >
                       Crear Promoción
@@ -181,7 +181,7 @@ export const DashboardTab = ({
                       <p className="text-yellow-500 font-medium">Stock Bajo</p>
                     </div>
                     <p className="text-sm text-yellow-500/80">Tienes {dashboardStats?.lowStockProducts} productos agotándose.</p>
-                    <Button size="sm" variant="outline" className="w-full bg-background border-yellow-500/20 hover:bg-yellow-500/10 cursor-pointer" onClick={() => onPosTabChange("products")}>Ver Inventario</Button>
+                    <Button size="sm" variant="outline" className="w-full bg-background/50 border-yellow-500/20 hover:bg-yellow-500/10 cursor-pointer text-yellow-600 dark:text-yellow-400" onClick={() => onPosTabChange("products")}>Ver Inventario</Button>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -195,7 +195,7 @@ export const DashboardTab = ({
                       <p className="text-red-500 font-medium">Créditos Vencidos</p>
                     </div>
                     <p className="text-sm text-red-500/80">Hay {overdueCredits.length} créditos que requieren cobro inmediato.</p>
-                    <Button size="sm" variant="outline" className="w-full bg-background border-red-500/20 hover:bg-red-500/10 cursor-pointer" onClick={() => { onPosTabChange("credits"); setCreditFilter("overdue") }}>Gestionar Cobros</Button>
+                    <Button size="sm" variant="outline" className="w-full bg-background/50 border-red-500/20 hover:bg-red-500/10 cursor-pointer text-red-600 dark:text-red-400" onClick={() => { onPosTabChange("credits"); setCreditFilter("overdue") }}>Gestionar Cobros</Button>
                   </CardContent>
                 </Card>
               </motion.div>

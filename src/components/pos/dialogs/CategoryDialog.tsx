@@ -50,12 +50,12 @@ export const CategoryDialog = ({
           </div>
           <div className="space-y-2">
             <Label>Icono / Emoji 🏷️</Label>
-            <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100 italic">
+            <div className="flex flex-wrap gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 italic">
               {["🏷️", "🍔", "🍺", "🍦", "🍎", "👕", "⚡", "💊", "🛠️", "📦"].map(emoji => (
                 <button 
                   key={emoji} 
                   type="button" 
-                  className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg transition-all duration-200 hover:bg-emerald-50 hover:scale-110 hover:shadow-sm ${categoryForm.icon === emoji ? "bg-white shadow-md ring-2 ring-emerald-500 scale-110" : ""}`} 
+                  className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg transition-all duration-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:scale-110 hover:shadow-sm ${categoryForm.icon === emoji ? "bg-white dark:bg-slate-800 shadow-md ring-2 ring-emerald-500 scale-110" : ""}`} 
                   onClick={() => onCategoryFormChange({ ...categoryForm, icon: emoji })} 
                 >
                   {emoji}
