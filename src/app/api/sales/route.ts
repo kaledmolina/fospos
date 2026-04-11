@@ -147,15 +147,15 @@ export async function GET(request: NextRequest) {
         new Date(p.expiryDate) <= sevenDaysFromNow
       ).length
 
-      // Obtener meta: Priorizar branchId de la query, luego branch del usuario, luego principal
+      // Obtener metas: Priorizar branchId de la query, luego buscar contexto
       let targetMonthlyGoal = 0
       
-      if (branchId) {
+      if (branchId && branchId !== "null" && branchId !== "undefined") {
         const selectedBranch = await db.branch.findUnique({ where: { id: branchId } })
         targetMonthlyGoal = selectedBranch?.monthlyGoal || 0
       } else {
         const user = await db.user.findUnique({
-          where: { id: session.user.id } || {},
+          where: { id: session.user.id },
           include: { branch: true }
         })
         targetMonthlyGoal = user?.branch?.monthlyGoal || 0
@@ -167,6 +167,9 @@ export async function GET(request: NextRequest) {
           targetMonthlyGoal = mainBranch?.monthlyGoal || 0
         }
       }
+
+      // Meta diaria aproximada (Meta mensual / 30) o valor base
+      const targetDailyGoal = targetMonthlyGoal > 0 ? Math.round(targetMonthlyGoal / 30) : 1000000
 
       // Ventas últimos 7 días (Tendencia)
       const weeklySales = []
@@ -206,6 +209,7 @@ export async function GET(request: NextRequest) {
           expiredCount,
           nearExpiryCount,
           monthlyGoal: targetMonthlyGoal,
+          dailyGoal: targetDailyGoal,
           weeklySales
         }
       })
