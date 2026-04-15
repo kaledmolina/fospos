@@ -280,52 +280,55 @@ export const SaleTab = ({
                 )}
               </div>
 
-              {/* Loyalty Redemption */}
-              {loyaltyConfig?.isActive && cartCustomer && (
-                <div className="mb-4 p-3 bg-muted/30 dark:bg-slate-900/50 rounded-lg border border-border/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Star className="w-4 h-4 text-amber-500" />
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Redimir Puntos</Label>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="number" 
-                      placeholder="Puntos..." 
-                      className="h-8 text-sm bg-background/50"
-                      value={redeemPoints || ""}
-                      onChange={(e) => onSetRedeemPoints(parseInt(e.target.value) || 0)}
-                    />
-                    <div className="flex-1 flex items-center justify-end px-2 bg-background/80 dark:bg-slate-800 rounded border text-xs font-bold text-amber-600 dark:text-amber-500">
-                      -{formatCurrency(loyaltyDiscount)}
-                    </div>
-                  </div>
+              {/* Descuentos y Beneficios - Consolidado en Tabs para ahorrar espacio */}
+              {(loyaltyConfig?.isActive && cartCustomer) || true ? (
+                <div className="mb-4">
+                  <Tabs defaultValue="loyalty" className="w-full">
+                    <TabsList className="grid grid-cols-2 h-8 p-0.5 bg-muted/50">
+                      <TabsTrigger value="loyalty" className="text-[10px] uppercase font-bold gap-1.5 h-7">
+                        <Star className="w-3 h-3 text-amber-500" /> Puntos
+                      </TabsTrigger>
+                      <TabsTrigger value="coupon" className="text-[10px] uppercase font-bold gap-1.5 h-7">
+                        <Ticket className="w-3 h-3 text-blue-500" /> Cupón
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="loyalty" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
+                      <div className="flex gap-2 items-center">
+                        <Input 
+                          type="number" 
+                          placeholder="Puntos a redimir..." 
+                          className="h-8 text-xs bg-background/50 border-amber-500/20 focus-visible:ring-amber-500/30"
+                          value={redeemPoints || ""}
+                          onChange={(e) => onSetRedeemPoints(parseInt(e.target.value) || 0)}
+                        />
+                        <div className="shrink-0 px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[10px] font-black border border-amber-500/20">
+                          -{formatCurrency(loyaltyDiscount)}
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="coupon" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
+                      <div className="flex gap-1.5">
+                        <Input 
+                          placeholder="CÓDIGO DE CUPÓN..." 
+                          className="h-8 text-xs uppercase bg-background/50 border-blue-500/20 focus-visible:ring-blue-500/30"
+                          value={couponCode}
+                          onChange={(e) => onSetCouponCode(e.target.value)}
+                        />
+                        <Button size="sm" variant="outline" className="h-8 px-2 text-[10px] font-bold border-blue-500/30 text-blue-600 hover:bg-blue-50" onClick={onValidateCoupon}>
+                          {appliedCoupon ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : "APLICAR"}
+                        </Button>
+                      </div>
+                      {appliedCoupon && (
+                        <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold px-1 flex items-center gap-1">
+                          <CheckCircle2 className="w-2.5 h-2.5" /> {appliedCoupon.description || appliedCoupon.code} (-{formatCurrency(couponDiscount)})
+                        </p>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 </div>
-              )}
-
-              {/* Coupons */}
-              <div className="mb-4 p-3 bg-muted/30 dark:bg-slate-900/50 rounded-lg border border-border/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <Ticket className="w-4 h-4 text-blue-500" />
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cupón / Bono</Label>
-                </div>
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="Escribe código..." 
-                    className="h-8 text-sm uppercase bg-background/50"
-                    value={couponCode}
-                    onChange={(e) => onSetCouponCode(e.target.value)}
-                  />
-                  <Button size="sm" variant="outline" className="h-8 dark:hover:bg-blue-900/20" onClick={onValidateCoupon}>
-                    {appliedCoupon ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : "Validar"}
-                  </Button>
-                </div>
-                {appliedCoupon && (
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> 
-                    Aplicado: {appliedCoupon.description || appliedCoupon.code} (-{formatCurrency(couponDiscount)})
-                  </p>
-                )}
-              </div>
+              ) : null}
               
               <ScrollArea className="flex-1 mb-4">
                 <AnimatePresence mode="popLayout">
