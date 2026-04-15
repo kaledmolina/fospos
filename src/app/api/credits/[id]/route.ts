@@ -111,10 +111,10 @@ export async function POST(
       }
     })
 
-    // Actualizar el crédito
+    // Actualizar el crédito y la venta en una transacción
     const newPaidAmount = credit.paidAmount + amount
     const newBalance = credit.balance - amount
-    let newStatus = credit.status
+    let newStatus: any = credit.status
 
     if (newBalance === 0) {
       newStatus = "PAID"
@@ -122,12 +122,23 @@ export async function POST(
       newStatus = "PARTIAL"
     }
 
-    await db.credit.update({
-      where: { id },
-      data: {
-        paidAmount: newPaidAmount,
-        balance: newBalance,
-        status: newStatus
+    await db.$transaction(async (tx) => {
+      // 1. Actualizar el crédito
+      await tx.credit.update({
+        where: { id },
+        data: {
+          paidAmount: newPaidAmount,
+          balance: newBalance,
+          status: newStatus
+        }
+      })
+
+      // 2. Si el crédito se pagó totalmente y tiene una venta vinculada, actualizar el estado de la venta
+      if (newStatus === "PAID" && credit.saleId) {
+        await tx.sale.update({
+          where: { id: credit.saleId },
+          data: { paymentStatus: "PAID" }
+        })
       }
     })
 
