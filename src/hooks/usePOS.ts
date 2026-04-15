@@ -763,8 +763,13 @@ export const usePOS = (session: any) => {
         setCashRegister(data.data)
         setCashDialog(false)
         fetchCashHistory()
+      } else {
+        toast.error(data.error || "No se pudo abrir la caja")
       }
-    } catch { toast.error("Error al abrir caja") }
+    } catch (error) { 
+      console.error("Error opening cash:", error)
+      toast.error("Error de conexión al abrir caja") 
+    }
   }
 
   const handleCloseCash = async (finalCash: number) => {

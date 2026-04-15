@@ -121,8 +121,9 @@ export async function POST(request: NextRequest) {
       data: {
         tenantId: session.user.tenantId,
         branchId: branchId,
-        openedBy: session.user.id,
-        initialCash: initialCash || 0
+        initialCash: initialCash || 0,
+        status: "OPEN",
+        openedBy: session.user.id
       }
     })
 
@@ -132,9 +133,9 @@ export async function POST(request: NextRequest) {
       data: cashRegister
     })
   } catch (error) {
-    console.error("Error opening cash register:", error)
+    console.error("❌ Error al abrir caja:", error)
     return NextResponse.json(
-      { success: false, error: "Error interno del servidor" },
+      { success: false, error: error instanceof Error ? error.message : "Error interno del servidor" },
       { status: 500 }
     )
   }
