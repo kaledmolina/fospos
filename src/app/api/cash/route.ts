@@ -73,27 +73,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar si ya hay una caja abierta
+    const body = await request.json()
+    const { initialCash } = body
+    const branchId = body.branchId || session.user.branchId
+
+    if (!branchId) {
+      return NextResponse.json(
+        { success: false, error: "La sucursal es requerida para abrir caja" },
+        { status: 400 }
+      )
+    }
+
+    // Verificar si ya hay una caja abierta en esta sucursal
     const openCash = await db.cashRegister.findFirst({
       where: {
         tenantId: session.user.tenantId,
+        branchId: branchId,
         status: "OPEN"
       }
     })
 
     if (openCash) {
       return NextResponse.json(
-        { success: false, error: "Ya hay una caja abierta" },
+        { success: false, error: "Ya hay una caja abierta en esta sucursal" },
         { status: 400 }
       )
     }
 
-    const body = await request.json()
-    const { initialCash } = body
-
     const cashRegister = await db.cashRegister.create({
       data: {
         tenantId: session.user.tenantId,
+        branchId: branchId,
         openedBy: session.user.id,
         initialCash: initialCash || 0
       }
@@ -127,18 +137,20 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json()
     const { finalCash, notes } = body
+    const branchId = body.branchId || session.user.branchId
 
-    // Buscar caja abierta
+    // Buscar caja abierta en esta sucursal
     const openCash = await db.cashRegister.findFirst({
       where: {
         tenantId: session.user.tenantId,
+        branchId: branchId || undefined,
         status: "OPEN"
       }
     })
 
     if (!openCash) {
       return NextResponse.json(
-        { success: false, error: "No hay caja abierta" },
+        { success: false, error: "No hay caja abierta en esta sucursal" },
         { status: 400 }
       )
     }

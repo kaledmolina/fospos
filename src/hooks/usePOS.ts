@@ -723,7 +723,10 @@ export const usePOS = (session: any) => {
       const res = await fetch("/api/cash", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initialCash })
+        body: JSON.stringify({ 
+          initialCash,
+          branchId: selectedBranch
+        })
       })
       const data = await res.json()
       if (data.success) {
@@ -739,7 +742,10 @@ export const usePOS = (session: any) => {
       const res = await fetch("/api/cash", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ finalCash })
+        body: JSON.stringify({ 
+          finalCash,
+          branchId: selectedBranch
+        })
       })
       const data = await res.json()
       if (data.success) {
