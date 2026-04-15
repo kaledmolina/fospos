@@ -36,6 +36,7 @@ export const usePOS = (session: any) => {
   const [creditFilter, setCreditFilter] = useState<string>("all")
   const [tenantUsers, setTenantUsers] = useState<TenantUserData[]>([])
   const [sales, setSales] = useState<any[]>([])
+  const [cashHistory, setCashHistory] = useState<any[]>([])
   
   // Cart state
   const [cart, setCart] = useState<{ 
@@ -325,6 +326,15 @@ export const usePOS = (session: any) => {
     } catch (error) { console.error("Error fetching coupons:", error) }
   }, [selectedBranch])
 
+  const fetchCashHistory = useCallback(async () => {
+    try {
+      const query = selectedBranch ? `?branchId=${selectedBranch}&type=history` : "?type=history"
+      const res = await fetch(`/api/cash${query}`)
+      const data = await res.json()
+      if (data.success) setCashHistory(data.data)
+    } catch (error) { console.error("Error fetching cash history:", error) }
+  }, [selectedBranch])
+
   // Initial Load
   useEffect(() => {
     if (session?.user?.tenantId) {
@@ -336,8 +346,9 @@ export const usePOS = (session: any) => {
       fetchSales()
       fetchCredits()
       fetchLoyaltyConfig()
+      fetchCashHistory()
     }
-  }, [session, fetchPOSData, fetchNotifications, fetchExpenses, fetchBranches, fetchUsers, fetchSales, fetchCredits, fetchLoyaltyConfig])
+  }, [session, fetchPOSData, fetchNotifications, fetchExpenses, fetchBranches, fetchUsers, fetchSales, fetchCredits, fetchLoyaltyConfig, fetchCashHistory])
   
   useEffect(() => {
     if (notificationsOpen) {
@@ -735,6 +746,7 @@ export const usePOS = (session: any) => {
     } catch { toast.error("Error al validar cupón") }
   }
 
+
   const handleOpenCash = async (initialCash: number) => {
     try {
       const res = await fetch("/api/cash", {
@@ -750,6 +762,7 @@ export const usePOS = (session: any) => {
         toast.success("Caja abierta")
         setCashRegister(data.data)
         setCashDialog(false)
+        fetchCashHistory()
       }
     } catch { toast.error("Error al abrir caja") }
   }
@@ -769,6 +782,7 @@ export const usePOS = (session: any) => {
         toast.success(`Caja cerrada. Diferencia: ${formatCurrency(data.data.difference || 0)}`)
         setCashRegister(null)
         setCashDialog(false)
+        fetchCashHistory()
       }
     } catch { toast.error("Error al cerrar caja") }
   }
@@ -1130,7 +1144,7 @@ export const usePOS = (session: any) => {
     fetchBranches, fetchUsers, fetchSubscriptionServices, fetchSubscriptions,
     fetchCredits, handleAddProduct, handleAddCategory, handleAddCustomer,
     addToCart, removeFromCart, updateCartQuantity, getCartTotal,
-    handleSale, handleOpenCash, handleCloseCash, 
+    handleSale, handleOpenCash, handleCloseCash, fetchCashHistory, cashHistory,
     handlePayment, handleAddExpense, handleAddBranch, handleDeleteBranch, 
     handleAddUser, handleDeleteUser, handleToggleUserActive, 
     handleFileUpload, handleBulkUpload,

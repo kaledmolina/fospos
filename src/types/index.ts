@@ -61,6 +61,8 @@ export interface CustomerData {
   phone: string | null
   email: string | null
   pendingBalance: number
+  creditLimit: number
+  points: number
 }
 
 export interface CreditWithDetails {

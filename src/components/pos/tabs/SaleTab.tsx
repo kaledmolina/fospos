@@ -226,14 +226,30 @@ export const SaleTab = ({
                 </Select>
                 
                 {cartCustomer && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-2 p-2 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-md border border-emerald-500/10 dark:border-emerald-500/20 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                       <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-                       <span className="text-sm font-medium">Puntos: {cartCustomer.points || 0}</span>
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} 
+                    animate={{ opacity: 1, height: "auto" }} 
+                    className="mt-2 p-2 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-md border border-emerald-500/10 dark:border-emerald-500/20 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
+                        <span className="text-sm font-medium">Puntos: {cartCustomer.points || 0}</span>
+                      </div>
+                      {loyaltyConfig?.isActive && (cartCustomer.points >= loyaltyConfig.minPointsToRedeem) && (
+                        <Badge className="bg-emerald-500 hover:bg-emerald-600 dark:text-slate-950 text-[10px] cursor-pointer" onClick={() => onSetRedeemPoints(cartCustomer.points)}>Redimir todo</Badge>
+                      )}
                     </div>
-                    {loyaltyConfig?.isActive && (cartCustomer.points >= loyaltyConfig.minPointsToRedeem) && (
-                      <Badge className="bg-emerald-500 hover:bg-emerald-600 dark:text-slate-950 text-[10px] cursor-pointer" onClick={() => onSetRedeemPoints(cartCustomer.points)}>Redimir todo</Badge>
-                    )}
+                    
+                    <div className="pt-2 border-t border-emerald-500/10 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Wallet className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Crédito Disponible</span>
+                      </div>
+                      <span className={`text-sm font-black ${ (cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0)) > 0 ? "text-blue-600 dark:text-blue-400" : "text-red-500" }`}>
+                        {formatCurrency(cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0))}
+                      </span>
+                    </div>
                   </motion.div>
                 )}
               </div>

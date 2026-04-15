@@ -14,6 +14,7 @@ interface CashTabProps {
   todayExpenses: number
   onSetExpenseDialog: (open: boolean) => void
   onPrintSummary: () => void
+  cashHistory: any[]
 }
 
 export const CashTab = ({
@@ -21,7 +22,8 @@ export const CashTab = ({
   onSetCashDialog,
   todayExpenses,
   onSetExpenseDialog,
-  onPrintSummary
+  onPrintSummary,
+  cashHistory
 }: CashTabProps) => {
   return (
     <motion.div key="cash" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
@@ -94,6 +96,65 @@ export const CashTab = ({
           </CardContent>
         </Card>
       )}
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-foreground mb-4">Historial de Arqueos</h2>
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs uppercase bg-muted/50 text-muted-foreground">
+                  <tr>
+                    <th className="px-6 py-4">Apertura</th>
+                    <th className="px-6 py-4">Cierre</th>
+                    <th className="px-6 py-4">Usuario</th>
+                    <th className="px-6 py-4">Inicial</th>
+                    <th className="px-6 py-4">Ventas</th>
+                    <th className="px-6 py-4">Final</th>
+                    <th className="px-6 py-4">Diferencia</th>
+                    <th className="px-6 py-4">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {cashHistory.map((item) => (
+                    <motion.tr key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-muted/30 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">{formatDate(item.openedAt)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{item.closedAt ? formatDate(item.closedAt) : "-"}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="font-medium">{item.openedByUser?.name}</span>
+                        {item.closedByUser && item.closedByUser.name !== item.openedByUser.name && (
+                          <span className="block text-[10px] text-muted-foreground">Cerró: {item.closedByUser.name}</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 font-medium">{formatCurrency(item.initialCash)}</td>
+                      <td className="px-6 py-4 text-emerald-600 font-bold">{formatCurrency(item.totalSales)}</td>
+                      <td className="px-6 py-4 font-bold">{item.finalCash ? formatCurrency(item.finalCash) : "-"}</td>
+                      <td className="px-6 py-4">
+                        {item.status === "CLOSED" ? (
+                          <span className={`${item.difference === 0 ? "text-emerald-500" : item.difference > 0 ? "text-blue-500" : "text-red-500"} font-bold`}>
+                            {formatCurrency(item.difference || 0)}
+                          </span>
+                        ) : "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant={item.status === "OPEN" ? "success" : "secondary"}>
+                          {item.status === "OPEN" ? "Abierta" : "Cerrada"}
+                        </Badge>
+                      </td>
+                    </motion.tr>
+                  ))}
+                  {cashHistory.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
+                        No hay registros históricos para esta sucursal.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </motion.div>
   )
 }

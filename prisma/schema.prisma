@@ -128,6 +128,10 @@ model User {
   // Créditos y Abonos registrados por este usuario
   creditPayments CreditPayment[]
   
+  // Cajas abiertas/cerradas por este usuario
+  openedRegisters CashRegister[] @relation("OpenedBy")
+  closedRegisters CashRegister[] @relation("ClosedBy")
+  
   @@map("users")
 }
 
@@ -498,9 +502,11 @@ model CashRegister {
   // Información de apertura
   openedAt      DateTime @default(now())
   openedBy      String   // ID del usuario que abrió
+  openedByUser  User     @relation("OpenedBy", fields: [openedBy], references: [id])
   initialCash   Float    @default(0) // Efectivo inicial en caja
   closedAt      DateTime?
   closedBy      String?  // ID del usuario que cerró
+  closedByUser  User?    @relation("ClosedBy", fields: [closedBy], references: [id])
   finalCash     Float?   // Efectivo final contado
   
   // Estado

@@ -17,10 +17,24 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const branchId = searchParams.get("branchId")
+    const type = searchParams.get("type")
 
     const where: any = {
       tenantId: session.user.tenantId,
       ...(branchId ? { branchId } : {})
+    }
+
+    if (type === "history") {
+      const history = await db.cashRegister.findMany({
+        where,
+        include: {
+          openedByUser: { select: { name: true } },
+          closedByUser: { select: { name: true } }
+        },
+        orderBy: { openedAt: "desc" },
+        take: 30
+      })
+      return NextResponse.json({ success: true, data: history })
     }
 
     // Buscar caja abierta
@@ -28,6 +42,9 @@ export async function GET(request: NextRequest) {
       where: {
         ...where,
         status: "OPEN"
+      },
+      include: {
+        openedByUser: { select: { name: true } }
       },
       orderBy: { openedAt: "desc" }
     })

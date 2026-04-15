@@ -218,6 +218,7 @@ export const POSView = ({
               todayExpenses={pos.todayExpenses}
               onSetExpenseDialog={pos.setExpenseDialog}
               onPrintSummary={() => pos.setCashReportDialog(true)}
+              cashHistory={pos.cashHistory}
             />
           )}
           {pos.posTab === "subscriptions" && (
