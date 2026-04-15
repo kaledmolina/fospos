@@ -5,6 +5,7 @@ import { Wallet, Receipt, CheckCircle, Printer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 import { fadeInUp } from "@/lib/animations"
 import { formatCurrency, formatDate } from "@/lib/utils"
 
