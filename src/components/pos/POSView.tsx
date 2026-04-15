@@ -129,6 +129,7 @@ export const POSView = ({
               onCashReceivedChange={pos.setCashReceived}
               change={pos.change}
               onSetChange={pos.setChange}
+              onSetCustomerDialog={pos.setCustomerDialog}
             />
           )}
           {pos.posTab === "loyalty" && (

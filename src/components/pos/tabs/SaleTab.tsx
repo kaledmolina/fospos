@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, ShoppingBag, Wallet, CreditCard, 
   FileText, Package, AlertTriangle, RefreshCw,
-  Ticket, Star, CheckCircle2
+  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -53,6 +53,7 @@ interface SaleTabProps {
   onCashReceivedChange: (amount: number) => void
   change: number
   onSetChange: (amount: number) => void
+  onSetCustomerDialog: (open: boolean) => void
 }
 
 export const SaleTab = ({
@@ -86,7 +87,8 @@ export const SaleTab = ({
   cashReceived,
   onCashReceivedChange,
   change,
-  onSetChange
+  onSetChange,
+  onSetCustomerDialog
 }: SaleTabProps) => {
   useEffect(() => {
     if (cartPaymentMethod === "CASH" && cashReceived > 0) {
@@ -217,38 +219,62 @@ export const SaleTab = ({
             </CardHeader>
             <CardContent className="flex-1 flex flex-col overflow-hidden p-4">
               <div className="mb-4">
-                <Select value={cartCustomer?.id || "none"} onValueChange={(v) => onSetCartCustomer(v === "none" ? null : customers.find(c => c.id === v) || null)}>
-                  <SelectTrigger><SelectValue placeholder="Cliente (opcional)" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Cliente general</SelectItem>
-                    {customers.map(customer => (<SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Select value={cartCustomer?.id || "none"} onValueChange={(v) => onSetCartCustomer(v === "none" ? null : customers.find(c => c.id === v) || null)}>
+                      <SelectTrigger className="w-full bg-background"><SelectValue placeholder="Cliente (opcional)" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Cliente general</SelectItem>
+                        {customers.map(customer => (<SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="shrink-0 text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all cursor-pointer"
+                    title="Nuevo Cliente"
+                    onClick={() => onSetCustomerDialog(true)}
+                  >
+                    <UserPlus className="w-4 h-4" />
+                  </Button>
+                </div>
                 
                 {cartCustomer && (
                   <motion.div 
-                    initial={{ opacity: 0, height: 0 }} 
-                    animate={{ opacity: 1, height: "auto" }} 
-                    className="mt-2 p-2 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-md border border-emerald-500/10 dark:border-emerald-500/20 space-y-2"
+                    initial={{ opacity: 0, scale: 0.95 }} 
+                    animate={{ opacity: 1, scale: 1 }} 
+                    className="mt-3 overflow-hidden rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent shadow-sm shadow-emerald-500/10"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-                        <span className="text-sm font-medium">Puntos: {cartCustomer.points || 0}</span>
+                    <div className="p-3 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                            <Star className="w-4 h-4 text-emerald-600 fill-emerald-500/50" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase font-bold tracking-wider text-emerald-700/70 dark:text-emerald-400/50">Puntos Acumulados</p>
+                            <p className="text-sm font-black text-emerald-700 dark:text-emerald-400">{cartCustomer.points || 0} pts</p>
+                          </div>
+                        </div>
+                        {loyaltyConfig?.isActive && (cartCustomer.points >= loyaltyConfig.minPointsToRedeem) && (
+                          <Button size="sm" variant="ghost" className="h-7 text-emerald-600 hover:bg-emerald-500/10 px-2 font-bold" onClick={() => onSetRedeemPoints(cartCustomer.points)}>
+                            Redimir
+                          </Button>
+                        )}
                       </div>
-                      {loyaltyConfig?.isActive && (cartCustomer.points >= loyaltyConfig.minPointsToRedeem) && (
-                        <Badge className="bg-emerald-500 hover:bg-emerald-600 dark:text-slate-950 text-[10px] cursor-pointer" onClick={() => onSetRedeemPoints(cartCustomer.points)}>Redimir todo</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="pt-2 border-t border-emerald-500/10 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Wallet className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Crédito Disponible</span>
+                      
+                      <div className="pt-2 border-t border-emerald-500/10 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                           <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/10">
+                              <Wallet className="w-3 h-3 text-blue-500" />
+                           </div>
+                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Crédito Disponible</span>
+                        </div>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded-full ${ (cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0)) > 0 ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-red-500/10 text-red-500" }`}>
+                          {formatCurrency(cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0))}
+                        </span>
                       </div>
-                      <span className={`text-sm font-black ${ (cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0)) > 0 ? "text-blue-600 dark:text-blue-400" : "text-red-500" }`}>
-                        {formatCurrency(cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0))}
-                      </span>
                     </div>
                   </motion.div>
                 )}
@@ -311,17 +337,28 @@ export const SaleTab = ({
                         initial={{ opacity: 0, x: 50, scale: 0.8 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: -50, scale: 0.8 }}
-                        className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border shadow-sm"
+                        className="group flex items-center gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-xl border border-transparent hover:border-border transition-all shadow-sm"
                       >
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">{formatCurrency(item.price)} c/u</p>
+                        <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border text-muted-foreground group-hover:text-emerald-500 transition-colors">
+                          {item.type === "PRODUCT" ? <Package className="w-5 h-5" /> : <RefreshCw className="w-5 h-5" />}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button size="icon" variant="outline" className="w-7 h-7" onClick={() => onUpdateCartQuantity(item.id, item.quantity - 1)}>-</Button>
-                          <span className="w-8 text-center text-sm font-bold text-emerald-600">{item.quantity}</span>
-                          <Button size="icon" variant="outline" className="w-7 h-7" onClick={() => onUpdateCartQuantity(item.id, item.quantity + 1)}>+</Button>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm truncate">{item.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{formatCurrency(item.price)} x {item.quantity}</p>
                         </div>
+                        <div className="flex items-center bg-background rounded-lg border p-0.5 shadow-sm">
+                          <Button size="icon" variant="ghost" className="w-6 h-6 h-auto" onClick={() => onUpdateCartQuantity(item.id, item.quantity - 1)}>-</Button>
+                          <span className="w-8 text-center text-xs font-black text-emerald-600">{item.quantity}</span>
+                          <Button size="icon" variant="ghost" className="w-6 h-6 h-auto" onClick={() => onUpdateCartQuantity(item.id, item.quantity + 1)}>+</Button>
+                        </div>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="w-8 h-8 text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100" 
+                          onClick={() => onUpdateCartQuantity(item.id, 0)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </motion.div>
                     ))}
                     {cart.length === 0 && (
@@ -356,15 +393,36 @@ export const SaleTab = ({
                 </div>
               </div>
               
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-sm"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
-                <div className="flex justify-between text-sm"><span>IVA (19%)</span><span>{formatCurrency(tax)}</span></div>
-                {loyaltyDiscount > 0 && <div className="flex justify-between text-sm text-amber-600"><span>Dcto. Puntos</span><span>-{formatCurrency(loyaltyDiscount)}</span></div>}
-                {couponDiscount > 0 && <div className="flex justify-between text-sm text-blue-600"><span>Dcto. Cupón</span><span>-{formatCurrency(couponDiscount)}</span></div>}
-                <Separator />
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span className="text-xl font-black text-emerald-500">{formatCurrency(total)}</span>
+              <div className="border-t pt-4 space-y-2.5">
+                <div className="flex justify-between text-xs font-medium text-muted-foreground px-1"><span>Subtotal bruto</span><span>{formatCurrency(subtotal)}</span></div>
+                <div className="flex justify-between text-xs font-medium text-muted-foreground px-1"><span>IVA (19%)</span><span>{formatCurrency(tax)}</span></div>
+                
+                {loyaltyDiscount > 0 && (
+                  <div className="flex justify-between text-xs font-bold text-amber-600 px-3 py-1 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200/50 dark:border-amber-900/30">
+                    <span className="flex items-center gap-1.5"><Star className="w-3 h-3 fill-amber-500" /> Descuento Puntos</span>
+                    <span>-{formatCurrency(loyaltyDiscount)}</span>
+                  </div>
+                )}
+                
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-xs font-bold text-blue-600 px-3 py-1 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200/50 dark:border-blue-900/30">
+                    <span className="flex items-center gap-1.5"><Ticket className="w-3 h-3 fill-blue-500 border-none" /> Cupón Aplicado</span>
+                    <span>-{formatCurrency(couponDiscount)}</span>
+                  </div>
+                )}
+                
+                <div className="my-2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                
+                <div className="flex justify-between items-end p-3 bg-slate-950 dark:bg-emerald-500/10 rounded-xl shadow-inner group">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] uppercase font-black tracking-widest text-emerald-500/70">Total a Pagar</p>
+                    <p className="text-2xl font-black text-white dark:text-emerald-400 tabular-nums leading-none">
+                      {formatCurrency(total)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-emerald-500/50 uppercase">Balance Final</p>
+                  </div>
                 </div>
 
                 {cartPaymentMethod === "CASH" && (
