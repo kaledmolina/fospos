@@ -27,7 +27,10 @@ export async function GET(request: NextRequest) {
     if (type === "history") {
       const history = await db.cashRegister.findMany({
         where,
-        /* include removed temporarily due to client generation lock */
+        include: {
+          openedByUser: { select: { name: true } },
+          closedByUser: { select: { name: true } }
+        },
         orderBy: { openedAt: "desc" },
         take: 30
       })
@@ -40,7 +43,9 @@ export async function GET(request: NextRequest) {
         ...where,
         status: "OPEN"
       },
-      /* include removed temporarily */
+      include: {
+        openedByUser: { select: { name: true } }
+      },
       orderBy: { openedAt: "desc" }
     })
 
@@ -118,7 +123,9 @@ export async function POST(request: NextRequest) {
         branchId: branchId,
         initialCash: initialCash || 0,
         status: "OPEN",
-        openedBy: session.user.id
+        openedByUser: {
+          connect: { id: session.user.id }
+        }
       }
     })
 
