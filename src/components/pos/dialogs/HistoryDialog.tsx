@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { Calendar, DollarSign, CreditCard, Wallet, Receipt } from "lucide-react"
+import { Calendar, DollarSign, CreditCard, Wallet, Receipt, User } from "lucide-react"
 
 interface HistoryItem {
   id: string

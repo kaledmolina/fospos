@@ -182,6 +182,8 @@ export const POSView = ({
               onSetPaymentDialog={pos.setPaymentDialog}
               onOpenHistory={pos.handleOpenHistory}
               getDaysOverdue={pos.getDaysOverdue}
+              creditSearch={pos.creditSearch}
+              onSetCreditSearch={pos.setCreditSearch}
             />
           )}
           {pos.posTab === "expenses" && (

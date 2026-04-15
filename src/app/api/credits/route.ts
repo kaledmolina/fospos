@@ -43,6 +43,11 @@ export async function GET(request: NextRequest) {
           }
         },
         payments: {
+          include: {
+             registeredBy: {
+                select: { name: true }
+             }
+          },
           orderBy: { createdAt: "desc" }
         }
       },

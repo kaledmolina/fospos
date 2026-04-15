@@ -34,6 +34,7 @@ export const usePOS = (session: any) => {
   const [branches, setBranches] = useState<BranchData[]>([])
   const [selectedBranch, setSelectedBranch] = useState<string | null>(session?.user?.branchId || null)
   const [creditFilter, setCreditFilter] = useState<string>("all")
+  const [creditSearch, setCreditSearch] = useState<string>("")
   const [tenantUsers, setTenantUsers] = useState<TenantUserData[]>([])
   const [sales, setSales] = useState<any[]>([])
   const [cashHistory, setCashHistory] = useState<any[]>([])
@@ -693,6 +694,7 @@ export const usePOS = (session: any) => {
         fetchPOSData()
         fetchCredits()
         fetchNotifications()
+        fetchSales()
       } else {
         toast.error("Error al procesar la venta", {
           description: data.error || "Ocurrió un error inesperado al guardar la venta."
@@ -815,6 +817,7 @@ export const usePOS = (session: any) => {
         fetchPOSData()
         fetchCredits()
         fetchNotifications()
+        fetchSales()
       }
     } catch { toast.error("Error al registrar abono") }
   }
@@ -1028,6 +1031,8 @@ export const usePOS = (session: any) => {
         toast.success("Pago registrado")
         setShowSubscriptionPaymentDialog(false)
         fetchSubscriptions()
+        fetchSales()
+        fetchPOSData()
       }
     } catch { toast.error("Error al registrar pago") }
   }
@@ -1101,6 +1106,13 @@ export const usePOS = (session: any) => {
   const unreadNotifications = notifications.filter(n => !n.isRead).length
   const overdueCredits = credits.filter(c => c.status === "OVERDUE")
   const filteredCredits = credits.filter(c => {
+    if (creditSearch) {
+      const search = creditSearch.toLowerCase()
+      const matchesName = c.customer.name.toLowerCase().includes(search)
+      const matchesInvoice = c.sale?.invoiceNumber?.toLowerCase().includes(search)
+      if (!matchesName && !matchesInvoice) return false
+    }
+
     if (creditFilter === "all") return c.status !== "PAID"
     if (creditFilter === "overdue") return c.status === "OVERDUE"
     if (creditFilter === "paid") return c.status === "PAID"
@@ -1119,6 +1131,7 @@ export const usePOS = (session: any) => {
     setNotificationsOpen, expenses, branches, setBranches,
     sales, fetchSales,
     selectedBranch, setSelectedBranch, creditFilter, setCreditFilter,
+    creditSearch, setCreditSearch,
     tenantUsers, cart, setCart, cartCustomer, setCartCustomer,
     cartPaymentMethod, setCartPaymentMethod, cartDiscount, setCartDiscount,
     productDialog, setProductDialog, categoryDialog, setCategoryDialog,

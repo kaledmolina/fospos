@@ -1,11 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { AlertCircle, Clock, CreditCard, Users } from "lucide-react"
+import { AlertCircle, Clock, CreditCard, Users, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select"
 import { fadeInUp, staggerContainer } from "@/lib/animations"
 import { formatCurrency, formatDate } from "@/lib/utils"
 
@@ -21,6 +22,8 @@ interface CreditsTabProps {
   onSetPaymentDialog: (open: boolean) => void
   onOpenHistory: (items: any[], title: string, description: string) => void
   getDaysOverdue: (date: string) => number
+  creditSearch: string
+  onSetCreditSearch: (search: string) => void
 }
 
 export const CreditsTab = ({
@@ -34,15 +37,26 @@ export const CreditsTab = ({
   onSetPaymentAmount,
   onSetPaymentDialog,
   onOpenHistory,
-  getDaysOverdue
+  getDaysOverdue,
+  creditSearch,
+  onSetCreditSearch
 }: CreditsTabProps) => {
   return (
     <motion.div key="credits" variants={fadeInUp} initial="initial" animate="animate" exit="exit">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Libreta de Créditos</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-1 md:flex-initial">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Buscar cliente o factura..." 
+              className="pl-9 h-10 w-full"
+              value={creditSearch}
+              onChange={(e) => onSetCreditSearch(e.target.value)}
+            />
+          </div>
           <Select value={creditFilter} onValueChange={onSetCreditFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
