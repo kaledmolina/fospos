@@ -427,15 +427,18 @@ export const SaleTab = ({
                 
                 <div className="my-2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 
-                <div className="flex justify-between items-end p-3 bg-slate-950 dark:bg-emerald-500/10 rounded-xl shadow-inner group">
-                  <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase font-black tracking-widest text-emerald-500/70">Total a Pagar</p>
-                    <p className="text-2xl font-black text-white dark:text-emerald-400 tabular-nums leading-none">
+                <div className="flex justify-between items-end p-4 bg-gradient-to-br from-emerald-600 to-emerald-700 dark:from-emerald-500/20 dark:to-emerald-500/5 rounded-2xl shadow-lg shadow-emerald-500/20 dark:shadow-none group transition-all duration-300">
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase font-black tracking-[0.2em] text-emerald-100 dark:text-emerald-500/70">Total a Pagar</p>
+                    <p className="text-3xl font-black text-white dark:text-emerald-400 tabular-nums leading-none drop-shadow-sm">
                       {formatCurrency(total)}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-bold text-emerald-500/50 uppercase">Balance Final</p>
+                  <div className="text-right pb-1">
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 dark:bg-emerald-500/10 backdrop-blur-sm border border-white/10">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
+                      <p className="text-[9px] font-black text-emerald-50 border-none uppercase tracking-tighter">Balance Final</p>
+                    </div>
                   </div>
                 </div>
 
