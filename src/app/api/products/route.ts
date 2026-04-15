@@ -25,6 +25,10 @@ export async function GET(request: NextRequest) {
       tenantId: session.user.tenantId
     }
 
+    if (branchId || session.user.branchId) {
+      where.branchId = branchId || session.user.branchId
+    }
+
     if (search) {
       where.OR = [
         { name: { contains: search } },
@@ -145,10 +149,13 @@ export async function POST(request: NextRequest) {
     }
 
     const product = await db.$transaction(async (tx) => {
+      const targetBranchId = body.branchId || session.user.branchId || null
+
       // 1. Crear el producto
       const mainProduct = await tx.product.create({
         data: {
           tenantId: session.user.tenantId,
+          branchId: targetBranchId,
           code: code || null,
           sku: sku || null,
           name,
@@ -169,23 +176,20 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // 2. Inicializar stock en la sucursal asignada o en todas las sucursales si es el admin
-      const branches = await tx.branch.findMany({
-        where: { tenantId: session.user.tenantId }
-      })
-
-      if (branches.length > 0) {
-        // En un POS multi-sucursal, generalmente inicializamos el stock en la sucursal principal o todas
-        await Promise.all(branches.map(branch => 
-          tx.productStock.create({
-            data: {
-              productId: mainProduct.id,
-              branchId: branch.id,
-              stock: branch.isMain ? (stock || 0) : 0,
-              minStock: minStock || 5
-            }
-          })
-        ))
+      if (targetBranchId) {
+        // En un POS con aislamiento de sucursal, solo creamos stock para la sucursal actual
+        await tx.productStock.create({
+          data: {
+            productId: mainProduct.id,
+            branchId: targetBranchId,
+            stock: stock || 0,
+            minStock: minStock || 5
+          }
+        })
+      } else {
+        // Fallback: si no hay sucursal (ej. superadmin creando global), inicializar en todas? 
+        // O mejor no crear stock hasta que se asigne.
+        // El usuario pidió aislamiento, así que asumimos que siempre hay una sucursal.
       }
 
       return mainProduct

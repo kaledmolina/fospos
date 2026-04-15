@@ -22,7 +22,8 @@ export async function GET(
     const product = await db.product.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId
+        tenantId: session.user.tenantId,
+        branchId: session.user.branchId || undefined
       },
       include: {
         category: true
@@ -74,7 +75,11 @@ export async function PATCH(
 
     // Verificar que el producto pertenece al tenant
     const existing = await db.product.findFirst({
-      where: { id, tenantId: session.user.tenantId }
+      where: { 
+        id, 
+        tenantId: session.user.tenantId,
+        branchId: session.user.branchId || undefined
+      }
     })
 
     if (!existing) {

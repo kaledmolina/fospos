@@ -91,6 +91,9 @@ model Branch {
   credits       Credit[]
   expenses      Expense[]
   
+  products      Product[]
+  categories    Category[]
+  
   @@unique([tenantId, name])
   @@map("branches")
 }
@@ -169,6 +172,9 @@ model Category {
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
+  branchId    String?
+  branch      Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  
   name        String   // Nombre de la categoría
   description String?
   color       String?  // Color para identificación visual
@@ -189,6 +195,10 @@ model Product {
   id            String   @id @default(cuid())
   tenantId      String
   tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  
   categoryId    String?
   category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   

@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 
-// GET - Listar categorías del tenant
-export async function GET() {
+// GET - Listar categorías del tenant/branch
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
@@ -15,8 +15,19 @@ export async function GET() {
       )
     }
 
+    const { searchParams } = new URL(request.url)
+    const branchId = searchParams.get("branchId") || session.user.branchId
+
+    const where: any = {
+      tenantId: session.user.tenantId
+    }
+
+    if (branchId) {
+      where.branchId = branchId
+    }
+
     const categories = await db.category.findMany({
-      where: { tenantId: session.user.tenantId },
+      where,
       include: {
         _count: {
           select: { products: true }
@@ -78,6 +89,7 @@ export async function POST(request: NextRequest) {
     const category = await db.category.create({
       data: {
         tenantId: session.user.tenantId,
+        branchId: body.branchId || session.user.branchId || null,
         name,
         description,
         color,

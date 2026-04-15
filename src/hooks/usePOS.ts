@@ -154,8 +154,8 @@ export const usePOS = (session: any) => {
       
       const [productsRes, categoriesRes, customersRes, statsRes, cashRes, creditsRes] = await Promise.all([
         fetch(`/api/products${query}`),
-        fetch(`/api/categories`),
-        fetch(`/api/customers`),
+        fetch(`/api/categories${query}`),
+        fetch(`/api/customers`), // Clientes usualmente son compartidos por tenant
         fetch(`/api/sales${statsQuery}`),
         fetch(`/api/cash${query}`),
         fetch(`/api/credits${query}`)
@@ -298,29 +298,32 @@ export const usePOS = (session: any) => {
 
   const fetchCredits = useCallback(async () => {
     try {
-      const res = await fetch("/api/credits")
+      const query = selectedBranch ? `?branchId=${selectedBranch}` : ""
+      const res = await fetch(`/api/credits${query}`)
       const data = await res.json()
       if (data.success) setCredits(data.data)
     } catch (error) {
       console.error("Error fetching credits:", error)
     }
-  }, [])
+  }, [selectedBranch])
 
   const fetchLoyaltyConfig = useCallback(async () => {
     try {
-      const res = await fetch("/api/loyalty/config")
+      const query = selectedBranch ? `?branchId=${selectedBranch}` : ""
+      const res = await fetch(`/api/loyalty/config${query}`)
       const data = await res.json()
       if (data.success) setLoyaltyConfig(data.data)
     } catch (error) { console.error("Error fetching loyalty config:", error) }
-  }, [])
+  }, [selectedBranch])
 
   const fetchCoupons = useCallback(async () => {
     try {
-      const res = await fetch("/api/loyalty/coupons")
+      const query = selectedBranch ? `?branchId=${selectedBranch}` : ""
+      const res = await fetch(`/api/loyalty/coupons${query}`)
       const data = await res.json()
       if (data.success) setCoupons(data.data)
     } catch (error) { console.error("Error fetching coupons:", error) }
-  }, [])
+  }, [selectedBranch])
 
   // Initial Load
   useEffect(() => {
@@ -357,7 +360,8 @@ export const usePOS = (session: any) => {
         stock: parseInt(String(productForm.stock)) || 0,
         minStock: parseInt(String(productForm.minStock)) || 5,
         expiryDate: productForm.expiryDate && productForm.expiryDate !== "" ? productForm.expiryDate : null,
-        categoryId: productForm.categoryId || null
+        categoryId: productForm.categoryId || null,
+        branchId: selectedBranch // Asegurar que se crea en la sucursal seleccionada
       }
 
       const res = await fetch("/api/products", {
@@ -387,7 +391,10 @@ export const usePOS = (session: any) => {
       const res = await fetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(categoryForm)
+        body: JSON.stringify({
+          ...categoryForm,
+          branchId: selectedBranch // Asegurar que se crea en la sucursal seleccionada
+        })
       })
       const data = await res.json()
       if (data.success) {
@@ -632,7 +639,8 @@ export const usePOS = (session: any) => {
           couponCode: appliedCoupon?.code,
           cashRegisterId: cashRegister?.id,
           cashReceived,
-          change
+          change,
+          branchId: selectedBranch
         })
       })
       const data = await res.json()
@@ -775,7 +783,10 @@ export const usePOS = (session: any) => {
       const res = await fetch("/api/expenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(expenseForm)
+        body: JSON.stringify({
+          ...expenseForm,
+          branchId: selectedBranch
+        })
       })
       if ((await res.json()).success) {
         toast.success("Gasto registrado")

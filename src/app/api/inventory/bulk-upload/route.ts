@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
           const newProduct = await db.product.create({
             data: {
               tenantId: session.user.tenantId,
+              branchId: targetBranchId,
               code: product.code || null,
               name: product.name || "Producto sin nombre",
               costPrice: product.costPrice || 0,

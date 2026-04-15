@@ -22,8 +22,11 @@ export async function GET(request: NextRequest) {
     const branchId = searchParams.get("branchId")
 
     const where: any = {
-      tenantId: session.user.tenantId,
-      ...(branchId ? { branchId } : {})
+      tenantId: session.user.tenantId
+    }
+
+    if (branchId || session.user.branchId) {
+      where.branchId = branchId || session.user.branchId
     }
 
     if (category) {
@@ -87,6 +90,7 @@ export async function POST(request: NextRequest) {
     const expense = await db.expense.create({
       data: {
         tenantId: session.user.tenantId,
+        branchId: session.user.branchId || null,
         category,
         description,
         amount,

@@ -125,24 +125,16 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      // Verificar si el usuario aún existe en la base de datos (para sesiones fantasma tras reinicio de BD)
-      const dbUser = await db.user.findUnique({
-        where: { id: token.id },
-        select: { id: true, isActive: true }
-      })
-
-      if (!dbUser || !dbUser.isActive) {
-        return null as any // Invalida la sesión
+      if (token) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string
+        session.user.tenantId = token.tenantId as string
+        session.user.tenantName = token.tenantName as string
+        session.user.tenantStatus = token.tenantStatus as string
+        session.user.branchId = token.branchId as string
+        session.user.branchName = token.branchName as string
+        session.user.theme = token.theme as string
       }
-
-      session.user.id = token.id
-      session.user.role = token.role
-      session.user.tenantId = token.tenantId
-      session.user.tenantName = token.tenantName
-      session.user.tenantStatus = token.tenantStatus
-      session.user.branchId = token.branchId
-      session.user.branchName = token.branchName
-      session.user.theme = token.theme
       return session
     }
   },

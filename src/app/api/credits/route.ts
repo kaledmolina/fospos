@@ -21,8 +21,7 @@ export async function GET(request: NextRequest) {
     const branchId = searchParams.get("branchId")
 
     const where: any = {
-      tenantId: session.user.tenantId,
-      ...(branchId ? { branchId } : {})
+      tenantId: session.user.tenantId
     }
 
     if (status && status !== "all") {

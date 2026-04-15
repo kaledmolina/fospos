@@ -22,197 +22,204 @@ export async function GET(request: NextRequest) {
     const branchId = searchParams.get("branchId")
 
     if (type === "stats") {
-      // Estadísticas del dashboard
-      const today = new Date()
-      const todayStart = startOfDay(today)
-      const todayEnd = endOfDay(today)
-      const monthStart = startOfMonth(today)
-      const monthEnd = endOfMonth(today)
+      try {
+        // Estadísticas del dashboard
+        const today = new Date()
+        const todayStart = startOfDay(today)
+        const todayEnd = endOfDay(today)
+        const monthStart = startOfMonth(today)
+        const monthEnd = endOfMonth(today)
 
-      const whereBase: any = {
-        tenantId: session.user.tenantId,
-        ...(branchId ? { branchId } : {})
-      }
-
-      // Ventas de hoy
-      const todaySales = await db.sale.aggregate({
-        where: {
-          ...whereBase,
-          createdAt: { gte: todayStart, lte: todayEnd }
-        },
-        _sum: { total: true },
-        _count: true
-      })
-
-      // Ventas del mes
-      const monthSales = await db.sale.aggregate({
-        where: {
-          ...whereBase,
-          createdAt: { gte: monthStart, lte: monthEnd }
-        },
-        _sum: { total: true },
-        _count: true
-      })
-
-      // Productos más vendidos
-      const topProductsRaw = await db.saleItem.groupBy({
-        by: ["productId", "productName", "productCode"],
-        where: {
-          sale: { 
-            tenantId: session.user.tenantId,
-            ...(branchId ? { branchId } : {})
-          }
-        },
-        _sum: {
-          quantity: true,
-          subtotal: true
-        },
-        orderBy: {
-          _sum: { quantity: "desc" }
-        },
-        take: 5
-      })
-
-      const topProducts = topProductsRaw.map(p => ({
-        id: p.productId || "",
-        name: p.productName,
-        code: p.productCode,
-        totalSold: p._sum.quantity || 0,
-        totalRevenue: p._sum.subtotal || 0
-      }))
-
-      // Ventas recientes
-      const recentSales = await db.sale.findMany({
-        where: whereBase,
-        include: {
-          customer: true,
-          items: true,
-          credit: {
-            include: {
-              payments: {
-                include: {
-                  registeredBy: {
-                    select: { name: true }
-                  }
-                },
-                orderBy: { createdAt: "desc" }
-              }
-            }
-          }
-        },
-        orderBy: { createdAt: "desc" },
-        take: 10
-      })
-
-      // Créditos pendientes
-      const pendingCredits = await db.credit.aggregate({
-        where: {
-          ...whereBase,
-          status: { in: ["PENDING", "PARTIAL"] }
-        },
-        _sum: { balance: true }
-      })
-
-      // Stock bajo y Vencimiento (Filtrado por sucursal si aplica)
-      const products = await db.product.findMany({
-        where: { tenantId: session.user.tenantId, isActive: true },
-        include: {
-          stockByBranch: branchId ? { where: { branchId } } : true
+        const whereBase: any = {
+          tenantId: session.user.tenantId,
+          ...(branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "" ? { branchId } : {})
         }
-      })
 
-      // Calcular stock real según sucursal
-      const mappedProducts = products.map(p => {
-        let stock = p.stock
-        let minStock = p.minStock
-        if (branchId) {
-          const bs = p.stockByBranch.find(s => s.branchId === branchId)
-          stock = bs?.stock || 0
-          minStock = bs?.minStock || p.minStock
-        }
-        return { ...p, currentStock: stock, currentMinStock: minStock }
-      })
-
-      const lowStockProducts = mappedProducts.filter(p => p.currentStock < p.currentMinStock).length
-
-      // Productos vencidos y por vencer (7 días)
-      const now = new Date()
-      const sevenDaysFromNow = new Date()
-      sevenDaysFromNow.setDate(now.getDate() + 7)
-
-      const expiredCount = mappedProducts.filter(p => p.expiryDate && new Date(p.expiryDate) < now).length
-      const nearExpiryCount = mappedProducts.filter(p => 
-        p.expiryDate && 
-        new Date(p.expiryDate) >= now && 
-        new Date(p.expiryDate) <= sevenDaysFromNow
-      ).length
-
-      // Obtener metas: Priorizar branchId de la query, luego buscar contexto
-      let targetMonthlyGoal = 0
-      
-      if (branchId && branchId !== "null" && branchId !== "undefined") {
-        const selectedBranch = await db.branch.findUnique({ where: { id: branchId } })
-        targetMonthlyGoal = selectedBranch?.monthlyGoal || 0
-      } else {
-        const user = await db.user.findUnique({
-          where: { id: session.user.id },
-          include: { branch: true }
-        })
-        targetMonthlyGoal = user?.branch?.monthlyGoal || 0
-        
-        if (targetMonthlyGoal === 0) {
-          const mainBranch = await db.branch.findFirst({
-            where: { tenantId: session.user.tenantId, isMain: true }
-          })
-          targetMonthlyGoal = mainBranch?.monthlyGoal || 0
-        }
-      }
-
-      // Meta diaria aproximada (Meta mensual / 30) o valor base
-      const targetDailyGoal = targetMonthlyGoal > 0 ? Math.round(targetMonthlyGoal / 30) : 1000000
-
-      // Ventas últimos 7 días (Tendencia)
-      const weeklySales = []
-      const days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
-      
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        const start = startOfDay(d)
-        const end = endOfDay(d)
-        
-        const daySales = await db.sale.aggregate({
+        // Ventas de hoy
+        const todaySales = await db.sale.aggregate({
           where: {
             ...whereBase,
-            createdAt: { gte: start, lte: end }
+            createdAt: { gte: todayStart, lte: todayEnd }
           },
-          _sum: { total: true }
+          _sum: { total: true },
+          _count: true
         })
-        
-        weeklySales.push({
-          name: days[d.getDay()],
-          total: daySales._sum.total || 0
-        })
-      }
 
-      return NextResponse.json({
-        success: true,
-        data: {
-          todaySales: todaySales._sum.total || 0,
-          todayTransactions: todaySales._count,
-          monthSales: monthSales._sum.total || 0,
-          monthTransactions: monthSales._count,
-          topProducts,
-          recentSales,
-          pendingCredits: pendingCredits._sum.balance || 0,
-          lowStockProducts,
-          expiredCount,
-          nearExpiryCount,
-          monthlyGoal: targetMonthlyGoal,
-          dailyGoal: targetDailyGoal,
-          weeklySales
+        // Ventas del mes
+        const monthSales = await db.sale.aggregate({
+          where: {
+            ...whereBase,
+            createdAt: { gte: monthStart, lte: monthEnd }
+          },
+          _sum: { total: true },
+          _count: true
+        })
+
+        // Productos más vendidos
+        const topProductsRaw = await db.saleItem.groupBy({
+          by: ["productId", "productName", "productCode"],
+          where: {
+            sale: { 
+              tenantId: session.user.tenantId,
+              ...(branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "" ? { branchId } : {})
+            }
+          },
+          _sum: {
+            quantity: true,
+            subtotal: true
+          },
+          orderBy: {
+            _sum: { quantity: "desc" }
+          },
+          take: 5
+        })
+
+        const topProducts = topProductsRaw.map(p => ({
+          id: p.productId || "",
+          name: p.productName,
+          code: p.productCode,
+          totalSold: p._sum.quantity || 0,
+          totalRevenue: p._sum.subtotal || 0
+        }))
+
+        // Ventas recientes
+        const recentSales = await db.sale.findMany({
+          where: whereBase,
+          include: {
+            customer: true,
+            items: true,
+            credit: {
+              include: {
+                payments: {
+                  orderBy: { createdAt: "desc" }
+                }
+              }
+            }
+          },
+          orderBy: { createdAt: "desc" },
+          take: 10
+        })
+
+        // Créditos pendientes
+        const pendingCredits = await db.credit.aggregate({
+          where: {
+            tenantId: session.user.tenantId,
+            status: { in: ["PENDING", "PARTIAL"] }
+          },
+          _sum: { balance: true }
+        })
+
+        // Stock bajo y Vencimiento (Filtrado por sucursal si aplica)
+        const products = await db.product.findMany({
+          where: { tenantId: session.user.tenantId, isActive: true },
+          include: {
+            stockByBranch: true
+          }
+        })
+
+        // Calcular stock real según sucursal
+        const mappedProducts = products.map(p => {
+          let stock = p.stock
+          let minStock = p.minStock
+          if (branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "") {
+            const bs = p.stockByBranch.find(s => s.branchId === branchId)
+            stock = bs?.stock || 0
+            minStock = bs?.minStock || p.minStock
+          }
+          return { ...p, currentStock: stock, currentMinStock: minStock }
+        })
+
+        const lowStockProducts = mappedProducts.filter(p => p.currentStock < p.currentMinStock).length
+
+        // Productos vencidos y por vencer (7 días)
+        const now = new Date()
+        const sevenDaysFromNow = new Date()
+        sevenDaysFromNow.setDate(now.getDate() + 7)
+
+        const expiredCount = mappedProducts.filter(p => p.expiryDate && new Date(p.expiryDate) < now).length
+        const nearExpiryCount = mappedProducts.filter(p => 
+          p.expiryDate && 
+          new Date(p.expiryDate) >= now && 
+          new Date(p.expiryDate) <= sevenDaysFromNow
+        ).length
+
+        // Obtener metas: Priorizar branchId de la query, luego buscar contexto
+        let targetMonthlyGoal = 0
+        
+        if (branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "") {
+          const selectedBranch = await db.branch.findUnique({ where: { id: branchId } })
+          targetMonthlyGoal = selectedBranch?.monthlyGoal || 0
+        } else {
+          const user = await db.user.findUnique({
+            where: { id: session.user.id },
+            include: { branch: true }
+          })
+          targetMonthlyGoal = user?.branch?.monthlyGoal || 0
+          
+          if (targetMonthlyGoal === 0) {
+            const mainBranch = await db.branch.findFirst({
+              where: { tenantId: session.user.tenantId, isMain: true }
+            })
+            targetMonthlyGoal = mainBranch?.monthlyGoal || 0
+          }
         }
-      })
+
+        // Meta diaria aproximada (Meta mensual / 30) o valor base
+        const targetDailyGoal = targetMonthlyGoal > 0 ? Math.round(targetMonthlyGoal / 30) : 1000000
+
+        // Ventas últimos 7 días (Tendencia)
+        const weeklySales = []
+        const days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
+        
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date()
+          d.setDate(d.getDate() - i)
+          const start = startOfDay(d)
+          const end = endOfDay(d)
+          
+          const daySales = await db.sale.aggregate({
+            where: {
+              ...whereBase,
+              createdAt: { gte: start, lte: end }
+            },
+            _sum: { total: true }
+          })
+          
+          weeklySales.push({
+            name: days[d.getDay()],
+            total: daySales._sum.total || 0
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            todaySales: todaySales._sum.total || 0,
+            todayTransactions: todaySales._count,
+            monthSales: monthSales._sum.total || 0,
+            monthTransactions: monthSales._count,
+            topProducts,
+            recentSales,
+            pendingCredits: pendingCredits._sum.balance || 0,
+            lowStockProducts,
+            expiredCount,
+            nearExpiryCount,
+            monthlyGoal: targetMonthlyGoal,
+            dailyGoal: targetDailyGoal,
+            weeklySales
+          }
+        })
+      } catch (statsError: any) {
+        console.error("DEBUG: Error in stats calculation:", statsError)
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: "Error calculando estadísticas", 
+            details: statsError.message 
+          },
+          { status: 500 }
+        )
+      }
     }
 
     // LISTADO DE VENTAS
@@ -230,11 +237,6 @@ export async function GET(request: NextRequest) {
         credit: {
           include: {
             payments: {
-              include: {
-                registeredBy: {
-                  select: { name: true }
-                }
-              },
               orderBy: { createdAt: "desc" }
             }
           }
@@ -276,6 +278,7 @@ export async function POST(request: NextRequest) {
       pointsRedeemed, couponCode,
       cashReceived, change
     } = body
+    const userBranchId = body.branchId || session.user.branchId
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -331,7 +334,14 @@ export async function POST(request: NextRequest) {
           })
 
           if (!product) throw new Error(`Producto ${item.productId} no encontrado`)
-          if (product.stock < item.quantity) throw new Error(`Stock insuficiente para ${product.name}. Disponible: ${product.stock}`)
+          
+          // Verificar stock en sucursal específica
+          const productStock = await tx.productStock.findUnique({
+            where: { productId_branchId: { productId: product.id, branchId: userBranchId || "" } }
+          })
+
+          if (!productStock) throw new Error(`El producto ${product.name} no está registrado en esta sucursal`)
+          if (productStock.stock < item.quantity) throw new Error(`Stock insuficiente en sucursal para ${product.name}. Disponible: ${productStock.stock}`)
 
           const itemSubtotal = product.salePrice * item.quantity - (item.discount || 0)
           subtotal += itemSubtotal
@@ -347,7 +357,13 @@ export async function POST(request: NextRequest) {
             subtotal: itemSubtotal
           })
 
-          // Descontar stock
+          // Descontar stock en la sucursal
+          await tx.productStock.update({
+            where: { id: productStock.id },
+            data: { stock: { decrement: item.quantity } }
+          })
+
+          // También descontar stock global del producto para consistencia
           await tx.product.update({
             where: { id: product.id },
             data: { stock: { decrement: item.quantity } }
@@ -470,7 +486,8 @@ export async function POST(request: NextRequest) {
           paymentStatus: paymentMethod === "CREDIT" ? "PENDING" : "PAID",
           cashReceived: Number(cashReceived) || 0,
           change: Number(change) || 0,
-          cashRegisterId: cashRegisterId || null
+          cashRegisterId: cashRegisterId || null,
+          branchId: userBranchId || null
         },
         include: { items: true, customer: true }
       })
@@ -495,6 +512,7 @@ export async function POST(request: NextRequest) {
             tenantId: session.user.tenantId,
             customerId,
             saleId: sale.id,
+            branchId: userBranchId || null,
             totalAmount: finalTotal,
             paidAmount: 0,
             balance: finalTotal,
