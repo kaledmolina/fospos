@@ -138,129 +138,98 @@ export const POSDashboard = ({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-screen lg:ml-0 overflow-x-hidden">
-        {/* Mobile Header */}
-        <header className="lg:hidden flex items-center justify-between p-4 bg-card border-b border-border sticky top-0 z-30">
-          <Button variant="ghost" size="icon" onClick={() => onSidebarOpenChange(true)}>
-            <Menu className="w-5 h-5" />
-          </Button>
-          <span className="font-bold text-sm">{session?.user?.tenantName}</span>
-          <Popover onOpenChange={onNotificationsOpenChange}>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-5 h-5" />
-                {unreadNotifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {unreadNotifications}
-                  </span>
-                )}
+      <main className="flex-1 min-h-screen lg:ml-0 overflow-x-hidden flex flex-col">
+        {/* Unified Header */}
+        <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border print:hidden">
+          <div className="flex items-center justify-between h-16 px-4 md:px-6">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => onSidebarOpenChange(true)}>
+                <Menu className="w-5 h-5" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-4 border-b flex items-center justify-between">
-                <h3 className="font-semibold">Notificaciones</h3>
-                {(notifications?.length || 0) > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-[10px] h-6 px-2 uppercase font-black hover:text-emerald-500"
-                    onClick={() => {
-                        onClearNotifications()
-                        onNotificationsOpenChange(false)
-                    }}
-                  >
-                    Limpiar
-                  </Button>
-                )}
+              <div className="hidden lg:flex items-center gap-2 text-muted-foreground">
+                <Globe className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Portal POS</span>
               </div>
-              <ScrollArea className="h-80">
-                {(notifications?.length || 0) === 0 ? (
-                  <div className="p-4 text-center text-muted-foreground">Sin notificaciones</div>
-                ) : (
-                  <div className="divide-y">
-                    {notifications.map(n => (
-                      <div key={n.id} className={`p-4 ${!n.isRead ? "bg-emerald-500/10" : ""}`}>
-                        <div className="flex items-start gap-2">
-                          {n.type === "LOW_STOCK" && <Package className="w-4 h-4 text-yellow-600 mt-1" />}
-                          {(n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") && <AlertCircle className="w-4 h-4 text-red-600 mt-1" />}
-                          {(n.type === "CREDIT_DUE" || n.type === "DUE_SOON_CREDIT") && <Clock className="w-4 h-4 text-orange-600 mt-1" />}
-                          <div>
-                            <p className="text-sm font-medium">{n.title}</p>
-                            <p className="text-xs text-muted-foreground">{n.message}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+            </div>
+
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="flex items-center pr-2 md:pr-4 border-r border-border mr-1 md:mr-2">
+                <ThemeToggle />
+              </div>
+              
+              <Popover onOpenChange={onNotificationsOpenChange}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative hover:bg-accent transition-all duration-200">
+                    <Bell className="w-5 h-5" />
+                    {unreadNotifications > 0 && (
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0 shadow-2xl border-border bg-card/95 backdrop-blur-sm" align="end">
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h3 className="font-bold text-sm uppercase tracking-tighter">Notificaciones</h3>
+                    {(notifications?.length || 0) > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-[10px] h-6 px-2 uppercase font-black hover:text-emerald-500"
+                        onClick={() => {
+                           onClearNotifications()
+                           onNotificationsOpenChange(false)
+                        }}
+                      >
+                        Limpiar Todo
+                      </Button>
+                    )}
                   </div>
-                )}
-              </ScrollArea>
-            </PopoverContent>
-          </Popover>
+                  <ScrollArea className="h-80">
+                    {(notifications?.length || 0) === 0 ? (
+                      <div className="p-12 text-center flex flex-col items-center gap-2">
+                        <Bell className="w-8 h-8 text-muted-foreground/20" />
+                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Todo al día</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-border/50">
+                        {notifications.map(n => (
+                          <div key={n.id} className={`p-4 transition-colors hover:bg-accent/30 ${!n.isRead ? "bg-emerald-500/5" : ""}`}>
+                            <div className="flex items-start gap-3">
+                              <div className={`mt-1 p-1.5 rounded-lg ${
+                                n.type === "LOW_STOCK" ? "bg-yellow-500/10 text-yellow-600" :
+                                (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? "bg-red-500/10 text-red-600" :
+                                "bg-orange-500/10 text-orange-600"
+                              }`}>
+                                {n.type === "LOW_STOCK" ? <Package className="w-3.5 h-3.5" /> :
+                                 (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? <AlertCircle className="w-3.5 h-3.5" /> :
+                                 <Clock className="w-3.5 h-3.5" />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold leading-tight mb-1">{n.title}</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">{n.message}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </PopoverContent>
+              </Popover>
+
+              <div className="pl-2 md:pl-4 border-l border-border ml-1 md:mr-0 mr-[-10px]">
+                <BranchSelector 
+                  branches={branches}
+                  selectedBranch={selectedBranch}
+                  onBranchChange={onBranchChange}
+                  isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
+                />
+              </div>
+            </div>
+          </div>
         </header>
 
-        {/* Desktop Header Actions */}
-        <div className="hidden lg:flex items-center gap-4 fixed top-4 right-4 z-40">
-          <ThemeToggle />
-          <Popover onOpenChange={onNotificationsOpenChange}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="icon" className="relative bg-card border-border shadow-md cursor-pointer transition-all duration-200 hover:scale-105">
-                <Bell className="w-5 h-5" />
-                {unreadNotifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {unreadNotifications}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-4 border-b flex items-center justify-between">
-                <h3 className="font-semibold">Notificaciones</h3>
-                {(notifications?.length || 0) > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-[10px] h-6 px-2 uppercase font-black hover:text-emerald-500"
-                    onClick={() => {
-                       fetch("/api/notifications", { method: "PATCH", body: JSON.stringify({ markAll: true }) })
-                       .then(() => onNotificationsOpenChange(false))
-                    }}
-                  >
-                    Limpiar
-                  </Button>
-                )}
-              </div>
-              <ScrollArea className="h-80">
-                {(notifications?.length || 0) === 0 ? (
-                  <div className="p-4 text-center text-muted-foreground">Sin notificaciones</div>
-                ) : (
-                  <div className="divide-y">
-                    {notifications.map(n => (
-                      <div key={n.id} className={`p-4 ${!n.isRead ? "bg-emerald-500/10" : ""}`}>
-                        <div className="flex items-start gap-2">
-                          {n.type === "LOW_STOCK" && <Package className="w-4 h-4 text-yellow-600 mt-1" />}
-                          {(n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") && <AlertCircle className="w-4 h-4 text-red-600 mt-1" />}
-                          {(n.type === "CREDIT_DUE" || n.type === "DUE_SOON_CREDIT") && <Clock className="w-4 h-4 text-orange-600 mt-1" />}
-                          <div>
-                            <p className="text-sm font-medium">{n.title}</p>
-                            <p className="text-xs text-muted-foreground">{n.message}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
-            </PopoverContent>
-          </Popover>
-          <BranchSelector 
-            branches={branches}
-            selectedBranch={selectedBranch}
-            onBranchChange={onBranchChange}
-            isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
-          />
-        </div>
-
-        <div className="p-4 md:p-6 lg:pr-32 pb-24 lg:pb-6">
+        {/* Content Area */}
+        <div className="flex-1 p-4 md:p-6 pb-24 lg:pb-6">
           <AnimatePresence mode="wait">
             {children}
           </AnimatePresence>
