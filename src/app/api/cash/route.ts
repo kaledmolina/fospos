@@ -49,25 +49,9 @@ export async function GET(request: NextRequest) {
       orderBy: { openedAt: "desc" }
     })
 
-    if (openCash) {
-      return NextResponse.json({
-        success: true,
-        data: openCash
-      })
-    }
-
-    // Si no hay caja abierta, mostrar la última cerrada
-    const lastCash = await db.cashRegister.findFirst({
-      where: {
-        ...where,
-        status: "CLOSED"
-      },
-      orderBy: { closedAt: "desc" }
-    })
-
     return NextResponse.json({
       success: true,
-      data: lastCash || null
+      data: openCash || null
     })
   } catch (error) {
     console.error("Error fetching cash register:", error)
@@ -119,8 +103,12 @@ export async function POST(request: NextRequest) {
 
     const cashRegister = await db.cashRegister.create({
       data: {
-        tenantId: session.user.tenantId,
-        branchId: branchId,
+        tenant: {
+          connect: { id: session.user.tenantId }
+        },
+        branch: branchId ? {
+          connect: { id: branchId }
+        } : undefined,
         initialCash: initialCash || 0,
         status: "OPEN",
         openedByUser: {
@@ -170,7 +158,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!openCash) {
       return NextResponse.json(
-        { success: false, error: "No hay caja abierta en esta sucursal" },
+        { success: false, error: "No se encontró una caja abierta para esta sucursal o ya fue cerrada." },
         { status: 400 }
       )
     }

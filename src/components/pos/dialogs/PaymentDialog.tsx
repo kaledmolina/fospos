@@ -37,7 +37,13 @@ export const PaymentDialog = ({
         <DialogHeader>
           <DialogTitle>Registrar Abono</DialogTitle>
           <DialogDescription>
-            {selectedCredit?.customer.name} - Saldo: {formatCurrency(selectedCredit?.balance || 0)}
+            <span className="font-bold text-foreground">{selectedCredit?.customer.name}</span>
+            {selectedCredit?.sale?.invoiceNumber && (
+              <span className="ml-2 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono border">
+                #{selectedCredit.sale.invoiceNumber}
+              </span>
+            )}
+            <span className="block mt-1">Saldo pendiente: {formatCurrency(selectedCredit?.balance || 0)}</span>
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">

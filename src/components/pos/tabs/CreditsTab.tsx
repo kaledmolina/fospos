@@ -115,7 +115,14 @@ export const CreditsTab = ({
                       <Users className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="font-medium">{credit.customer.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{credit.customer.name}</p>
+                        {credit.sale?.invoiceNumber && (
+                           <Badge variant="secondary" className="text-[10px] h-4 px-1.5 font-bold">
+                             {credit.sale.invoiceNumber}
+                           </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">{formatDate(credit.createdAt)}</p>
                       {isOverdue && (
                         <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 mt-1">

@@ -121,8 +121,8 @@ export const CashTab = ({
                       <td className="px-6 py-4 whitespace-nowrap">{formatDate(item.openedAt)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{item.closedAt ? formatDate(item.closedAt) : "-"}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-medium">{item.openedByUser?.name}</span>
-                        {item.closedByUser && item.closedByUser.name !== item.openedByUser.name && (
+                        <span className="font-medium">{item.openedByUser?.name || "Desconocido"}</span>
+                        {item.closedByUser && item.closedByUser.name !== item.openedByUser?.name && (
                           <span className="block text-[10px] text-muted-foreground">Cerró: {item.closedByUser.name}</span>
                         )}
                       </td>

@@ -36,6 +36,12 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         customer: true,
+        sale: {
+          select: {
+            invoiceNumber: true,
+            createdAt: true
+          }
+        },
         payments: {
           orderBy: { createdAt: "desc" }
         }
