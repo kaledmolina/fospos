@@ -345,6 +345,23 @@ export const usePOS = (session: any) => {
     }
   }, [notificationsOpen, fetchNotifications])
 
+  // Limpiar carrito al cambiar de sucursal para evitar errores de inventario cruzado
+  useEffect(() => {
+    if (cart.length > 0) {
+      setCart([])
+      setCartCustomer(null)
+      setCartDiscount(0)
+      setRedeemPoints(0)
+      setCouponCode("")
+      setAppliedCoupon(null)
+      setCashReceived(0)
+      setChange(0)
+      toast.info("Carrito limpiado por cambio de sucursal", {
+        description: "Los productos de una sucursal no pueden venderse en otra."
+      })
+    }
+  }, [selectedBranch])
+
   // Handlers
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
