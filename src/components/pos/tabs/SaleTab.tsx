@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, ShoppingBag, Wallet, CreditCard, 
   FileText, Package, AlertTriangle, RefreshCw,
-  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2
+  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -247,34 +247,33 @@ export const SaleTab = ({
                     className="mt-3 overflow-hidden rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent shadow-sm shadow-emerald-500/10"
                   >
                     <div className="p-3 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                            <Star className="w-4 h-4 text-emerald-600 fill-emerald-500/50" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase font-bold tracking-wider text-emerald-700/70 dark:text-emerald-400/50">Puntos Acumulados</p>
-                            <p className="text-sm font-black text-emerald-700 dark:text-emerald-400">{cartCustomer.points || 0} pts</p>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                          <Users className="w-5 h-5 text-emerald-600" />
                         </div>
-                        {loyaltyConfig?.isActive && (cartCustomer.points >= loyaltyConfig.minPointsToRedeem) && (
-                          <Button size="sm" variant="ghost" className="h-7 text-emerald-600 hover:bg-emerald-500/10 px-2 font-bold" onClick={() => onSetRedeemPoints(cartCustomer.points)}>
-                            Redimir
-                          </Button>
-                        )}
+                        <div className="min-w-0">
+                          <p className="text-[10px] uppercase font-black tracking-widest text-emerald-600/60 leading-none mb-1">Cliente Seleccionado</p>
+                          <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 truncate">{cartCustomer.name}</p>
+                        </div>
                       </div>
                       
-                      <div className="pt-2 border-t border-emerald-500/10 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                           <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/10">
-                              <Wallet className="w-3 h-3 text-blue-500" />
-                           </div>
-                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Crédito Disponible</span>
-                        </div>
-                        <span className={`text-xs font-black px-2 py-0.5 rounded-full ${ (cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0)) > 0 ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-red-500/10 text-red-500" }`}>
-                          {formatCurrency(cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0))}
-                        </span>
-                      </div>
+                      {cartPaymentMethod === "CREDIT" && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }} 
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="pt-2 border-t border-emerald-500/10 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                             <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/10">
+                                <Wallet className="w-3 h-3 text-blue-500" />
+                             </div>
+                             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Crédito Disponible</span>
+                          </div>
+                          <span className={`text-xs font-black px-2 py-0.5 rounded-full ${ (cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0)) > 0 ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-red-500/10 text-red-500" }`}>
+                            {formatCurrency(cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0))}
+                          </span>
+                        </motion.div>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -293,14 +292,26 @@ export const SaleTab = ({
                       </TabsTrigger>
                     </TabsList>
                     
-                    <TabsContent value="loyalty" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
+                    <TabsContent value="loyalty" className="mt-2 space-y-2 p-3 bg-muted/20 rounded-lg border border-dashed border-border/60">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
+                          <span className="text-[10px] font-bold uppercase text-muted-foreground">Disponibles: <span className="text-amber-600 dark:text-amber-500">{cartCustomer?.points || 0} pts</span></span>
+                        </div>
+                        {loyaltyConfig?.isActive && (cartCustomer?.points >= loyaltyConfig.minPointsToRedeem) && (
+                          <Button size="sm" variant="ghost" className="h-5 text-[9px] text-emerald-600 hover:bg-emerald-500/10 px-1 font-black" onClick={() => onSetRedeemPoints(cartCustomer?.points || 0)}>
+                            USAR TODOS
+                          </Button>
+                        )}
+                      </div>
                       <div className="flex gap-2 items-center">
                         <Input 
                           type="number" 
                           placeholder="Puntos a redimir..." 
                           className="h-8 text-xs bg-background/50 border-amber-500/20 focus-visible:ring-amber-500/30"
                           value={redeemPoints || ""}
-                          onChange={(e) => onSetRedeemPoints(parseInt(e.target.value) || 0)}
+                          max={cartCustomer?.points || 0}
+                          onChange={(e) => onSetRedeemPoints(Math.min(parseInt(e.target.value) || 0, cartCustomer?.points || 0))}
                         />
                         <div className="shrink-0 px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[10px] font-black border border-amber-500/20">
                           -{formatCurrency(loyaltyDiscount)}

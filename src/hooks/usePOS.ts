@@ -1188,9 +1188,12 @@ export const usePOS = (session: any) => {
     todayExpenses: expenses.filter(e => e.date === new Date().toISOString().split('T')[0]).reduce((sum, e) => sum + e.amount, 0),
     
     // Loyalty & Coupons
-    loyaltyConfig, setLoyaltyConfig, fetchLoyaltyConfig, handleSaveLoyaltyConfig,
+    fetchLoyaltyConfig, handleSaveLoyaltyConfig,
     coupons, fetchCoupons, handleValidateCoupon,
-    redeemPoints, setRedeemPoints,
+    redeemPoints, setRedeemPoints: (points: number) => {
+      const available = cartCustomer?.points || 0
+      setRedeemPoints(Math.min(points, available))
+    },
     couponCode, setCouponCode,
     appliedCoupon, setAppliedCoupon,
     calculatePointsDiscount: (points: number) => {
