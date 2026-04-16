@@ -55,15 +55,15 @@ export const POSDashboard = ({
   onBranchChange
 }: POSDashboardProps) => {
   return (
-    <div className="min-h-screen flex bg-background text-foreground transition-colors duration-300">
+    <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden">
       {/* Confetti for celebrations */}
       <Confetti show={showConfetti} />
       
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:shadow-none lg:bg-card/50`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:shadow-none lg:bg-card/50 flex flex-col h-screen`}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b shrink-0">
           <div className="flex items-center gap-2">
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
@@ -80,57 +80,59 @@ export const POSDashboard = ({
           </Button>
         </div>
         
-        <nav className="p-4 space-y-1">
-          {[
-            { id: "dashboard", icon: BarChart3, label: "Dashboard" },
-            { id: "sale", icon: ShoppingBag, label: "Nueva Venta" },
-            { id: "transactions", icon: Receipt, label: "Transacciones" },
-            { id: "categories", icon: FolderOpen, label: "Categorías" },
-            { id: "products", icon: Package, label: "Productos" },
-            { id: "customers", icon: Users, label: "Clientes" },
-            { id: "credits", icon: CreditCard, label: "Fiados" },
-            { id: "expenses", icon: Receipt, label: "Gastos" },
-            { id: "cash", icon: Wallet, label: "Caja" },
-            { id: "subscriptions", icon: RefreshCw, label: "Suscripciones" },
-            ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "loyalty", icon: Star, label: "Fidelización" }] : []),
-            ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "branches", icon: Building2, label: "Sucursales" }] : []),
-            ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "users", icon: Users, label: "Usuarios" }] : [])
-          ].map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <Button
-                variant={posTab === item.id ? "default" : "ghost"}
-                className={`w-full justify-start cursor-pointer transition-all duration-200 relative group ${posTab === item.id ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-accent text-muted-foreground hover:text-foreground"}`}
-                onClick={() => onTabChangeWithEffects(item.id)}
+        <ScrollArea className="flex-1 px-4 py-4">
+          <nav className="space-y-1">
+            {[
+              { id: "dashboard", icon: BarChart3, label: "Dashboard" },
+              { id: "sale", icon: ShoppingBag, label: "Nueva Venta" },
+              { id: "transactions", icon: Receipt, label: "Transacciones" },
+              { id: "categories", icon: FolderOpen, label: "Categorías" },
+              { id: "products", icon: Package, label: "Productos" },
+              { id: "customers", icon: Users, label: "Clientes" },
+              { id: "credits", icon: CreditCard, label: "Fiados" },
+              { id: "expenses", icon: Receipt, label: "Gastos" },
+              { id: "cash", icon: Wallet, label: "Caja" },
+              { id: "subscriptions", icon: RefreshCw, label: "Suscripciones" },
+              ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "loyalty", icon: Star, label: "Fidelización" }] : []),
+              ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "branches", icon: Building2, label: "Sucursales" }] : []),
+              ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "users", icon: Users, label: "Usuarios" }] : [])
+            ].map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
               >
-                <item.icon className="w-4 h-4 mr-2" />
-                {item.label}
-                {posTab === item.id && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r"
-                  />
-                )}
-              </Button>
-            </motion.div>
-          ))}
-        </nav>
+                <Button
+                  variant={posTab === item.id ? "default" : "ghost"}
+                  className={`w-full justify-start cursor-pointer transition-all duration-200 relative group ${posTab === item.id ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-accent text-muted-foreground hover:text-foreground"}`}
+                  onClick={() => onTabChangeWithEffects(item.id)}
+                >
+                  <item.icon className="w-4 h-4 mr-2" />
+                  {item.label}
+                  {posTab === item.id && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r"
+                    />
+                  )}
+                </Button>
+              </motion.div>
+            ))}
+          </nav>
+        </ScrollArea>
         
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-card">
+        <div className="p-4 border-t bg-card/80 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center border">
               <Users className="w-4 h-4 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{session?.user?.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+              <p className="text-sm font-bold truncate leading-none mb-1 text-foreground">{session?.user?.name}</p>
+              <p className="text-[10px] text-muted-foreground truncate uppercase tracking-widest">{session?.user?.email}</p>
             </div>
           </div>
-          <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-all duration-200" onClick={onSignOut}>
+          <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-all duration-200 font-bold" onClick={onSignOut}>
             <LogOut className="w-4 h-4 mr-2" />
             Cerrar Sesión
           </Button>
@@ -138,7 +140,7 @@ export const POSDashboard = ({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-screen lg:ml-0 overflow-x-hidden flex flex-col">
+      <main className="flex-1 h-screen lg:ml-0 flex flex-col overflow-hidden">
         {/* Unified Header */}
         <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border print:hidden">
           <div className="flex items-center justify-between h-16 px-4 md:px-6">
@@ -229,7 +231,7 @@ export const POSDashboard = ({
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 p-4 md:p-6 pb-24 lg:pb-6">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 lg:pb-6 custom-scrollbar">
           <AnimatePresence mode="wait">
             {children}
           </AnimatePresence>
