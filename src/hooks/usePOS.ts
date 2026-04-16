@@ -338,6 +338,14 @@ export const usePOS = (session: any) => {
     } catch (error) { console.error("Error fetching cash history:", error) }
   }, [selectedBranch])
 
+  // Carga automática de servicios y suscripciones cuando el tab está activo o la sesión cambia
+  useEffect(() => {
+    if (posTab === "subscriptions" && session?.user?.tenantId) {
+      fetchSubscriptionServices();
+      fetchSubscriptions();
+    }
+  }, [posTab, session, fetchSubscriptionServices, fetchSubscriptions]);
+
   // Initial Load
   useEffect(() => {
     if (session?.user?.tenantId) {
@@ -715,6 +723,8 @@ export const usePOS = (session: any) => {
         fetchCredits()
         fetchNotifications()
         fetchSales()
+        fetchSubscriptionServices()
+        fetchSubscriptions()
       } else {
         toast.error("Error al procesar la venta", {
           description: data.error || "Ocurrió un error inesperado al guardar la venta."
