@@ -166,7 +166,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                         className="pl-10 h-10 bg-white/50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-emerald-500/20"
                       />
                     </div>
-                    <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-900 shrink-0">
+                    <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-900 shrink-0 cursor-pointer">
                       <Filter className="w-4 h-4 mr-2 opacity-60" /> <span className="text-xs font-bold uppercase tracking-wider">Filtros</span>
                     </Button>
                   </div>
@@ -188,7 +188,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                     </thead>
                     <tbody className="divide-y">
                       {movements.filter(m => m.product.name.toLowerCase().includes(search.toLowerCase())).map((m) => (
-                        <tr key={m.id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-900/50 transition-colors">
+                        <tr key={m.id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-900/50 transition-colors cursor-pointer">
                           <td className="px-4 py-3 tabular-nums text-muted-foreground">
                             {format(new Date(m.createdAt), "dd MMM, HH:mm", { locale: es })}
                           </td>
@@ -313,7 +313,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                       <Button 
                         variant="outline" 
                         onClick={() => setShowPODialog(true)}
-                        className="mt-8 rounded-xl border-emerald-500/20 text-emerald-600 font-bold hover:bg-emerald-50"
+                        className="mt-8 rounded-xl border-emerald-500/20 text-emerald-600 font-bold hover:bg-emerald-50 cursor-pointer"
                       >
                         Crear Orden Ahora
                       </Button>

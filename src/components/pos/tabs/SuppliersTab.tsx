@@ -71,7 +71,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                   className="pl-10 h-11 bg-white/50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-emerald-500/20 font-medium"
                 />
               </div>
-              <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-slate-200 dark:border-zinc-800 shrink-0">
+              <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-slate-200 dark:border-zinc-800 shrink-0 cursor-pointer">
                 <Filter className="w-4 h-4 opacity-60" />
               </Button>
             </div>
@@ -149,7 +149,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                     <div className="text-[10px] uppercase font-black text-muted-foreground tracking-widest opacity-40">
                       ID: {supplier.id.slice(-8)}
                     </div>
-                    <Button variant="ghost" size="sm" className="h-8 rounded-lg font-bold text-[10px] uppercase text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10">
+                    <Button variant="ghost" size="sm" className="h-8 rounded-lg font-bold text-[10px] uppercase text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 cursor-pointer">
                       Ver Historial <ExternalLink className="w-3 h-3 ml-2" />
                     </Button>
                   </div>
@@ -168,7 +168,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                 </div>
                 <Button 
                   onClick={onAdd}
-                  className="mt-4 bg-emerald-600 dark:bg-emerald-500 rounded-2xl h-11 px-8 font-black uppercase tracking-widest text-[10px]"
+                  className="mt-4 bg-emerald-600 dark:bg-emerald-500 rounded-2xl h-11 px-8 font-black uppercase tracking-widest text-[10px] cursor-pointer"
                 >
                   <Plus className="w-3 h-3 mr-2" /> Registrar ahora
                 </Button>

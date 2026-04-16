@@ -811,6 +811,61 @@ export const usePOS = (session: any) => {
     } catch { toast.error("Error de conexión") }
   }
 
+  const handleAddSupplier = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const res = await fetch("/api/suppliers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(supplierForm)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("Proveedor registrado")
+        setSupplierDialog(false)
+        setSupplierForm({ name: "", nit: "", phone: "", email: "", address: "", notes: "" })
+        fetchPOSData()
+      } else {
+        toast.error(data.error || "Error al registrar proveedor")
+      }
+    } catch { toast.error("Error de conexión") }
+  }
+
+  const handleUpdateSupplier = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingSupplier) return
+    try {
+      const res = await fetch(`/api/suppliers/${editingSupplier.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(supplierForm)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("Proveedor actualizado")
+        setSupplierDialog(false)
+        setEditingSupplier(null)
+        setSupplierForm({ name: "", nit: "", phone: "", email: "", address: "", notes: "" })
+        fetchPOSData()
+      } else {
+        toast.error(data.error || "Error al actualizar")
+      }
+    } catch { toast.error("Error de conexión") }
+  }
+
+  const handleDeleteSupplier = async (id: string) => {
+    try {
+      const res = await fetch(`/api/suppliers/${id}`, { method: "DELETE" })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("Proveedor eliminado")
+        fetchPOSData()
+      } else {
+        toast.error(data.error || "No se pudo eliminar")
+      }
+    } catch { toast.error("Error de conexión") }
+  }
+
   const handleValidateCoupon = async () => {
     if (!couponCode) return
     try {
