@@ -881,6 +881,14 @@ export const usePOS = (session: any) => {
     toast.success("Tarjeta de regalo añadida al carrito")
   }
 
+  const handleSetCartPaymentMethod = (method: string) => {
+    setCartPaymentMethod(method)
+    if (method !== "GIFT_CARD") {
+      setAppliedGiftCard(null)
+      setGiftCardCode("")
+    }
+  }
+
   const handlePrintGiftCard = (card: any) => {
     setSelectedGiftCard(card)
     setShowGiftCardPrintDialog(true)
@@ -1311,7 +1319,7 @@ export const usePOS = (session: any) => {
     creditSearch, setCreditSearch,
     saleSearch, setSaleSearch,
     tenantUsers, cart, setCart, cartCustomer, setCartCustomer,
-    cartPaymentMethod, setCartPaymentMethod, cartDiscount, setCartDiscount,
+    cartPaymentMethod, setCartPaymentMethod: handleSetCartPaymentMethod, cartDiscount, setCartDiscount,
     productDialog, setProductDialog, categoryDialog, setCategoryDialog,
     customerDialog, setCustomerDialog, paymentDialog, setPaymentDialog,
     cashDialog, setCashDialog, expenseDialog, setExpenseDialog,

@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, ShoppingBag, Wallet, CreditCard, 
   FileText, Package, AlertTriangle, RefreshCw,
-  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap
+  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,7 +38,7 @@ interface SaleTabProps {
   total: number
   onHandleSale: () => void
   subscriptionServices: any[]
-  onAddServiceToCart: (service: any) => void
+  onAddServiceToCart: (service: any, isSubscription: boolean) => void
   // Loyalty & Coupons
   loyaltyConfig: any
   redeemPoints: number
@@ -62,6 +62,7 @@ interface SaleTabProps {
   onSetGiftCardCode: (code: string) => void
   onValidateGiftCard: () => void
   appliedGiftCard: any
+  onPrintGiftCard: (card: any) => void
 }
 
 export const SaleTab = ({
@@ -103,8 +104,17 @@ export const SaleTab = ({
   giftCardCode,
   onSetGiftCardCode,
   onValidateGiftCard,
-  appliedGiftCard
+  appliedGiftCard,
+  onPrintGiftCard
 }: SaleTabProps) => {
+  const giftCardInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (cartPaymentMethod === "GIFT_CARD") {
+      giftCardInputRef.current?.focus()
+    }
+  }, [cartPaymentMethod])
+
   useEffect(() => {
     if (cartPaymentMethod === "CASH" && cashReceived > 0) {
       onSetChange(Math.max(0, cashReceived - total))
@@ -592,22 +602,37 @@ export const SaleTab = ({
                           <Input 
                             placeholder="GIFT-XXXX"
                             value={giftCardCode}
+                            ref={giftCardInputRef}
                             onChange={(e) => onSetGiftCardCode(e.target.value)}
                             className="h-8 pl-7 bg-background border-blue-500/30 font-bold text-blue-600 uppercase" 
                           />
                         </div>
                         <Button 
                           size="sm" 
-                          className="h-8 px-3 text-[10px] font-black uppercase bg-blue-600 shadow-md"
+                          className={`h-8 px-3 text-[10px] font-black uppercase shadow-md transition-colors ${appliedGiftCard ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-600 hover:bg-blue-700"}`}
                           onClick={onValidateGiftCard}
                         >
-                          {appliedGiftCard ? "OK" : "LISTO"}
+                          {appliedGiftCard ? <CheckCircle2 className="w-4 h-4" /> : "LISTO"}
                         </Button>
                       </div>
                       {appliedGiftCard && (
-                        <p className="text-[9px] font-black text-emerald-600 flex items-center gap-1 mt-1">
-                          <CheckCircle2 className="w-2.5 h-2.5" /> 
-                          SALDO: {formatCurrency(appliedGiftCard.balance)}
+                        <motion.div 
+                          initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                          className="flex items-center justify-between mt-2 px-1 text-[10px] font-black"
+                        >
+                          <p className="text-emerald-600 flex items-center gap-1">
+                            <CheckCircle2 className="w-2.5 h-2.5" /> 
+                            SALDO: {formatCurrency(appliedGiftCard.balance)}
+                          </p>
+                          <p className={appliedGiftCard.balance >= total ? "text-emerald-600" : "text-red-500"}>
+                            {appliedGiftCard.balance >= total ? "SALDO SUFICIENTE" : "SALDO INSUFICIENTE"}
+                          </p>
+                        </motion.div>
+                      )}
+                      {!appliedGiftCard && giftCardCode && (
+                        <p className="text-[9px] font-black text-amber-600 flex items-center gap-1 mt-1">
+                          <AlertCircle className="w-2.5 h-2.5" /> 
+                          PRESIONA LISTO PARA VALIDAR
                         </p>
                       )}
                     </div>
@@ -644,10 +669,23 @@ export const SaleTab = ({
 
               </div>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="mt-4">
+                {cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total) && (
+                  <p className="text-[10px] font-black text-red-500 text-center mb-2 uppercase tracking-tight">
+                    {!appliedGiftCard ? "Validación de tarjeta requerida" : "Saldo de tarjeta insuficiente"}
+                  </p>
+                )}
                 <Button 
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 shadow-lg shadow-emerald-500/25" 
+                  className={`w-full cursor-pointer transition-all duration-300 shadow-lg ${
+                    cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total)
+                      ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed shadow-none"
+                      : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25"
+                  }`}
                   size="lg" 
-                  disabled={cart.length === 0 || !cashRegister} 
+                  disabled={
+                    cart.length === 0 || 
+                    !cashRegister ||
+                    (cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total))
+                  } 
                   onClick={onHandleSale}
                 >
                   <ShoppingBag className="w-4 h-4 mr-2" />Procesar Venta
