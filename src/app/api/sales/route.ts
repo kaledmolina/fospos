@@ -103,6 +103,22 @@ export async function GET(request: NextRequest) {
           _sum: { balance: true }
         });
 
+        const giftCards = await db.giftCard.findMany({
+          where: { tenantId: session.user.tenantId },
+          include: { 
+            customer: true,
+            redemptions: {
+              include: {
+                sale: {
+                  include: { customer: true }
+                }
+              },
+              orderBy: { createdAt: "desc" }
+            }
+          },
+          orderBy: { createdAt: "desc" }
+        });
+
         const products = await db.product.findMany({
           where: { tenantId: session.user.tenantId, isActive: true },
           include: { stockByBranch: true }
@@ -401,6 +417,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (paymentMethod === "GIFT_CARD") {
+        if (!customerId) throw new Error("Cliente requerido para pago con Tarjeta de Regalo");
         if (!giftCardCode) throw new Error("Código de tarjeta de regalo requerido");
         const card = await tx.giftCard.findUnique({
           where: { tenantId_code: { tenantId: session.user.tenantId, code: giftCardCode.toUpperCase() } }

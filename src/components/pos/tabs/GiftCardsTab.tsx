@@ -5,7 +5,9 @@ import { motion } from "framer-motion"
 import { 
   Ticket, Search, Filter, Calendar, 
   User, CheckCircle2, Clock, XCircle,
-  MoreVertical, ArrowRightLeft, Eye
+  MoreVertical, ArrowRightLeft, Eye,
+  ChevronDown, ChevronUp, History,
+  DollarSign
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -21,6 +23,7 @@ interface GiftCardsTabProps {
 
 export const GiftCardsTab = ({ giftCards, onPrintCard }: GiftCardsTabProps) => {
   const [search, setSearch] = useState("")
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
 
   const filteredCards = giftCards.filter(card => 
     card.code.toLowerCase().includes(search.toLowerCase()) ||
@@ -166,6 +169,48 @@ export const GiftCardsTab = ({ giftCards, onPrintCard }: GiftCardsTabProps) => {
                       </span>
                     </div>
                   )}
+
+                  {/* Historial de Redenciones */}
+                  <div className="mt-4 pt-4 border-t border-dashed border-slate-100 dark:border-zinc-800">
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       className="w-full justify-between h-7 text-[10px] font-black uppercase tracking-tighter text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                       onClick={() => setExpandedCard(expandedCard === card.id ? null : card.id)}
+                     >
+                       <span className="flex items-center gap-1.5">
+                         <History className="w-3.5 h-3.5" /> Historial de Uso ({card.redemptions?.length || 0})
+                       </span>
+                       {expandedCard === card.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                     </Button>
+
+                     {expandedCard === card.id && (
+                       <motion.div 
+                         initial={{ opacity: 0, height: 0 }}
+                         animate={{ opacity: 1, height: "auto" }}
+                         className="mt-2 space-y-2 overflow-hidden"
+                       >
+                         {card.redemptions && card.redemptions.length > 0 ? (
+                           card.redemptions.map((red: any) => (
+                             <div key={red.id} className="p-2 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 space-y-1">
+                               <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                                 <span className="text-slate-500">{new Date(red.createdAt).toLocaleDateString()}</span>
+                                 <span className="text-emerald-600">-{formatCurrency(red.amountUsed)}</span>
+                               </div>
+                               <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
+                                 <User className="w-3 h-3" />
+                                 <span className="truncate max-w-[150px] font-bold">
+                                   Usado por: {red.sale?.customer?.name || "Cliente General"}
+                                 </span>
+                               </div>
+                             </div>
+                           ))
+                         ) : (
+                           <p className="text-[9px] text-center text-muted-foreground py-2 italic">Sin movimientos registrados</p>
+                         )}
+                       </motion.div>
+                     )}
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

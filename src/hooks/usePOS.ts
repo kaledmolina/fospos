@@ -708,8 +708,15 @@ export const usePOS = (session: any) => {
       return
     }
 
-    // Validación de Tarjeta Regalo: Requiere código y saldo
+    // Validación de Tarjeta Regalo: Requiere código, saldo y CLIENTE
     if (cartPaymentMethod === "GIFT_CARD") {
+      if (!cartCustomer) {
+        toast.error("¡Cliente requerido!", {
+          description: "Para redimir una tarjeta de regalo, es obligatorio seleccionar un cliente registrado para la trazabilidad.",
+          duration: 5000
+        })
+        return
+      }
       if (!appliedGiftCard) {
         toast.error("¡Tarjeta no validada!", {
           description: "Debes ingresar y validar un código de tarjeta de regalo.",

@@ -25,6 +25,11 @@ export async function GET(request: NextRequest) {
         include: {
           customer: true,
           redemptions: {
+            include: {
+              sale: {
+                include: { customer: true }
+              }
+            },
             orderBy: { createdAt: "desc" }
           }
         }
@@ -39,7 +44,17 @@ export async function GET(request: NextRequest) {
 
     const giftCards = await db.giftCard.findMany({
       where: { tenantId: session.user.tenantId },
-      include: { customer: true },
+      include: { 
+        customer: true,
+        redemptions: {
+          include: {
+            sale: {
+              include: { customer: true }
+            }
+          },
+          orderBy: { createdAt: "desc" }
+        }
+      },
       orderBy: { createdAt: "desc" }
     });
 

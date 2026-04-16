@@ -669,14 +669,20 @@ export const SaleTab = ({
 
               </div>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="mt-4">
-                {cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total) && (
-                  <p className="text-[10px] font-black text-red-500 text-center mb-2 uppercase tracking-tight">
-                    {!appliedGiftCard ? "Validación de tarjeta requerida" : "Saldo de tarjeta insuficiente"}
-                  </p>
+                {cartPaymentMethod === "GIFT_CARD" && (
+                  (!cartCustomer || !appliedGiftCard || appliedGiftCard.balance < total) && (
+                    <p className="text-[10px] font-black text-red-500 text-center mb-2 uppercase tracking-tight">
+                      {!cartCustomer 
+                        ? "Selecciona un cliente para redimir tarjeta" 
+                        : !appliedGiftCard 
+                          ? "Validación de tarjeta requerida" 
+                          : "Saldo de tarjeta insuficiente"}
+                    </p>
+                  )
                 )}
                 <Button 
                   className={`w-full cursor-pointer transition-all duration-300 shadow-lg ${
-                    cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total)
+                    cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total || !cartCustomer)
                       ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed shadow-none"
                       : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25"
                   }`}
@@ -684,7 +690,7 @@ export const SaleTab = ({
                   disabled={
                     cart.length === 0 || 
                     !cashRegister ||
-                    (cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total))
+                    (cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total || !cartCustomer))
                   } 
                   onClick={onHandleSale}
                 >
