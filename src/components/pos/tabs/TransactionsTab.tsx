@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Search, Receipt, Calendar, User, ShoppingBag, CreditCard, Wallet, ArrowRight } from "lucide-react"
+import { Search, Receipt, Calendar, User, ShoppingBag, CreditCard, Wallet, ArrowRight, Printer } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -15,10 +15,13 @@ interface TransactionsTabProps {
   onSetLastSale: (sale: any) => void
   onSetReceiptDialog: (open: boolean) => void
   onOpenHistory: (items: any[], title: string, description?: string) => void
+  saleSearch: string
+  onSetSaleSearch: (search: string) => void
 }
 
 export const TransactionsTab = ({ 
-  sales, onSetLastSale, onSetReceiptDialog, onOpenHistory 
+  sales, onSetLastSale, onSetReceiptDialog, onOpenHistory,
+  saleSearch, onSetSaleSearch
 }: TransactionsTabProps) => {
   return (
     <motion.div 
@@ -30,15 +33,20 @@ export const TransactionsTab = ({
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Historial de Transacciones</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Historial de Transacciones</h1>
           <p className="text-sm text-muted-foreground">Consulta y gestiona todas las ventas y movimientos</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Buscar por factura o cliente..." className="pl-9 w-64 bg-card" />
+            <Input 
+              placeholder="Factura o cliente..." 
+              className="pl-9 w-64 bg-card border-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+              value={saleSearch}
+              onChange={(e) => onSetSaleSearch(e.target.value)}
+            />
           </div>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 border-border/50 hover:bg-emerald-500 hover:text-white transition-all">
             <Calendar className="w-4 h-4" />
             Filtrar Fecha
           </Button>
@@ -121,12 +129,12 @@ export const TransactionsTab = ({
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-2 text-right">
                           {sale.paymentMethod === "CREDIT" && sale.credit && (
                             <Button
                               variant="ghost"
-                              size="icon"
-                              className="w-8 h-8 rounded-full text-orange-500 hover:text-orange-600 hover:bg-orange-500/10"
+                              size="sm"
+                              className="h-8 w-8 rounded-lg text-orange-500 hover:text-orange-600 hover:bg-orange-500/10"
                               title="Ver historial de abonos"
                               onClick={() => onOpenHistory(
                                 sale.credit.payments,
@@ -138,16 +146,16 @@ export const TransactionsTab = ({
                             </Button>
                           )}
                           <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Ver Factura"
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8 gap-2 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all cursor-pointer shadow-sm shadow-emerald-500/5 group/btn"
                             onClick={() => {
                               onSetLastSale(sale)
                               onSetReceiptDialog(true)
                             }}
                           >
-                            <ArrowRight className="w-4 h-4" />
+                            <Printer className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform" />
+                            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-tight">Imprimir</span>
                           </Button>
                         </div>
                       </td>

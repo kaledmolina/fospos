@@ -37,6 +37,7 @@ export const usePOS = (session: any) => {
   const [creditSearch, setCreditSearch] = useState<string>("")
   const [tenantUsers, setTenantUsers] = useState<TenantUserData[]>([])
   const [sales, setSales] = useState<any[]>([])
+  const [saleSearch, setSaleSearch] = useState<string>("")
   const [cashHistory, setCashHistory] = useState<any[]>([])
   
   // Cart state
@@ -1125,13 +1126,22 @@ export const usePOS = (session: any) => {
     return true
   })
 
+  const filteredSales = sales.filter(s => {
+    if (!saleSearch) return true
+    const search = saleSearch.toLowerCase()
+    const matchesInvoice = s.invoiceNumber?.toLowerCase().includes(search)
+    const matchesCustomer = s.customer?.name.toLowerCase().includes(search)
+    return matchesInvoice || matchesCustomer
+  })
+
   return {
     posTab, setPosTab, products, categories, customers, credits,
     dashboardStats, cashRegister, notifications, notificationsOpen, 
     setNotificationsOpen, expenses, branches, setBranches,
-    sales, fetchSales,
+    sales, filteredSales, fetchSales,
     selectedBranch, setSelectedBranch, creditFilter, setCreditFilter,
     creditSearch, setCreditSearch,
+    saleSearch, setSaleSearch,
     tenantUsers, cart, setCart, cartCustomer, setCartCustomer,
     cartPaymentMethod, setCartPaymentMethod, cartDiscount, setCartDiscount,
     productDialog, setProductDialog, categoryDialog, setCategoryDialog,
@@ -1188,7 +1198,7 @@ export const usePOS = (session: any) => {
     todayExpenses: expenses.filter(e => e.date === new Date().toISOString().split('T')[0]).reduce((sum, e) => sum + e.amount, 0),
     
     // Loyalty & Coupons
-    fetchLoyaltyConfig, handleSaveLoyaltyConfig,
+    loyaltyConfig, fetchLoyaltyConfig, handleSaveLoyaltyConfig,
     coupons, fetchCoupons, handleValidateCoupon,
     redeemPoints, setRedeemPoints: (points: number) => {
       const available = cartCustomer?.points || 0

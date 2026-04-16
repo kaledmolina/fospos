@@ -248,10 +248,12 @@ export const POSView = ({
           )}
           {pos.posTab === "transactions" && (
             <TransactionsTab
-              sales={pos.sales || []}
+              sales={pos.filteredSales || []}
               onSetLastSale={pos.setLastSale}
               onSetReceiptDialog={pos.setReceiptDialog}
               onOpenHistory={pos.handleOpenHistory}
+              saleSearch={pos.saleSearch}
+              onSetSaleSearch={pos.setSaleSearch}
             />
           )}
         </AnimatePresence>

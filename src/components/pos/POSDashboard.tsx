@@ -61,7 +61,7 @@ export const POSDashboard = ({
       
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border shadow-lg transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:shadow-none`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:shadow-none lg:bg-card/50`}
       >
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
@@ -249,7 +249,7 @@ export const POSDashboard = ({
       )}
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-40">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-lg border-t border-border/50 shadow-[-5px_0_30px_rgba(0,0,0,0.1)] z-40">
         <div className="grid grid-cols-5 h-16">
           {[
             { id: "dashboard", icon: Home, label: "Inicio" },

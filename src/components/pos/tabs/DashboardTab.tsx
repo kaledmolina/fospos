@@ -53,35 +53,34 @@ export const DashboardTab = ({
             color: "purple", trend: "+18%", isUp: true, prefix: "$" 
           },
           { 
-            icon: CreditCard, label: "Créditos", value: dashboardStats?.pendingCredits || 0, 
-            color: "red", trend: "Pendiente", isUp: false, prefix: "$" 
+            icon: CreditCard, label: "Cobros Pendientes", value: dashboardStats?.pendingCredits || 0, 
+            color: "orange", trend: "Créditos", isUp: false, prefix: "$" 
           }
         ].map((stat, i) => (
           <motion.div key={stat.label} variants={fadeInUp} whileHover={{ scale: 1.02, y: -4 }}>
-            <Card className="cursor-pointer transition-all duration-300 hover:shadow-xl overflow-hidden relative group">
-              <div className={`absolute inset-0 bg-gradient-to-br from-${stat.color}-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-              <CardContent className="p-4 relative">
-                <div className="flex items-start justify-between">
-                  <div className={`w-10 h-10 bg-${stat.color}-500/10 rounded-xl flex items-center justify-center shadow-sm`}>
-                    <stat.icon className={`w-5 h-5 text-${stat.color}-500`} />
+            <Card className="cursor-pointer border-none shadow-lg shadow-black/5 dark:shadow-emerald-500/5 transition-all duration-300 hover:shadow-xl overflow-hidden relative group h-full">
+              <div className={`absolute inset-0 bg-gradient-to-br from-${stat.color}-500/10 via-${stat.color}-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+              <CardContent className="p-5 relative">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-12 h-12 bg-${stat.color}-500/10 dark:bg-${stat.color}-500/20 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300`}>
+                    <stat.icon className={`w-6 h-6 text-${stat.color}-600 dark:text-${stat.color}-400`} />
                   </div>
-                  <div className="flex items-center gap-1">
-                    {stat.isUp ? <ArrowUpRight className="w-4 h-4 text-emerald-500" /> : <ArrowDownRight className="w-4 h-4 text-red-500" />}
-                    <span className={`text-xs font-medium ${stat.isUp ? 'text-emerald-500' : 'text-red-500'}`}>{stat.trend}</span>
-                  </div>
+                  <Badge variant="outline" className={`h-6 border-none ${stat.isUp ? 'bg-emerald-500/10 text-emerald-600' : 'bg-orange-500/10 text-orange-600'} text-[10px] font-black`}>
+                    {stat.trend}
+                  </Badge>
                 </div>
-                <div className="mt-3">
-                  <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                  <div className="text-xl font-bold">
+                <div>
+                  <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60 mb-1">{stat.label}</p>
+                  <div className="text-2xl font-black text-foreground tabular-nums">
                     <AnimatedCounter value={stat.value as number} prefix={stat.prefix === "$" ? "$" : ""} />
                   </div>
                 </div>
-                <div className="mt-2 flex justify-end">
-                  <Sparkline 
-                    data={[10, 15, 12, 18, 22, 19, 25, 28]} 
-                    color={stat.color === "emerald" ? "#10B981" : stat.color === "blue" ? "#3B82F6" : stat.color === "purple" ? "#8B5CF6" : "#EF4444"} 
-                    width={50} height={15} 
-                  />
+                <div className="mt-4 pt-4 border-t border-muted/50 flex items-center justify-between">
+                   <div className="flex -space-x-2">
+                      <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-background" />
+                      <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 border-2 border-background" />
+                   </div>
+                   <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-0 group-hover:opacity-100 transition-opacity">Ver informe</p>
                 </div>
               </CardContent>
             </Card>
