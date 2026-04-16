@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency } from "@/lib/utils"
+import { Pause } from "lucide-react"
 
 // 1. Subscription Service Dialog
 interface ServiceDialogProps {
@@ -162,6 +163,59 @@ export const SubscriptionPaymentDialog = ({
           </Select>
         </div>
         <Button className="w-full bg-emerald-500 hover:bg-emerald-600" onClick={onSubmit}>Registrar Pago</Button>
+      </div>
+    </DialogContent>
+  </Dialog>
+)
+// 4. Subscription Freeze Dialog
+interface SubscriptionFreezeDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  selectedSubscription: any
+  days: string
+  onDaysChange: (days: string) => void
+  onSubmit: () => void
+}
+
+export const SubscriptionFreezeDialog = ({
+  open, onOpenChange, selectedSubscription, days, onDaysChange, onSubmit
+}: SubscriptionFreezeDialogProps) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <Pause className="w-5 h-5 text-blue-500" /> Congelar Suscripción
+        </DialogTitle>
+        <DialogDescription>
+          Pausar temporalmente el servicio para el cliente.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-4 py-2">
+        {selectedSubscription && (
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+            <p className="font-semibold text-blue-900">{selectedSubscription.customer.name}</p>
+            <p className="text-xs text-blue-700">{selectedSubscription.service.name}</p>
+          </div>
+        )}
+        <div className="space-y-2">
+          <Label htmlFor="days">¿Cuántos días desea congelar?</Label>
+          <div className="flex items-center gap-3">
+            <Input 
+              id="days"
+              type="number" 
+              value={days} 
+              onChange={e => onDaysChange(e.target.value)}
+              className="font-bold text-lg"
+            />
+            <span className="text-muted-foreground font-medium">Días</span>
+          </div>
+          <p className="text-[10px] text-muted-foreground pt-1">
+            * El servicio se reactivará automáticamente tras este periodo.
+          </p>
+        </div>
+        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={onSubmit}>
+          Confirmar Congelación
+        </Button>
       </div>
     </DialogContent>
   </Dialog>

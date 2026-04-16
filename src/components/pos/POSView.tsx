@@ -28,10 +28,12 @@ import { HistoryDialog } from "./dialogs/HistoryDialog"
 import { BulkUploadDialog } from "./dialogs/BulkUploadDialog"
 import { ReceiptDialog } from "./dialogs/ReceiptDialog"
 import { CashReportDialog } from "./dialogs/CashReportDialog"
+import { ConfirmationDialog } from "./dialogs/ConfirmationDialog"
 import { 
   SubscriptionServiceDialog, 
   NewSubscriptionDialog, 
-  SubscriptionPaymentDialog 
+  SubscriptionPaymentDialog,
+  SubscriptionFreezeDialog
 } from "./dialogs/SubscriptionDialogs"
 import { AnimatePresence } from "framer-motion"
 
@@ -244,6 +246,7 @@ export const POSView = ({
               onUnfreezeSubscription={pos.handleUnfreezeSubscription}
               onCancelSubscription={pos.handleCancelSubscription}
               onOpenHistory={pos.handleOpenHistory}
+              onSetShowFreezeDialog={pos.setShowFreezeDialog}
             />
           )}
           {pos.posTab === "transactions" && (
@@ -355,6 +358,14 @@ export const POSView = ({
         services={pos.subscriptionServices}
         onSubmit={pos.handleCreateSubscription}
       />
+      <ConfirmationDialog
+        open={pos.confirmDialog.open}
+        onOpenChange={(open) => pos.setConfirmDialog({ ...pos.confirmDialog, open })}
+        title={pos.confirmDialog.title}
+        message={pos.confirmDialog.message}
+        onConfirm={pos.confirmDialog.onConfirm}
+        variant={pos.confirmDialog.variant}
+      />
       <SubscriptionPaymentDialog
         open={pos.showSubscriptionPaymentDialog}
         onOpenChange={pos.setShowSubscriptionPaymentDialog}
@@ -364,6 +375,14 @@ export const POSView = ({
         method={pos.subscriptionPaymentMethod}
         onMethodChange={pos.setSubscriptionPaymentMethod}
         onSubmit={() => pos.handleSubscriptionPayment()}
+      />
+      <SubscriptionFreezeDialog
+        open={pos.showFreezeDialog}
+        onOpenChange={pos.setShowFreezeDialog}
+        selectedSubscription={pos.selectedSubscription}
+        days={pos.freezeDays}
+        onDaysChange={pos.setFreezeDays}
+        onSubmit={pos.handleFreezeSubscription}
       />
       <StockAdjustmentDialog
         open={pos.stockAdjustmentDialog}

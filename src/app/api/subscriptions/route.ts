@@ -175,16 +175,79 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Si hay pago inicial, registrarlo
+    // Si hay pago inicial, registrarlo como Venta y Pago
     if (data.initialPayment && data.initialPayment > 0) {
-      await db.subscriptionPayment.create({
-        data: {
-          subscriptionId: subscription.id,
-          amount: parseFloat(data.initialPayment),
-          paymentMethod: data.paymentMethod || "CASH",
-          periodStart: startDate,
-          periodEnd: nextBillingDate,
-          status: "PAID"
+      const initialAmount = parseFloat(data.initialPayment)
+      
+      await db.$transaction(async (tx) => {
+        // 1. Obtener datos del Tenant para la factura
+        const tenant = await tx.tenant.findUnique({ where: { id: session.user.tenantId } })
+        if (!tenant) throw new Error("Tenant no encontrado")
+
+        const currentInvoiceNum = tenant.invoiceNumber
+        const invoiceNumber = `${tenant.invoicePrefix}-${currentInvoiceNum.toString().padStart(4, "0")}`
+
+        // 2. Incrementar contador de facturas
+        await tx.tenant.update({
+          where: { id: tenant.id },
+          data: { invoiceNumber: { increment: 1 } }
+        })
+
+        // 3. Crear la Venta (Transacción)
+        await tx.sale.create({
+          data: {
+            tenantId: session.user.tenantId,
+            customerId: subscription.customerId,
+            invoiceNumber,
+            total: initialAmount,
+            subtotal: initialAmount,
+            paymentMethod: data.paymentMethod || "CASH",
+            paymentStatus: "PAID",
+            cashRegisterId: data.cashRegisterId || null,
+            branchId: session.user.branchId || null,
+            notes: `Pago inicial suscripción: ${subscription.service.name}`,
+            items: {
+              create: [{
+                productName: `Pago Inicial: ${subscription.service.name}`,
+                unitPrice: initialAmount,
+                quantity: 1,
+                subtotal: initialAmount,
+                discount: 0
+              }]
+            }
+          }
+        })
+
+        // 4. Crear el registro de Pago de Suscripción
+        await tx.subscriptionPayment.create({
+          data: {
+            subscriptionId: subscription.id,
+            amount: initialAmount,
+            paymentMethod: data.paymentMethod || "CASH",
+            periodStart: startDate,
+            periodEnd: nextBillingDate,
+            status: "PAID",
+            receiptNumber: invoiceNumber
+          }
+        })
+
+        // 5. Actualizar compras totales del cliente
+        await tx.customer.update({
+          where: { id: subscription.customerId },
+          data: { totalPurchases: { increment: initialAmount } }
+        })
+
+        // 6. Actualizar Caja si aplica
+        if (data.cashRegisterId) {
+          const updateData: any = { totalSales: { increment: initialAmount } }
+          if (data.paymentMethod === "CASH") updateData.totalCash = { increment: initialAmount }
+          else if (data.paymentMethod === "CARD") updateData.totalCard = { increment: initialAmount }
+          else if (data.paymentMethod === "TRANSFER") updateData.totalTransfer = { increment: initialAmount }
+
+          await tx.cashRegister.update({
+            where: { id: data.cashRegisterId },
+            data: updateData
+          })
         }
       })
     }

@@ -3,7 +3,8 @@
 import { motion } from "framer-motion"
 import { 
   Crown, CheckCircle, AlertCircle, DollarSign, 
-  Plus, Pause, Play, RefreshCw, Edit, Trash2, XCircle
+  Plus, Pause, Play, RefreshCw, Edit, Trash2, XCircle,
+  Calendar, User, Clock, ArrowRight, Activity, CreditCard
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,6 +33,7 @@ interface SubscriptionsTabProps {
   onUnfreezeSubscription: (id: string) => void
   onCancelSubscription: (id: string) => void
   onOpenHistory: (items: any[], title: string, description: string) => void
+  onSetShowFreezeDialog: (open: boolean) => void
 }
 
 export const SubscriptionsTab = ({
@@ -52,7 +54,8 @@ export const SubscriptionsTab = ({
   onFreezeSubscription,
   onUnfreezeSubscription,
   onCancelSubscription,
-  onOpenHistory
+  onOpenHistory,
+  onSetShowFreezeDialog
 }: SubscriptionsTabProps) => {
   return (
     <motion.div key="subscriptions" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
@@ -187,42 +190,115 @@ export const SubscriptionsTab = ({
           <Card>
             <CardContent className="p-0">
               <ScrollArea className="h-96">
-                <div className="divide-y">
+                <div className="divide-y text-sm">
                   {subscriptions.map(sub => (
-                    <div key={sub.id} className="p-4 hover:bg-muted/30">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    <div key={sub.id} className="p-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        {/* 1. Información del Cliente y Servicio */}
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${
                             sub.status === "ACTIVE" ? "bg-green-500/10" : sub.status === "FROZEN" ? "bg-blue-500/10" : "bg-red-500/10"
                           }`}>
-                            {sub.status === "FROZEN" ? <Pause className="w-5 h-5 text-blue-500" /> : <Play className="w-5 h-5 text-green-500" />}
+                            {sub.status === "FROZEN" ? <Pause className="w-6 h-6 text-blue-500" /> : <Play className="w-6 h-6 text-green-500" />}
                           </div>
                           <div>
-                            <p className="font-medium">{sub.customer.name}</p>
-                            <p className="text-sm text-muted-foreground">{sub.service.name} • {formatCurrency(sub.agreedPrice)}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-lg text-foreground">{sub.customer.name}</p>
+                              <Badge variant="outline" className={
+                                sub.status === "ACTIVE" ? "border-green-500/30 text-green-600 bg-green-50" : 
+                                sub.status === "FROZEN" ? "border-blue-500/30 text-blue-600 bg-blue-50" : 
+                                "border-red-500/30 text-red-600 bg-red-50"
+                              }>
+                                {sub.status}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
+                              <Activity className="w-3 h-3" />
+                              <span>{sub.service.name}</span>
+                              <span className="mx-1">•</span>
+                              <CreditCard className="w-3 h-3" />
+                              <span className="font-semibold text-emerald-600">{formatCurrency(sub.agreedPrice)}</span>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className={sub.status === "ACTIVE" ? "border-green-500/20 text-green-500 bg-green-500/10" : "border-blue-500/20 text-blue-500 bg-blue-500/10"}>
-                            {sub.status}
-                          </Badge>
-                          <div className="flex gap-1">
-                            <Button variant="outline" size="sm" onClick={() => { onSetSelectedSubscription(sub); onSetSubscriptionPaymentAmount(sub.agreedPrice.toString()); onSetShowSubscriptionPaymentDialog(true) }}>
-                              <DollarSign className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => {
+
+                        {/* 2. Primas Fechas / Info de Cobro */}
+                        <div className="flex flex-col gap-1 px-4 py-2 bg-muted/20 rounded-lg border border-muted/30">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            <span>Próximo cobro:</span>
+                          </div>
+                          <p className="font-semibold text-sm">
+                            {sub.nextBillingDate ? formatDateShort(sub.nextBillingDate) : "No definida"}
+                          </p>
+                        </div>
+
+                        {/* 3. Acciones con Etiquetas */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 h-9 px-3 gap-1.5"
+                            onClick={() => { 
+                              onSetSelectedSubscription(sub); 
+                              onSetSubscriptionPaymentAmount(sub.agreedPrice.toString()); 
+                              onSetShowSubscriptionPaymentDialog(true) 
+                            }}
+                          >
+                            <DollarSign className="w-4 h-4" />
+                            <span className="text-xs font-semibold">Cobrar</span>
+                          </Button>
+                          
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-9 px-3 gap-1.5"
+                            onClick={() => {
                               onOpenHistory(
                                 sub.payments || [],
                                 `Pagos - ${sub.customer.name}`,
                                 `Historial de mensualidades para ${sub.service.name}`
                               )
-                            }}>
-                              <RefreshCw className="w-4 h-4" />
+                            }}
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                            <span className="text-xs font-semibold">Historial</span>
+                          </Button>
+                          
+                          {sub.status === "ACTIVE" ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-blue-600 border-blue-200 hover:bg-blue-50 h-9 px-3 gap-1.5"
+                              onClick={() => {
+                                onSetSelectedSubscription(sub);
+                                onSetShowFreezeDialog(true);
+                              }}
+                            >
+                              <Pause className="w-4 h-4" />
+                              <span className="text-xs font-semibold">Congelar</span>
                             </Button>
-                            {sub.status === "ACTIVE" && <Button variant="outline" size="sm" onClick={() => { const days = prompt("¿Días?", "30"); if (days) onFreezeSubscription(sub.id, parseInt(days)) }}><Pause className="w-4 h-4" /></Button>}
-                            {sub.status === "FROZEN" && <Button variant="outline" size="sm" onClick={() => onUnfreezeSubscription(sub.id)}><Play className="w-4 h-4" /></Button>}
-                            <Button variant="outline" size="sm" className="text-red-600" onClick={() => onCancelSubscription(sub.id)}><XCircle className="w-4 h-4" /></Button>
-                          </div>
+                          ) : sub.status === "FROZEN" ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-green-600 border-green-200 hover:bg-green-50 h-9 px-3 gap-1.5"
+                              onClick={() => onUnfreezeSubscription(sub.id)}
+                            >
+                              <Play className="w-4 h-4" />
+                              <span className="text-xs font-semibold">Reactivar</span>
+                            </Button>
+                          ) : null}
+
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-500 border-red-200 hover:bg-red-50 h-9 px-3 gap-1.5"
+                            onClick={() => onCancelSubscription(sub.id)}
+                          >
+                            <XCircle className="w-4 h-4" />
+                            <span className="text-xs font-semibold">Baja</span>
+                           </Button>
                         </div>
                       </div>
                     </div>

@@ -81,41 +81,97 @@ export async function POST(request: NextRequest) {
     const amount = parseFloat(data.amount)
     const now = new Date()
     const periodEnd = new Date(now)
-    periodEnd.setDate(periodEnd.getDate() + subscription.service.billingDays)
+    periodEnd.setDate(periodEnd.getDate() + (subscription.service.billingDays || 30))
 
-    // Crear el pago
-    const payment = await db.subscriptionPayment.create({
-      data: {
-        subscriptionId: data.subscriptionId,
-        amount,
-        paymentMethod: data.paymentMethod || "CASH",
-        periodStart: now,
-        periodEnd,
-        status: "PAID",
-        receiptNumber: data.receiptNumber || "",
-        notes: data.notes || null
-      }
-    })
-
-    // Actualizar la suscripción
-    await db.customerSubscription.update({
-      where: { id: data.subscriptionId },
-      data: {
-        lastPaymentDate: now,
-        nextBillingDate: periodEnd,
-        status: "ACTIVE"
-      }
-    })
-
-    // Si la suscripción estaba vencida, actualizar estado
-    if (subscription.status === "OVERDUE" || subscription.status === "PENDING") {
-      await db.customerSubscription.update({
-        where: { id: data.subscriptionId },
-        data: { status: "ACTIVE" }
+    const result = await db.$transaction(async (tx) => {
+      // 1. Obtener datos del Tenant para la factura
+      const tenant = await tx.tenant.findUnique({
+        where: { id: session.user.tenantId }
       })
-    }
 
-    return NextResponse.json({ success: true, data: payment })
+      if (!tenant) throw new Error("Tenant no encontrado")
+
+      const currentInvoiceNum = tenant.invoiceNumber
+      const invoiceNumber = `${tenant.invoicePrefix}-${currentInvoiceNum.toString().padStart(4, "0")}`
+
+      // 2. Incrementar contador de facturas
+      await tx.tenant.update({
+        where: { id: tenant.id },
+        data: { invoiceNumber: { increment: 1 } }
+      })
+
+      // 3. Crear la Venta (Transacción)
+      const sale = await tx.sale.create({
+        data: {
+          tenantId: session.user.tenantId,
+          customerId: subscription.customerId,
+          invoiceNumber,
+          total: amount,
+          subtotal: amount,
+          paymentMethod: data.paymentMethod || "CASH",
+          paymentStatus: "PAID",
+          cashRegisterId: data.cashRegisterId || null,
+          branchId: session.user.branchId || null,
+          notes: `Pago de suscripción: ${subscription.service.name}`,
+          items: {
+            create: [{
+              productName: `Servicio: ${subscription.service.name}`,
+              unitPrice: amount,
+              quantity: 1,
+              subtotal: amount,
+              discount: 0
+            }]
+          }
+        }
+      })
+
+      // 4. Crear el registro de Pago de Suscripción
+      const payment = await tx.subscriptionPayment.create({
+        data: {
+          subscriptionId: data.subscriptionId,
+          amount,
+          paymentMethod: data.paymentMethod || "CASH",
+          periodStart: now,
+          periodEnd,
+          status: "PAID",
+          receiptNumber: invoiceNumber, // Usar el número de factura como recibo
+          notes: data.notes || null
+        }
+      })
+
+      // 5. Actualizar la suscripción
+      await tx.customerSubscription.update({
+        where: { id: data.subscriptionId },
+        data: {
+          lastPaymentDate: now,
+          nextBillingDate: periodEnd,
+          status: "ACTIVE"
+        }
+      })
+
+      // 6. Actualizar Caja si aplica
+      if (data.cashRegisterId) {
+        const updateData: any = { totalSales: { increment: amount } }
+        if (data.paymentMethod === "CASH") updateData.totalCash = { increment: amount }
+        else if (data.paymentMethod === "CARD") updateData.totalCard = { increment: amount }
+        else if (data.paymentMethod === "TRANSFER") updateData.totalTransfer = { increment: amount }
+
+        await tx.cashRegister.update({
+          where: { id: data.cashRegisterId },
+          data: updateData
+        })
+      }
+
+      // 7. Actualizar compras totales del cliente
+      await tx.customer.update({
+        where: { id: subscription.customerId },
+        data: { totalPurchases: { increment: amount } }
+      })
+
+      return payment
+    })
+
+    return NextResponse.json({ success: true, data: result })
   } catch (error) {
     console.error("Error creating subscription payment:", error)
     return NextResponse.json(

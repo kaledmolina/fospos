@@ -117,6 +117,8 @@ export const usePOS = (session: any) => {
   const [subscriptionPaymentAmount, setSubscriptionPaymentAmount] = useState("")
   const [subscriptionPaymentMethod, setSubscriptionPaymentMethod] = useState("CASH")
   const [subscriptionTab, setSubscriptionTab] = useState("services")
+  const [showFreezeDialog, setShowFreezeDialog] = useState(false)
+  const [freezeDays, setFreezeDays] = useState("30")
   const [showConfetti, setShowConfetti] = useState(false)
   const [lastSale, setLastSale] = useState<any>(null)
   const [receiptDialog, setReceiptDialog] = useState(false)
@@ -131,6 +133,24 @@ export const usePOS = (session: any) => {
   const [couponCode, setCouponCode] = useState<string>("")
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
   
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    variant: "destructive" | "default";
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    variant: "destructive"
+  });
+
+  const askConfirm = (title: string, message: string, onConfirm: () => void, variant: "destructive" | "default" = "destructive") => {
+    setConfirmDialog({ open: true, title, message, onConfirm, variant });
+  };
+
   // History state
   const [historyDialog, setHistoryDialog] = useState(false)
   const [historyItems, setHistoryItems] = useState<any[]>([])
@@ -905,14 +925,20 @@ export const usePOS = (session: any) => {
   }
 
   const handleDeleteBranch = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar esta sucursal?")) return
-    try {
-      const res = await fetch(`/api/branches?id=${id}`, { method: "DELETE" })
-      if ((await res.json()).success) {
-        toast.success("Sucursal eliminada")
-        fetchBranches()
+    askConfirm(
+      "¿Eliminar sucursal?",
+      "Esta acción no se puede deshacer y podría afectar los registros históricos de ventas asociados.",
+      async () => {
+        try {
+          const res = await fetch(`/api/branches?id=${id}`, { method: "DELETE" })
+          if ((await res.json()).success) {
+            toast.success("Sucursal eliminada")
+            fetchBranches()
+            setConfirmDialog(prev => ({ ...prev, open: false }))
+          }
+        } catch { toast.error("Error al eliminar") }
       }
-    } catch { toast.error("Error al eliminar") }
+    )
   }
 
   const handleAddUser = async (e: React.FormEvent) => {
@@ -935,14 +961,20 @@ export const usePOS = (session: any) => {
   }
 
   const handleDeleteUser = async (id: string) => {
-    if (!confirm("¿Eliminar usuario?")) return
-    try {
-      const res = await fetch(`/api/users?id=${id}`, { method: "DELETE" })
-      if ((await res.json()).success) {
-        toast.success("Usuario eliminado")
-        fetchUsers()
+    askConfirm(
+      "¿Eliminar usuario?",
+      "El usuario perderá acceso inmediato al sistema.",
+      async () => {
+        try {
+          const res = await fetch(`/api/users?id=${id}`, { method: "DELETE" })
+          if ((await res.json()).success) {
+            toast.success("Usuario eliminado")
+            fetchUsers()
+            setConfirmDialog(prev => ({ ...prev, open: false }))
+          }
+        } catch { toast.error("Error al eliminar") }
       }
-    } catch { toast.error("Error al eliminar") }
+    )
   }
 
   const handleToggleUserActive = async (id: string, active: boolean) => {
@@ -1019,14 +1051,20 @@ export const usePOS = (session: any) => {
   }
 
   const handleDeleteSubscriptionService = async (id: string) => {
-    if (!confirm("¿Eliminar servicio?")) return
-    try {
-      const res = await fetch(`/api/subscription-services?id=${id}`, { method: "DELETE" })
-      if ((await res.json()).success) {
-        toast.success("Servicio eliminado")
-        fetchSubscriptionServices()
+    askConfirm(
+      "¿Eliminar servicio?",
+      "Esto no eliminará las suscripciones activas, pero no se podrán crear nuevas de este tipo.",
+      async () => {
+        try {
+          const res = await fetch(`/api/subscription-services?id=${id}`, { method: "DELETE" })
+          if ((await res.json()).success) {
+            toast.success("Servicio eliminado")
+            fetchSubscriptionServices()
+            setConfirmDialog(prev => ({ ...prev, open: false }))
+          }
+        } catch { toast.error("Error al eliminar") }
       }
-    } catch { toast.error("Error al eliminar") }
+    )
   }
 
   const handleCreateSubscription = async (e: React.FormEvent) => {
@@ -1035,12 +1073,16 @@ export const usePOS = (session: any) => {
       const res = await fetch("/api/subscriptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newSubscription)
+        body: JSON.stringify({
+          ...newSubscription,
+          cashRegisterId: cashRegister?.id
+        })
       })
       if ((await res.json()).success) {
         toast.success("Suscripción creada")
         setShowNewSubscriptionDialog(false)
         fetchSubscriptions()
+        fetchPOSData() // Actualizar transacciones y caja
       }
     } catch { toast.error("Error al crear suscripción") }
   }
@@ -1048,13 +1090,14 @@ export const usePOS = (session: any) => {
   const handleSubscriptionPayment = async () => {
     if (!selectedSubscription) return
     try {
-      const res = await fetch("/api/subscriptions?type=payment", {
+      const res = await fetch("/api/subscriptions/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subscriptionId: selectedSubscription.id,
           amount: parseFloat(subscriptionPaymentAmount),
-          method: subscriptionPaymentMethod
+          paymentMethod: subscriptionPaymentMethod,
+          cashRegisterId: cashRegister?.id
         })
       })
       if ((await res.json()).success) {
@@ -1067,15 +1110,17 @@ export const usePOS = (session: any) => {
     } catch { toast.error("Error al registrar pago") }
   }
 
-  const handleFreezeSubscription = async (id: string) => {
+  const handleFreezeSubscription = async () => {
+    if (!selectedSubscription) return
     try {
       const res = await fetch("/api/subscriptions?type=status", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: "FROZEN" })
+        body: JSON.stringify({ id: selectedSubscription.id, status: "FROZEN", days: parseInt(freezeDays) })
       })
       if ((await res.json()).success) {
         toast.success("Suscripción congelada")
+        setShowFreezeDialog(false)
         fetchSubscriptions()
       }
     } catch { toast.error("Error al congelar") }
@@ -1096,18 +1141,24 @@ export const usePOS = (session: any) => {
   }
 
   const handleCancelSubscription = async (id: string) => {
-    if (!confirm("¿Cancelar suscripción?")) return
-    try {
-      const res = await fetch("/api/subscriptions?type=status", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: "CANCELLED" })
-      })
-      if ((await res.json()).success) {
-        toast.success("Suscripción cancelada")
-        fetchSubscriptions()
+    askConfirm(
+      "¿Cancelar suscripción?",
+      "El servicio se marcará como cancelado y el cliente no podrá utilizarlo.",
+      async () => {
+        try {
+          const res = await fetch("/api/subscriptions?type=status", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status: "CANCELLED" })
+          })
+          if ((await res.json()).success) {
+            toast.success("Suscripción cancelada")
+            fetchSubscriptions()
+            setConfirmDialog(prev => ({ ...prev, open: false }))
+          }
+        } catch { toast.error("Error al cancelar") }
       }
-    } catch { toast.error("Error al cancelar") }
+    )
   }
 
   const handleAdjustStock = async (data: any) => {
@@ -1197,6 +1248,7 @@ export const usePOS = (session: any) => {
     setSelectedSubscription, subscriptionPaymentAmount, 
     setSubscriptionPaymentAmount, subscriptionPaymentMethod, 
     setSubscriptionPaymentMethod, subscriptionTab, setSubscriptionTab,
+    showFreezeDialog, setShowFreezeDialog, freezeDays, setFreezeDays, confirmDialog, setConfirmDialog,
     showConfetti, fetchPOSData, fetchNotifications, handleClearNotifications, fetchExpenses, 
     fetchBranches, fetchUsers, fetchSubscriptionServices, fetchSubscriptions,
     fetchCredits, handleAddProduct, handleAddCategory, handleAddCustomer,
