@@ -17,6 +17,7 @@ import { CategoriesTab } from "./tabs/CategoriesTab"
 import { LoyaltyConfigTab } from "./tabs/LoyaltyConfigTab"
 import { GiftCardsTab } from "./tabs/GiftCardsTab"
 import { AdvancedInventoryTab } from "./tabs/AdvancedInventoryTab"
+import { SuppliersTab } from "./tabs/SuppliersTab"
 import { StockAdjustmentDialog } from "./dialogs/StockAdjustmentDialog"
 import { ProductDialog } from "./dialogs/ProductDialog"
 import { CategoryDialog } from "./dialogs/CategoryDialog"
@@ -32,6 +33,7 @@ import { BulkUploadDialog } from "./dialogs/BulkUploadDialog"
 import { ReceiptDialog } from "./dialogs/ReceiptDialog"
 import { CashReportDialog } from "./dialogs/CashReportDialog"
 import { ConfirmationDialog } from "./dialogs/ConfirmationDialog"
+import { SupplierDialog } from "./dialogs/SupplierDialog"
 import { 
   SubscriptionServiceDialog, 
   NewSubscriptionDialog, 
@@ -77,6 +79,9 @@ export const POSView = ({
           }
           if (tab === "giftcards") {
             pos.fetchGiftCards()
+          }
+          if (tab === "suppliers") {
+            pos.fetchPOSData() // Reutilizamos para cargar proveedores
           }
         }}
         sidebarOpen={sidebarOpen}
@@ -243,6 +248,31 @@ export const POSView = ({
               cashHistory={pos.cashHistory}
             />
           )}
+
+          {pos.posTab === "suppliers" && (
+            <SuppliersTab 
+              suppliers={pos.suppliers}
+              onAdd={() => {
+                pos.setEditingSupplier(null)
+                pos.setSupplierForm({ name: "", nit: "", phone: "", email: "", address: "", notes: "" })
+                pos.setSupplierDialog(true)
+              }}
+              onEdit={(supplier) => {
+                pos.setEditingSupplier(supplier)
+                pos.setSupplierForm({
+                  name: supplier.name,
+                  nit: supplier.nit || "",
+                  phone: supplier.phone || "",
+                  email: supplier.email || "",
+                  address: supplier.address || "",
+                  notes: supplier.notes || ""
+                })
+                pos.setSupplierDialog(true)
+              }}
+              onDelete={pos.handleDeleteSupplier}
+            />
+          )}
+
           {pos.posTab === "subscriptions" && (
             <SubscriptionsTab
               subscriptionStats={pos.subscriptionStats}
@@ -418,6 +448,14 @@ export const POSView = ({
         onOpenChange={pos.setStockAdjustmentDialog}
         product={pos.selectedProductForStock}
         onAdjust={pos.handleAdjustStock}
+      />
+      <SupplierDialog
+        open={pos.supplierDialog}
+        onOpenChange={pos.setSupplierDialog}
+        form={pos.supplierForm}
+        setForm={pos.setSupplierForm}
+        editingSupplier={pos.editingSupplier}
+        onSubmit={pos.editingSupplier ? pos.handleUpdateSupplier : pos.handleAddSupplier}
       />
       <HistoryDialog
         open={pos.historyDialog}

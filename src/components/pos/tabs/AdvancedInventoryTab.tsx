@@ -130,10 +130,10 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
           <TabsList className="grid grid-cols-2 w-full md:w-[400px] h-12 bg-slate-100/50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 p-1 rounded-2xl backdrop-blur-sm">
-            <TabsTrigger value="kardex" className="rounded-xl font-black text-[10px] uppercase tracking-wider data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-lg transition-all">
+            <TabsTrigger value="kardex" className="rounded-xl font-black text-[10px] uppercase tracking-wider data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-lg transition-all cursor-pointer hover:bg-white/50 dark:hover:bg-zinc-800/50">
               <History className="w-4 h-4 mr-2" /> Kardex
             </TabsTrigger>
-            <TabsTrigger value="purchases" className="rounded-xl font-black text-[10px] uppercase tracking-wider data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-lg transition-all">
+            <TabsTrigger value="purchases" className="rounded-xl font-black text-[10px] uppercase tracking-wider data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-lg transition-all cursor-pointer hover:bg-white/50 dark:hover:bg-zinc-800/50">
               <ShoppingCart className="w-4 h-4 mr-2" /> Compras
             </TabsTrigger>
           </TabsList>
@@ -243,10 +243,10 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                     <CardDescription className="text-sm font-medium">Abastece tu inventario con tus proveedores estratégicos</CardDescription>
                   </div>
                   <Button 
-                    className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-xl shadow-emerald-500/20 rounded-xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all hover:scale-[1.02] active:scale-95"
+                    className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-xl shadow-emerald-500/20 rounded-xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:cursor-not-allowed group"
                     onClick={() => setShowPODialog(true)}
                   >
-                    <Plus className="w-4 h-4 mr-2" /> Nueva Orden
+                    <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" /> Nueva Orden
                   </Button>
                 </div>
               </CardHeader>
@@ -289,13 +289,13 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                           <div className="flex items-center gap-2">
                             {po.status === "PENDING" && (
                               <Button 
-                                className="bg-emerald-600 hover:bg-emerald-700 font-bold"
+                                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 font-bold rounded-xl transition-all hover:scale-105 cursor-pointer"
                                 onClick={() => handleReceivePO(po.id)}
                               >
                                 <CheckCircle2 className="w-4 h-4 mr-2" /> Recibir
                               </Button>
                             )}
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors">
                               <Eye className="w-4 h-4" />
                             </Button>
                           </div>

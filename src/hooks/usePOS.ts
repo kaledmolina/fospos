@@ -25,6 +25,7 @@ export const usePOS = (session: any) => {
     recentSales: []
   })
   const [cashRegister, setCashRegister] = useState<CashRegisterData | null>(null)
+  const [suppliers, setSuppliers] = useState<any[]>([])
   
   // New state
   const [notifications, setNotifications] = useState<NotificationData[]>([])
@@ -66,6 +67,7 @@ export const usePOS = (session: any) => {
   const [bulkUploadDialog, setBulkUploadDialog] = useState(false)
   const [userDialog, setUserDialog] = useState(false)
   const [stockAdjustmentDialog, setStockAdjustmentDialog] = useState(false)
+  const [supplierDialog, setSupplierDialog] = useState(false)
   const [selectedProductForStock, setSelectedProductForStock] = useState<any>(null)
   
   // Form states
@@ -76,6 +78,8 @@ export const usePOS = (session: any) => {
   })
   const [categoryForm, setCategoryForm] = useState({ name: "", description: "", color: "#10B981", icon: "🏷️" })
   const [customerForm, setCustomerForm] = useState({ name: "", document: "", phone: "", email: "", address: "", creditLimit: 0 })
+  const [supplierForm, setSupplierForm] = useState({ name: "", nit: "", phone: "", email: "", address: "", notes: "" })
+  const [editingSupplier, setEditingSupplier] = useState<any | null>(null)
   const [selectedCredit, setSelectedCredit] = useState<CreditWithDetails | null>(null)
   const [paymentAmount, setPaymentAmount] = useState(0)
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0])
@@ -214,6 +218,9 @@ export const usePOS = (session: any) => {
       
       const giftCardsRes = await fetch("/api/gift-cards")
       if (giftCardsRes.ok) setGiftCards((await giftCardsRes.json()).data)
+
+      const suppliersRes = await fetch("/api/suppliers")
+      if (suppliersRes.ok) setSuppliers((await suppliersRes.json()).data)
     } catch (error) {
       console.error("Error fetching POS data:", error)
     }
@@ -1422,6 +1429,9 @@ export const usePOS = (session: any) => {
     selectedGiftCard,
     handlePrintGiftCard,
     historyDialog, setHistoryDialog, historyItems, historyTitle, historyDescription,
-    handleOpenHistory
+    handleOpenHistory,
+    suppliers, setSuppliers, supplierDialog, setSupplierDialog,
+    supplierForm, setSupplierForm, editingSupplier, setEditingSupplier,
+    handleAddSupplier, handleUpdateSupplier, handleDeleteSupplier
   }
 }

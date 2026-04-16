@@ -74,8 +74,8 @@ export const PurchaseOrderDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[650px] h-[85vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950 rounded-3xl">
-        <div className="p-6 bg-slate-50/50 dark:bg-zinc-900/30 border-b backdrop-blur-md">
+      <DialogContent className="w-[95vw] sm:max-w-[650px] max-h-[90vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950 rounded-[2rem]">
+        <div className="p-6 bg-slate-50/50 dark:bg-zinc-900/30 border-b backdrop-blur-md shrink-0">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-2xl font-black text-emerald-600">
               <div className="p-2 bg-emerald-500 rounded-lg shadow-lg shadow-emerald-500/20">
@@ -96,14 +96,21 @@ export const PurchaseOrderDialog = ({
                 <Label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground ml-1">Proveedor</Label>
                 <Select value={supplierId} onValueChange={setSupplierId}>
                   <SelectTrigger className="h-12 border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 rounded-xl focus:ring-emerald-500/20 transition-all">
-                    <SelectValue placeholder="Selecciona un proveedor" />
+                    <SelectValue placeholder={suppliers.length === 0 ? "No hay proveedores registrados" : "Selecciona un proveedor"} />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 shadow-xl">
-                    {suppliers.map(s => (
-                      <SelectItem key={s.id} value={s.id} className="rounded-lg focus:bg-emerald-50 dark:focus:bg-emerald-500/10">
-                        {s.name} <span className="text-[10px] text-muted-foreground ml-2 opacity-60">({s.taxId || "Sin NIT"})</span>
-                      </SelectItem>
-                    ))}
+                    {suppliers.length === 0 ? (
+                      <div className="p-4 text-center">
+                        <p className="text-xs text-muted-foreground mb-2">No tienes proveedores creados</p>
+                        <p className="text-[10px] font-bold text-emerald-600">Ve a la pestaña de Proveedores para crear uno</p>
+                      </div>
+                    ) : (
+                      suppliers.map(s => (
+                        <SelectItem key={s.id} value={s.id} className="rounded-lg focus:bg-emerald-50 dark:focus:bg-emerald-500/10">
+                          {s.name} <span className="text-[10px] text-muted-foreground ml-2 opacity-60">({s.taxId || "Sin NIT"})</span>
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -116,7 +123,7 @@ export const PurchaseOrderDialog = ({
                     variant="outline" 
                     size="sm" 
                     onClick={addItem}
-                    className="h-8 text-[10px] font-black uppercase text-emerald-600 border-emerald-500/20 hover:bg-emerald-50"
+                    className="h-8 text-[10px] font-black uppercase text-emerald-600 border-emerald-500/20 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg px-4 transition-all hover:translate-x-1"
                   >
                     <Plus className="w-3 h-3 mr-1" /> Añadir Item
                   </Button>
@@ -134,14 +141,20 @@ export const PurchaseOrderDialog = ({
                             <SelectValue placeholder="Seleccionar producto" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 shadow-xl">
-                            {products.map(p => (
-                              <SelectItem key={p.id} value={p.id} className="rounded-lg focus:bg-emerald-50 dark:focus:bg-emerald-500/10">
-                                <div className="flex items-center justify-between w-full gap-4">
-                                  <span>{p.name}</span>
-                                  <Badge variant="outline" className="text-[9px] h-4 font-black bg-slate-100 dark:bg-zinc-800 border-none opacity-60">Stock: {p.stock}</Badge>
-                                </div>
-                              </SelectItem>
-                            ))}
+                            {products.length === 0 ? (
+                              <div className="p-4 text-center">
+                                <p className="text-xs text-muted-foreground">No hay productos disponibles</p>
+                              </div>
+                            ) : (
+                              products.map(p => (
+                                <SelectItem key={p.id} value={p.id} className="rounded-lg focus:bg-emerald-50 dark:focus:bg-emerald-500/10">
+                                  <div className="flex items-center justify-between w-full gap-4">
+                                    <span>{p.name}</span>
+                                    <Badge variant="outline" className="text-[9px] h-4 font-black bg-slate-100 dark:bg-zinc-800 border-none opacity-60">Stock: {p.stock}</Badge>
+                                  </div>
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
 
@@ -186,9 +199,18 @@ export const PurchaseOrderDialog = ({
                   ))}
 
                   {items.length === 0 && (
-                    <div className="text-center py-10 border-2 border-dashed rounded-2xl border-slate-100 bg-slate-50/50">
-                      <ShoppingCart className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                      <p className="text-xs font-bold text-slate-400">Añade productos a la orden</p>
+                    <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl bg-slate-50/30 dark:bg-zinc-900/10 animate-in fade-in zoom-in-95 duration-500">
+                      <div className="w-14 h-14 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm mx-auto mb-4 flex items-center justify-center border border-slate-100 dark:border-zinc-800">
+                        <ShoppingCart className="w-6 h-6 text-emerald-500 opacity-40" />
+                      </div>
+                      <p className="text-xs font-bold text-slate-500 dark:text-zinc-400">Añade productos a la orden</p>
+                      <button 
+                        type="button"
+                        onClick={addItem}
+                        className="mt-4 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-500 transition-colors"
+                      >
+                        + Comenzar a añadir
+                      </button>
                     </div>
                   )}
                 </div>
@@ -206,31 +228,34 @@ export const PurchaseOrderDialog = ({
             </div>
           </ScrollArea>
 
-          <div className="p-6 bg-slate-50/50 dark:bg-zinc-900/30 border-t mt-auto backdrop-blur-md">
-            <div className="flex items-center justify-between mb-6 px-2">
+          <div className="p-6 bg-white dark:bg-zinc-950 border-t shrink-0">
+            <div className="flex items-center justify-between mb-6 px-1">
               <div className="space-y-1">
                 <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest opacity-60">Inversión Total Estimada</p>
-                <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{formatCurrency(total)}</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-emerald-500">$</span>
+                  <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{total.toLocaleString()}</p>
+                </div>
               </div>
               <div className="text-right flex flex-col items-end gap-2">
-                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+                <Badge className="bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg shadow-emerald-500/20 border-none">
                   {items.length} {items.length === 1 ? 'Producto' : 'Productos'}
                 </Badge>
               </div>
             </div>
 
-            <DialogFooter className="gap-3 sm:gap-1">
+            <DialogFooter className="gap-3 sm:gap-2">
               <Button 
                 type="button" 
                 variant="ghost" 
                 onClick={() => onOpenChange(false)}
-                className="font-bold text-muted-foreground hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl px-6"
+                className="font-bold text-muted-foreground hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl px-8 transition-all hover:text-foreground"
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit" 
-                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 h-12 px-10 rounded-xl font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95"
+                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 h-12 px-10 rounded-xl font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                 disabled={loading || !supplierId || items.length === 0}
               >
                 {loading ? "Procesando..." : "Emitir Orden de Compra"}

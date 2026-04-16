@@ -90,6 +90,7 @@ export const POSDashboard = ({
               { id: "products", icon: Package, label: "Productos" },
               { id: "advanced-inventory", icon: Truck, label: "Inventario Pro" },
               { id: "customers", icon: Users, label: "Clientes" },
+              { id: "suppliers", icon: Users, label: "Proveedores" },
               { id: "credits", icon: CreditCard, label: "Fiados" },
               { id: "expenses", icon: Receipt, label: "Gastos" },
               { id: "cash", icon: Wallet, label: "Caja" },
