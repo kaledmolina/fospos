@@ -6,13 +6,14 @@ import {
   History, ShoppingCart, Plus, Calendar, 
   Package, TrendingUp, TrendingDown, RefreshCw,
   CheckCircle2, XCircle, Clock, Truck, ChevronRight,
-  Filter, Search, ArrowUpRight, ArrowDownRight, Settings2, Eye
+  Filter, Search, ArrowUpRight, ArrowDownRight, Settings2, Eye, PlusCircle
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PurchaseOrderDialog } from "../dialogs/PurchaseOrderDialog"
 import { formatCurrency } from "@/lib/utils"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -27,8 +28,10 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
   const [activeTab, setActiveTab] = useState("kardex")
   const [movements, setMovements] = useState<any[]>([])
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([])
+  const [suppliers, setSuppliers] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
+  const [showPODialog, setShowPODialog] = useState(false)
 
   const fetchMovements = async () => {
     setLoading(true)
@@ -56,10 +59,42 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
     }
   }
 
+  const fetchSuppliers = async () => {
+    try {
+      const res = await fetch("/api/suppliers")
+      const data = await res.json()
+      if (data.success) setSuppliers(data.data)
+    } catch (error) {
+      console.error("Error loading suppliers")
+    }
+  }
+
   useEffect(() => {
     if (activeTab === "kardex") fetchMovements()
-    else fetchPurchaseOrders()
+    else {
+      fetchPurchaseOrders()
+      fetchSuppliers()
+    }
   }, [activeTab])
+
+  const handleCreatePO = async (data: any) => {
+    try {
+      const res = await fetch("/api/purchase-orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      const result = await res.json()
+      if (result.success) {
+        toast.success("Orden de compra creada exitosamente")
+        fetchPurchaseOrders()
+      } else {
+        toast.error(result.error)
+      }
+    } catch (error) {
+      toast.error("Error al crear la orden")
+    }
+  }
 
   const handleReceivePO = async (id: string) => {
     try {
@@ -94,11 +129,11 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
-          <TabsList className="grid grid-cols-2 w-full md:w-[400px] h-11 bg-slate-100 dark:bg-zinc-900 border p-1 rounded-xl">
-            <TabsTrigger value="kardex" className="rounded-lg font-bold text-xs uppercase tracking-tighter data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-sm">
+          <TabsList className="grid grid-cols-2 w-full md:w-[400px] h-12 bg-slate-100/50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 p-1 rounded-2xl backdrop-blur-sm">
+            <TabsTrigger value="kardex" className="rounded-xl font-black text-[10px] uppercase tracking-wider data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-lg transition-all">
               <History className="w-4 h-4 mr-2" /> Kardex
             </TabsTrigger>
-            <TabsTrigger value="purchases" className="rounded-lg font-bold text-xs uppercase tracking-tighter data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-sm">
+            <TabsTrigger value="purchases" className="rounded-xl font-black text-[10px] uppercase tracking-wider data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-lg transition-all">
               <ShoppingCart className="w-4 h-4 mr-2" /> Compras
             </TabsTrigger>
           </TabsList>
@@ -114,25 +149,25 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
             exit={{ opacity: 0, y: -20 }}
             className="space-y-4"
           >
-            <Card className="border-none shadow-xl shadow-slate-200/50 dark:shadow-none bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+            <Card className="border border-slate-100 dark:border-zinc-800 shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl rounded-3xl overflow-hidden">
+              <CardHeader className="pb-4 border-b border-slate-50 dark:border-zinc-900/50 bg-slate-50/30 dark:bg-zinc-900/20">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <CardTitle className="text-lg font-bold">Movimientos de Inventario</CardTitle>
+                    <CardTitle className="text-xl font-black tracking-tight">Movimientos de Inventario</CardTitle>
                     <CardDescription>Traza cada entrada y salida de productos</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-64">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-full md:w-72">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground opacity-50" />
                       <Input 
-                        placeholder="Buscar producto..." 
+                        placeholder="Buscar por producto..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-9 h-9 bg-background/50 border-slate-200"
+                        className="pl-10 h-10 bg-white/50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-emerald-500/20"
                       />
                     </div>
-                    <Button variant="outline" size="sm" className="h-9">
-                      <Filter className="w-4 h-4 mr-2" /> Filtros
+                    <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-900 shrink-0">
+                      <Filter className="w-4 h-4 mr-2 opacity-60" /> <span className="text-xs font-bold uppercase tracking-wider">Filtros</span>
                     </Button>
                   </div>
                 </div>
@@ -200,14 +235,17 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
             exit={{ opacity: 0, y: -20 }}
             className="space-y-4"
           >
-             <Card className="border-none shadow-xl shadow-slate-200/50 dark:shadow-none bg-white/50 dark:bg-zinc-950/50 backdrop-blur-xl">
-              <CardHeader className="pb-2">
+            <Card className="border border-slate-100 dark:border-zinc-800 shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl rounded-3xl overflow-hidden">
+              <CardHeader className="pb-4 border-b border-slate-50 dark:border-zinc-900/50 bg-slate-50/30 dark:bg-zinc-900/20">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <CardTitle className="text-lg font-bold">Órdenes de Compra</CardTitle>
-                    <CardDescription>Abastece tu inventario con tus proveedores</CardDescription>
+                    <CardTitle className="text-xl font-black tracking-tight">Órdenes de Compra</CardTitle>
+                    <CardDescription className="text-sm font-medium">Abastece tu inventario con tus proveedores estratégicos</CardDescription>
                   </div>
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 shadow-md">
+                  <Button 
+                    className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-xl shadow-emerald-500/20 rounded-xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all hover:scale-[1.02] active:scale-95"
+                    onClick={() => setShowPODialog(true)}
+                  >
                     <Plus className="w-4 h-4 mr-2" /> Nueva Orden
                   </Button>
                 </div>
@@ -215,15 +253,15 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
               <CardContent>
                 <div className="grid grid-cols-1 gap-4">
                   {purchaseOrders.map((po) => (
-                    <div key={po.id} className="group p-4 rounded-2xl border bg-background hover:border-emerald-500/50 transition-all duration-300 shadow-sm hover:shadow-md">
-                      <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${
-                            po.status === "RECEIVED" ? "bg-emerald-500/10 text-emerald-600" :
-                            po.status === "PENDING" ? "bg-amber-500/10 text-amber-600" :
-                            "bg-slate-500/10 text-slate-600"
+                    <div key={po.id} className="group p-5 rounded-3xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-emerald-500/50 transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/5">
+                      <div className="flex flex-wrap items-center justify-between gap-6">
+                        <div className="flex items-center gap-5">
+                          <div className={`p-4 rounded-2xl transition-colors duration-500 ${
+                            po.status === "RECEIVED" ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/5 dark:text-emerald-400" :
+                            po.status === "PENDING" ? "bg-amber-500/10 text-amber-600 dark:bg-amber-500/5 dark:text-amber-400" :
+                            "bg-slate-500/10 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400"
                           }`}>
-                            <Truck className="w-6 h-6" />
+                            <Truck className="w-7 h-7" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
@@ -266,10 +304,19 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                     </div>
                   ))}
                   {purchaseOrders.length === 0 && (
-                    <div className="text-center py-12 border-2 border-dashed rounded-3xl">
-                      <Truck className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-                      <p className="font-bold text-slate-500 text-lg">No hay órdenes de compra</p>
-                      <p className="text-sm text-slate-400">Crea tu primera orden para abastecer tu stock</p>
+                    <div className="text-center py-20 border-2 border-dashed border-slate-100 dark:border-zinc-800 rounded-[32px] bg-slate-50/50 dark:bg-zinc-900/20 animate-in fade-in zoom-in-95 duration-500">
+                      <div className="w-20 h-20 bg-white dark:bg-zinc-900 rounded-3xl shadow-xl mx-auto mb-6 flex items-center justify-center border border-slate-50 dark:border-zinc-800">
+                        <Truck className="w-10 h-10 text-emerald-500 opacity-20" />
+                      </div>
+                      <p className="font-black text-slate-900 dark:text-white text-xl tracking-tight">Sin órdenes registradas</p>
+                      <p className="text-sm text-muted-foreground mt-2 max-w-[250px] mx-auto font-medium">Empieza a abastecer tu inventario creando tu primera orden de compra.</p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowPODialog(true)}
+                        className="mt-8 rounded-xl border-emerald-500/20 text-emerald-600 font-bold hover:bg-emerald-50"
+                      >
+                        Crear Orden Ahora
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -278,6 +325,14 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PurchaseOrderDialog 
+        open={showPODialog}
+        onOpenChange={setShowPODialog}
+        suppliers={suppliers}
+        products={products}
+        onCreate={handleCreatePO}
+      />
     </div>
   )
 }
