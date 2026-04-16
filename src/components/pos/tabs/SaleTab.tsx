@@ -4,9 +4,8 @@ import { useEffect, useRef } from "react"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { 
-  Search, ShoppingBag, Wallet, CreditCard, 
-  FileText, Package, AlertTriangle, RefreshCw,
-  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle
+  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle,
+  LayoutGrid, ArrowRightLeft, Minus
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -105,7 +104,11 @@ export const SaleTab = ({
   onSetGiftCardCode,
   onValidateGiftCard,
   appliedGiftCard,
-  onPrintGiftCard
+  onPrintGiftCard,
+  cartPayments,
+  onAddPayment,
+  onRemovePayment,
+  onUpdatePayment
 }: SaleTabProps) => {
   const giftCardInputRef = useRef<HTMLInputElement>(null)
 
@@ -538,7 +541,8 @@ export const SaleTab = ({
                     { id: "CARD", label: "Tarjeta", icon: CreditCard },
                     { id: "TRANSFER", label: "Transf.", icon: RefreshCw },
                     { id: "CREDIT", label: "Crédito", icon: FileText },
-                    { id: "GIFT_CARD", label: "Regalo", icon: Ticket }
+                    { id: "GIFT_CARD", label: "Regalo", icon: Ticket },
+                    { id: "MIXED", label: "Mixto", icon: LayoutGrid }
                   ].map(method => (
                     <motion.div key={method.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                       <Button
@@ -588,83 +592,161 @@ export const SaleTab = ({
                   </div>
                 </div>
 
-                {cartPaymentMethod === "GIFT_CARD" && (
+                {/* Pago Mixto / Detalle de Pagos */}
+                {(cartPaymentMethod === "MIXED" || cartPayments.length > 1) && (
                   <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="p-3 bg-blue-500/5 rounded-lg border border-blue-500/20 space-y-3 mb-4"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-4 bg-slate-100/50 dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-4 mb-4"
                   >
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-blue-600">Código de Tarjeta de Regalo</Label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <Ticket className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-500" />
-                          <Input 
-                            placeholder="GIFT-XXXX"
-                            value={giftCardCode}
-                            ref={giftCardInputRef}
-                            onChange={(e) => onSetGiftCardCode(e.target.value)}
-                            className="h-8 pl-7 bg-background border-blue-500/30 font-bold text-blue-600 uppercase" 
-                          />
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[10px] uppercase font-black text-slate-500 tracking-widest">Desglose de Pagos</Label>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 text-[10px] font-black uppercase text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 px-2"
+                        onClick={onAddPayment}
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1" /> Añadir
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {cartPayments.map((payment, index) => (
+                        <div key={index} className="flex gap-2 items-start group">
+                          <div className="flex-1 space-y-2">
+                            <div className="flex gap-2">
+                              <Select 
+                                value={payment.method} 
+                                onValueChange={(val) => onUpdatePayment(index, { method: val })}
+                              >
+                                <SelectTrigger className="h-8 w-28 text-[10px] font-bold uppercase bg-background">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="CASH">Efectivo</SelectItem>
+                                  <SelectItem value="CARD">Tarjeta</SelectItem>
+                                  <SelectItem value="TRANSFER">Transf.</SelectItem>
+                                  <SelectItem value="CREDIT">Crédito</SelectItem>
+                                  <SelectItem value="GIFT_CARD">Regalo</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <div className="relative flex-1">
+                                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-emerald-500" />
+                                <Input 
+                                  type="number" 
+                                  value={payment.amount || ""}
+                                  onChange={(e) => onUpdatePayment(index, { amount: parseFloat(e.target.value) || 0 })}
+                                  className="h-8 pl-6 text-xs font-black tabular-nums bg-background"
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                            
+                            {payment.method === "GIFT_CARD" && (
+                              <div className="relative">
+                                <Ticket className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-500" />
+                                <Input 
+                                  placeholder="CÓDIGO GIFT CARD"
+                                  value={payment.details?.code || ""}
+                                  onChange={(e) => onUpdatePayment(index, { details: { ...payment.details, code: e.target.value.toUpperCase() } })}
+                                  className="h-7 pl-7 text-[9px] font-black uppercase bg-blue-500/5 border-blue-500/20"
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          {cartPayments.length > 1 && (
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-50"
+                              onClick={() => onRemovePayment(index)}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
-                        <Button 
-                          size="sm" 
-                          className={`h-8 px-3 text-[10px] font-black uppercase shadow-md transition-colors ${appliedGiftCard ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-600 hover:bg-blue-700"}`}
-                          onClick={onValidateGiftCard}
-                        >
-                          {appliedGiftCard ? <CheckCircle2 className="w-4 h-4" /> : "LISTO"}
-                        </Button>
+                      ))}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
+                      <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-500">
+                        <span>Restante</span>
+                        <span className={total - cartPayments.reduce((sum, p) => sum + p.amount, 0) === 0 ? "text-emerald-500" : "text-amber-600"}>
+                          {formatCurrency(Math.max(0, total - cartPayments.reduce((sum, p) => sum + p.amount, 0)))}
+                        </span>
                       </div>
-                      {appliedGiftCard && (
+                      <div className="mt-1 h-1 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                         <motion.div 
-                          initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
-                          className="flex items-center justify-between mt-2 px-1 text-[10px] font-black"
-                        >
-                          <p className="text-emerald-600 flex items-center gap-1">
-                            <CheckCircle2 className="w-2.5 h-2.5" /> 
-                            SALDO: {formatCurrency(appliedGiftCard.balance)}
-                          </p>
-                          <p className={appliedGiftCard.balance >= total ? "text-emerald-600" : "text-red-500"}>
-                            {appliedGiftCard.balance >= total ? "SALDO SUFICIENTE" : "SALDO INSUFICIENTE"}
-                          </p>
-                        </motion.div>
-                      )}
-                      {!appliedGiftCard && giftCardCode && (
-                        <p className="text-[9px] font-black text-amber-600 flex items-center gap-1 mt-1">
-                          <AlertCircle className="w-2.5 h-2.5" /> 
-                          PRESIONA LISTO PARA VALIDAR
-                        </p>
-                      )}
+                          className="h-full bg-emerald-500"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (cartPayments.reduce((sum, p) => sum + p.amount, 0) / total) * 100)}%` }}
+                        />
+                      </div>
                     </div>
                   </motion.div>
                 )}
 
-                {cartPaymentMethod === "CASH" && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/20 space-y-3 mb-4"
-                  >
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-emerald-600">Dinero entregado</Label>
-                      <div className="relative">
-                        <Wallet className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-emerald-500" />
-                        <Input 
-                          type="number" 
-                          placeholder="0"
-                          value={cashReceived || ""}
-                          onChange={(e) => onCashReceivedChange(parseFloat(e.target.value) || 0)}
-                          className="h-8 pl-7 bg-background dark:bg-slate-900 border-emerald-500/30 font-bold text-emerald-600 dark:text-emerald-400" 
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center px-1">
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground">Devuelta/Cambio</span>
-                      <span className={`font-black ${change > 0 ? "text-emerald-500" : "text-muted-foreground"}`}>
-                        {formatCurrency(change)}
-                      </span>
-                    </div>
-                  </motion.div>
+                {/* Vista Simple (Backward compatibility / Fast payment) */}
+                {cartPaymentMethod !== "MIXED" && cartPayments.length <= 1 && (
+                  <>
+                    {cartPaymentMethod === "GIFT_CARD" && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="p-3 bg-blue-500/5 rounded-lg border border-blue-500/20 space-y-3 mb-4"
+                      >
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-blue-600">Código de Tarjeta de Regalo</Label>
+                          <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <Ticket className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-500" />
+                              <Input 
+                                placeholder="GIFT-XXXX"
+                                value={giftCardCode}
+                                ref={giftCardInputRef}
+                                onChange={(e) => onSetGiftCardCode(e.target.value)}
+                                className="h-8 pl-7 bg-background border-blue-500/30 font-bold text-blue-600 uppercase" 
+                              />
+                            </div>
+                            <Button 
+                              size="sm" 
+                              className={`h-8 px-3 text-[10px] font-black uppercase shadow-md transition-colors ${appliedGiftCard ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-600 hover:bg-blue-700"}`}
+                              onClick={onValidateGiftCard}
+                            >
+                              {appliedGiftCard ? <CheckCircle2 className="w-4 h-4" /> : "LISTO"}
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {cartPaymentMethod === "CASH" && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/20 space-y-3 mb-4"
+                      >
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-emerald-600">Dinero entregado</Label>
+                          <div className="relative">
+                            <Wallet className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-emerald-500" />
+                            <Input 
+                              type="number" 
+                              placeholder="0"
+                              value={cashReceived || ""}
+                              onChange={(e) => {
+                                onCashReceivedChange(parseFloat(e.target.value) || 0)
+                                onUpdatePayment(0, { amount: total }) // Sync with simple payment
+                              }}
+                              className="h-8 pl-7 bg-background dark:bg-slate-900 border-emerald-500/30 font-bold text-emerald-600 dark:text-emerald-400" 
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </>
                 )}
 
               </div>

@@ -55,6 +55,7 @@ model Tenant {
   coupons         Coupon[]
   activationCode  ActivationCode?
   giftCards       GiftCard[]
+  purchaseOrders  PurchaseOrder[]
   
   @@map("tenants")
 }
@@ -91,6 +92,7 @@ model Branch {
   users         User[]
   credits       Credit[]
   expenses      Expense[]
+  purchaseOrders PurchaseOrder[]
   
   products      Product[]
   categories    Category[]
@@ -164,6 +166,7 @@ model Supplier {
   updatedAt     DateTime @updatedAt
   
   inventoryMovements InventoryMovement[]
+  purchaseOrders     PurchaseOrder[]
   
   @@unique([tenantId, name])
   @@map("suppliers")
@@ -237,6 +240,7 @@ model Product {
   saleItems     SaleItem[]
   stockByBranch ProductStock[]
   movements     InventoryMovement[]
+  purchaseOrderItems PurchaseOrderItem[]
   
   @@unique([tenantId, code]) // Código de barras único por tenant
   @@unique([tenantId, sku])  // SKU único por tenant
@@ -288,6 +292,7 @@ model InventoryMovement {
   totalCost     Float?     @default(0)
   
   notes         String?
+  reason        String?    // Motivo del ajuste (ej: "Dañado", "Error de conteo")
   createdBy     String     // ID del usuario
   
   createdAt     DateTime   @default(now())
@@ -383,6 +388,7 @@ model Sale {
   // Relaciones Gift Cards
   giftCardRedemptions GiftCardRedemption[]
   giftCardSold    GiftCard[] @relation("GiftCardSold")
+  payments        SalePayment[]
   
   // Timestamps
   createdAt     DateTime @default(now())
@@ -426,6 +432,67 @@ enum PaymentStatus {
   PENDING    // Pendiente de pago
   PARTIAL    // Pago parcial
   PAID       // Pagado completamente
+  CANCELLED  // Cancelado
+}
+
+/// Registro de cada pago de una venta (para pagos mixtos)
+model SalePayment {
+  id              String   @id @default(cuid())
+  saleId          String
+  sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  method          PaymentMethod
+  amount          Float
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  @@map("sale_payments")
+}
+
+// ==================== PURCHASE ORDERS (COMPRAS) ====================
+
+/// Orden de Compra a proveedor
+model PurchaseOrder {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  supplierId      String
+  supplier        Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  
+  branchId        String?
+  branch          Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  
+  status          PurchaseOrderStatus @default(PENDING)
+  totalAmount     Float    @default(0)
+  items           PurchaseOrderItem[]
+  
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("purchase_orders")
+}
+
+/// Item de una orden de compra
+model PurchaseOrderItem {
+  id              String   @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  quantity        Float    // Cantidad comprada
+  unitCost        Float    // Costo unitario acordado
+  subtotal        Float    // quantity * unitCost
+
+  @@map("purchase_order_items")
+}
+
+enum PurchaseOrderStatus {
+  PENDING    // Pedido realizado, esperando mercancía
+  RECEIVED   // Mercancía recibida (actualiza stock)
   CANCELLED  // Cancelado
 }
 

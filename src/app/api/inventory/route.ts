@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const { 
       productId, branchId, type, quantity, 
       referenceType, referenceId, supplierId,
-      unitCost, notes 
+      unitCost, notes, reason 
     } = body
 
     if (!productId || !branchId || !type || quantity === undefined) {
@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
         unitCost,
         totalCost: unitCost ? unitCost * quantity : 0,
         notes,
+        reason,
         createdBy: session.user.id
       }
     })

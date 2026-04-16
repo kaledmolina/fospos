@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Store, X, LogOut, Menu, Bell, Package, AlertCircle, 
   Clock, BarChart3, ShoppingBag, Users, CreditCard, 
-  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe, Ticket
+  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe, Ticket, Truck
 } from "lucide-react"
 import { BranchSelector } from "./shared/BranchSelector"
 import { Button } from "@/components/ui/button"
@@ -88,6 +88,7 @@ export const POSDashboard = ({
               { id: "transactions", icon: Receipt, label: "Transacciones" },
               { id: "categories", icon: FolderOpen, label: "Categorías" },
               { id: "products", icon: Package, label: "Productos" },
+              { id: "advanced-inventory", icon: Truck, label: "Inventario Pro" },
               { id: "customers", icon: Users, label: "Clientes" },
               { id: "credits", icon: CreditCard, label: "Fiados" },
               { id: "expenses", icon: Receipt, label: "Gastos" },

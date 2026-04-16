@@ -16,6 +16,7 @@ import { TransactionsTab } from "./tabs/TransactionsTab"
 import { CategoriesTab } from "./tabs/CategoriesTab"
 import { LoyaltyConfigTab } from "./tabs/LoyaltyConfigTab"
 import { GiftCardsTab } from "./tabs/GiftCardsTab"
+import { AdvancedInventoryTab } from "./tabs/AdvancedInventoryTab"
 import { StockAdjustmentDialog } from "./dialogs/StockAdjustmentDialog"
 import { ProductDialog } from "./dialogs/ProductDialog"
 import { CategoryDialog } from "./dialogs/CategoryDialog"
@@ -144,6 +145,10 @@ export const POSView = ({
               onSetGiftCardCode={pos.setGiftCardCode}
               onValidateGiftCard={pos.handleValidateGiftCard}
               appliedGiftCard={pos.appliedGiftCard}
+              cartPayments={pos.cartPayments}
+              onAddPayment={pos.handleAddPayment}
+              onRemovePayment={pos.handleRemovePayment}
+              onUpdatePayment={pos.handleUpdatePayment}
             />
           )}
           {pos.posTab === "loyalty" && (
@@ -275,6 +280,12 @@ export const POSView = ({
             <GiftCardsTab 
               giftCards={pos.giftCards} 
               onPrintCard={pos.handlePrintGiftCard} 
+            />
+          )}
+          {pos.posTab === "advanced-inventory" && (
+            <AdvancedInventoryTab 
+              products={pos.products}
+              branches={pos.branches}
             />
           )}
         </AnimatePresence>

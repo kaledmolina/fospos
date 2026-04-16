@@ -52,6 +52,7 @@ export const usePOS = (session: any) => {
   }[]>([])
   const [cartCustomer, setCartCustomer] = useState<CustomerData | null>(null)
   const [cartPaymentMethod, setCartPaymentMethod] = useState<string>("CASH")
+  const [cartPayments, setCartPayments] = useState<{ method: string, amount: number, details?: any }[]>([])
   const [cartDiscount, setCartDiscount] = useState(0)
   
   // Dialogs
@@ -687,48 +688,28 @@ export const usePOS = (session: any) => {
     const { total } = getCartTotal()
     
     if (cart.length === 0) return
+
+    // Validación de Pago Total (para Mixtos o Simples)
+    const paidTotal = cartPayments.reduce((sum, p) => sum + p.amount, 0)
     
-    // Validación de Efectivo: Requiere dinero recibido
-    if (cartPaymentMethod === "CASH") {
-      if (!cashReceived || cashReceived < total) {
-        toast.error("¡Pago incompleto!", {
-          description: `Para ventas en efectivo, debes ingresar un monto igual o mayor al total (${total.toLocaleString()}).`,
+    if (Math.abs(paidTotal - total) > 1) { // Margen de 1 unidad por redondeo
+       toast.error("¡Pago incompleto!", {
+          description: `El total de pagos (${formatCurrency(paidTotal)}) no coincide con el total de la venta (${formatCurrency(total)}).`,
           duration: 5000
-        })
-        return
-      }
+       })
+       return
     }
 
-    // Validación de Crédito: Requiere cliente registrado
-    if (cartPaymentMethod === "CREDIT" && !cartCustomer) {
-      toast.error("¡Acción requerida!", {
-        description: "Para realizar una venta a CRÉDITO, es obligatorio seleccionar un cliente registrado.",
-        duration: 8000
-      })
-      return
-    }
-
-    // Validación de Tarjeta Regalo: Requiere código, saldo y CLIENTE
-    if (cartPaymentMethod === "GIFT_CARD") {
-      if (!cartCustomer) {
-        toast.error("¡Cliente requerido!", {
-          description: "Para redimir una tarjeta de regalo, es obligatorio seleccionar un cliente registrado para la trazabilidad.",
-          duration: 5000
-        })
-        return
+    // Validaciones específicas por cada método en el array de pagos
+    for (const payment of cartPayments) {
+      if (payment.method === "GIFT_CARD") {
+        if (!cartCustomer) {
+          toast.error("¡Cliente requerido!", { description: "Para redimir una tarjeta de regalo, es obligatorio seleccionar un cliente.", duration: 5000 })
+          return
+        }
       }
-      if (!appliedGiftCard) {
-        toast.error("¡Tarjeta no validada!", {
-          description: "Debes ingresar y validar un código de tarjeta de regalo.",
-          duration: 5000
-        })
-        return
-      }
-      if (appliedGiftCard.balance < total) {
-        toast.error("¡Saldo insuficiente!", {
-          description: `La tarjeta solo tiene ${formatCurrency(appliedGiftCard.balance)}. Por favor elige otro método o reduce el carrito.`,
-          duration: 5000
-        })
+      if (payment.method === "CREDIT" && !cartCustomer) {
+        toast.error("¡Cliente requerido!", { description: "Para ventas a crédito, debes seleccionar un cliente.", duration: 5000 })
         return
       }
     }
@@ -739,6 +720,8 @@ export const usePOS = (session: any) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerId: cartCustomer?.id,
+          payments: cartPayments,
+          paymentMethod: cartPaymentMethod,
           items: cart.map(item => {
             // Si es un servicio, el ID real está en data.id, item.id es el compositeId
             const realId = item.type === "SERVICE" ? item.data.id : item.id
@@ -890,10 +873,38 @@ export const usePOS = (session: any) => {
 
   const handleSetCartPaymentMethod = (method: string) => {
     setCartPaymentMethod(method)
+    const { total } = getCartTotal()
+    
+    // Si no es mixto, resetear pagos a uno solo del método seleccionado
+    if (method !== "MIXED") {
+      setCartPayments([{ method, amount: total }])
+    }
+    
+    // Limpieza de estados específicos
     if (method !== "GIFT_CARD") {
       setAppliedGiftCard(null)
       setGiftCardCode("")
     }
+    if (method !== "CASH") {
+      setCashReceived(0)
+      setChange(0)
+    }
+  }
+
+  const handleAddPayment = () => {
+    setCartPayments([...cartPayments, { method: "CASH", amount: 0 }])
+  }
+
+  const handleRemovePayment = (index: number) => {
+    const newPayments = [...cartPayments]
+    newPayments.splice(index, 1)
+    setCartPayments(newPayments)
+  }
+
+  const handleUpdatePayment = (index: number, data: any) => {
+    const newPayments = [...cartPayments]
+    newPayments[index] = { ...newPayments[index], ...data }
+    setCartPayments(newPayments)
   }
 
   const handlePrintGiftCard = (card: any) => {

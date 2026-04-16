@@ -38,7 +38,8 @@ export const StockAdjustmentDialog = ({
         productId: product.id,
         type,
         quantity,
-        notes
+        notes,
+        reason: notes // Pass as reason for Kardex traceability
       })
       onOpenChange(false)
       setQuantity(0)

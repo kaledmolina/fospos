@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
       discount, cashRegisterId,
       pointsRedeemed, couponCode,
       cashReceived, change,
-      giftCardCode
+      giftCardCode, payments
     } = body;
     const userBranchId = body.branchId || session.user.branchId;
 
@@ -308,8 +308,28 @@ export async function POST(request: NextRequest) {
             subtotal: itemSubtotal
           });
 
-          await tx.productStock.update({ where: { id: productStock.id }, data: { stock: { decrement: item.quantity } } });
+          const previousStock = productStock.stock;
+          const newStock = previousStock - item.quantity;
+
+          await tx.productStock.update({ where: { id: productStock.id }, data: { stock: newStock } });
           await tx.product.update({ where: { id: product.id }, data: { stock: { decrement: item.quantity } } });
+
+          // Registrar en Kardex
+          await tx.inventoryMovement.create({
+            data: {
+              tenantId: session.user.tenantId,
+              productId: product.id,
+              branchId: userBranchId || "",
+              type: "SALE",
+              quantity: item.quantity,
+              previousStock,
+              newStock,
+              referenceType: "SALE",
+              referenceId: invoiceNumber, // Usamos el número de factura como referencia
+              notes: `Venta POS #${invoiceNumber}`,
+              createdBy: session.user.id
+            }
+          });
         } else if (item.type === "SERVICE") {
           const service = await tx.subscriptionService.findFirst({ where: { id: item.serviceId, tenantId: session.user.tenantId } });
           if (!service) throw new Error(`Servicio ${item.serviceId} no encontrado`);
@@ -405,35 +425,45 @@ export async function POST(request: NextRequest) {
       const tax = Math.round(subtotal * 0.19);
       const finalTotal = Math.max(0, subtotal + tax - (discount || 0) - pointsValue - couponDiscount);
 
-      if (paymentMethod === "CREDIT") {
-        if (!customerId) throw new Error("Cliente requerido para crédito");
-        const customer = await tx.customer.findUnique({ 
-          where: { id: customerId }, 
-          include: { credits: { where: { status: { in: ["PENDING", "PARTIAL"] } }, select: { balance: true } } } 
-        });
-        if (!customer) throw new Error("Cliente no encontrado");
-        const currentDebt = customer.credits.reduce((sum, c) => sum + c.balance, 0);
-        if (customer.creditLimit > 0 && (currentDebt + finalTotal) > customer.creditLimit) throw new Error("Límite de crédito excedido");
-      }
+      // 1. Validaciones previas de todos los pagos
+      const effectivePayments = (payments && Array.isArray(payments) && payments.length > 0) 
+        ? payments 
+        : [{ method: paymentMethod || "CASH", amount: finalTotal }];
 
-      if (paymentMethod === "GIFT_CARD") {
-        if (!customerId) throw new Error("Cliente requerido para pago con Tarjeta de Regalo");
-        if (!giftCardCode) throw new Error("Código de tarjeta de regalo requerido");
-        const card = await tx.giftCard.findUnique({
-          where: { tenantId_code: { tenantId: session.user.tenantId, code: giftCardCode.toUpperCase() } }
-        });
-        if (!card || card.status !== "ACTIVE" || !card.isActive) throw new Error("Tarjeta de regalo inválida o inactiva");
-        if (card.balance < finalTotal) throw new Error(`Saldo insuficiente en la tarjeta de regalo (Saldo: ${card.balance})`);
-
-        await tx.giftCard.update({
-          where: { id: card.id },
-          data: { 
-            balance: { decrement: finalTotal },
-            status: card.balance - finalTotal <= 0 ? "USED_UP" : "ACTIVE"
+      for (const p of effectivePayments) {
+        if (p.method === "CREDIT") {
+          if (!customerId) throw new Error("Cliente requerido para crédito");
+          const customer = await tx.customer.findUnique({ 
+            where: { id: customerId }, 
+            include: { credits: { where: { status: { in: ["PENDING", "PARTIAL"] } }, select: { balance: true } } } 
+          });
+          if (!customer) throw new Error("Cliente no encontrado");
+          const currentDebt = customer.credits.reduce((sum, c) => sum + c.balance, 0);
+          if (customer.creditLimit > 0 && (currentDebt + p.amount) > customer.creditLimit) {
+            throw new Error(`Límite de crédito excedido para el abono de ${p.amount}`);
           }
-        });
-        
-        // El registro de redención se hace después de crear la venta
+        }
+
+        if (p.method === "GIFT_CARD") {
+          const code = p.details?.code || giftCardCode;
+          if (!code) throw new Error("Código de tarjeta de regalo requerido");
+          
+          const card = await tx.giftCard.findUnique({
+            where: { tenantId_code: { tenantId: session.user.tenantId, code: code.toUpperCase() } }
+          });
+          
+          if (!card || !card.isActive) throw new Error("Tarjeta de regalo inválida o inactiva");
+          if (card.balance < p.amount) throw new Error(`Saldo insuficiente en tarjeta ${code} (Saldo: ${card.balance})`);
+          
+          // Actualizamos balance
+          await tx.giftCard.update({
+            where: { id: card.id },
+            data: { 
+              balance: { decrement: p.amount },
+              status: card.balance - p.amount <= 0 ? "USED_UP" : "ACTIVE"
+            }
+          });
+        }
       }
 
       const sale = await tx.sale.create({
@@ -464,47 +494,68 @@ export async function POST(request: NextRequest) {
         await tx.customer.update({ where: { id: customerId }, data: { points: { increment: netPointsChange }, totalPurchases: { increment: finalTotal } } });
       }
 
-      if (paymentMethod === "CREDIT" && customerId) {
-        const credit = await tx.credit.create({
-          data: {
-            tenantId: session.user.tenantId,
-            customerId,
-            saleId: sale.id,
-            totalAmount: finalTotal,
-            paidAmount: 0,
-            balance: finalTotal,
-            status: "PENDING",
-            branchId: userBranchId || null
-          }
+      // 3. Procesar pagos individuales
+      if (cashRegisterId) {
+        await tx.cashRegister.update({
+          where: { id: cashRegisterId },
+          data: { totalSales: { increment: finalTotal } }
         });
-        await tx.sale.update({ where: { id: sale.id }, data: { creditId: credit.id } });
       }
 
-      if (cashRegisterId) {
-        const updateData: any = { totalSales: { increment: finalTotal } };
-        if (paymentMethod === "CASH") updateData.totalCash = { increment: finalTotal };
-        else if (paymentMethod === "CARD") updateData.totalCard = { increment: finalTotal };
-        else if (paymentMethod === "TRANSFER") updateData.totalTransfer = { increment: finalTotal };
-        else if (paymentMethod === "CREDIT") updateData.totalCredit = { increment: finalTotal };
-        else if (paymentMethod === "GIFT_CARD") {
-          updateData.totalGiftCard = { increment: finalTotal };
-          
-          const card = await tx.giftCard.findUnique({
-            where: { tenantId_code: { tenantId: session.user.tenantId, code: giftCardCode!.toUpperCase() } }
+      for (const p of effectivePayments) {
+        // Crear registro de SalePayment
+        await tx.salePayment.create({
+          data: {
+            saleId: sale.id,
+            method: p.method,
+            amount: p.amount,
+            notes: p.details?.notes || null
+          }
+        });
+
+        // Lógica específica por método
+        if (p.method === "CREDIT" && customerId) {
+          const credit = await tx.credit.create({
+            data: {
+              tenantId: session.user.tenantId,
+              customerId,
+              saleId: sale.id,
+              totalAmount: p.amount,
+              paidAmount: 0,
+              balance: p.amount,
+              status: "PENDING",
+              branchId: userBranchId || null
+            }
           });
-          
+          await tx.sale.update({ where: { id: sale.id }, data: { creditId: credit.id } });
+        }
+
+        if (p.method === "GIFT_CARD") {
+          const code = p.details?.code || giftCardCode;
+          const card = await tx.giftCard.findUnique({
+            where: { tenantId_code: { tenantId: session.user.tenantId, code: code!.toUpperCase() } }
+          });
           if (card) {
             await tx.giftCardRedemption.create({
-              data: {
-                giftCardId: card.id,
-                saleId: sale.id,
-                amountUsed: finalTotal
-              }
+              data: { giftCardId: card.id, saleId: sale.id, amountUsed: p.amount }
             });
           }
         }
 
-        await tx.cashRegister.update({ where: { id: cashRegisterId }, data: updateData });
+        // Actualizar totales de Caja Registradora por cada pago
+        if (cashRegisterId) {
+          const regUpdate: any = {};
+          if (p.method === "CASH") regUpdate.totalCash = { increment: p.amount };
+          else if (p.method === "CARD") regUpdate.totalCard = { increment: p.amount };
+          else if (p.method === "TRANSFER") regUpdate.totalTransfer = { increment: p.amount };
+          else if (p.method === "CREDIT") regUpdate.totalCredit = { increment: p.amount };
+          else if (p.method === "GIFT_CARD") regUpdate.totalGiftCard = { increment: p.amount };
+          
+          await tx.cashRegister.update({
+            where: { id: cashRegisterId },
+            data: regUpdate
+          });
+        }
       }
 
       return sale;
