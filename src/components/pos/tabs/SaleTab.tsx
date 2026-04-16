@@ -196,35 +196,54 @@ export const SaleTab = ({
                         animate="animate"
                       >
                         {subscriptionServices.filter(s => s.isActive).map((service) => (
-                          <motion.div key={service.id} variants={fadeInUp} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
-                            <Button
-                              variant="outline"
-                              className="h-auto p-0 w-full flex flex-col items-stretch overflow-hidden group cursor-pointer border-blue-500/10 hover:border-blue-500/50 hover:shadow-xl transition-all duration-300"
-                              onClick={() => onAddServiceToCart(service)}
-                            >
-                              <div className="bg-gradient-to-br from-blue-600/90 to-indigo-600/90 p-3 text-white">
-                                <div className="flex items-center justify-between mb-1">
-                                  <Badge className="bg-white/20 text-white border-none text-[8px] font-black uppercase tracking-tighter">
-                                    {service.billingCycle}
-                                  </Badge>
-                                  <RefreshCw className="w-3 h-3 text-white/50 group-hover:rotate-180 transition-transform duration-500" />
-                                </div>
-                                <p className="font-black text-sm text-left truncate tracking-tight">{service.name}</p>
+                          <motion.div 
+                            key={service.id} 
+                            variants={fadeInUp} 
+                            whileHover={{ y: -4 }} 
+                            className="bg-card rounded-xl border border-blue-500/10 shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col"
+                          >
+                            <div className="bg-gradient-to-br from-blue-600/90 to-indigo-600/90 p-3 text-white">
+                              <div className="flex items-center justify-between mb-1">
+                                <Badge className="bg-white/20 text-white border-none text-[8px] font-black uppercase tracking-tighter">
+                                  {service.billingCycle}
+                                </Badge>
+                                <Zap className="w-3 h-3 text-white/50" />
                               </div>
-                              <div className="p-3 bg-card space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] font-bold text-muted-foreground uppercase">Mensualidad</span>
-                                  <p className="font-black text-blue-600 dark:text-blue-400">{formatCurrency(service.price)}</p>
-                                </div>
-                                <div className="flex items-center justify-between pt-1 border-t border-border/50">
-                                  <div className="flex items-center gap-1">
-                                    <Plus className="w-2.5 h-2.5 text-indigo-500" />
-                                    <span className="text-[9px] font-bold text-muted-foreground">Inscripción</span>
-                                  </div>
-                                  <p className="text-[10px] font-black text-indigo-500">{formatCurrency(service.setupFee)}</p>
-                                </div>
+                              <p className="font-black text-sm text-left truncate tracking-tight">{service.name}</p>
+                            </div>
+                            
+                            <div className="p-3 space-y-2 flex-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase">Mensualidad</span>
+                                <p className="font-black text-blue-600 dark:text-blue-400">{formatCurrency(service.price)}</p>
                               </div>
-                            </Button>
+                              <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                                <div className="flex items-center gap-1">
+                                  <Plus className="w-2.5 h-2.5 text-indigo-500" />
+                                  <span className="text-[9px] font-bold text-muted-foreground">Inscripción</span>
+                                </div>
+                                <p className="text-[10px] font-black text-indigo-500">{formatCurrency(service.setupFee)}</p>
+                              </div>
+                            </div>
+
+                            <div className="p-2 bg-muted/30 grid grid-cols-2 gap-2 border-t border-border/50">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-[9px] font-black uppercase tracking-tighter border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all bg-white dark:bg-zinc-900 shadow-sm"
+                                onClick={() => onAddServiceToCart(service, false)}
+                              >
+                                <Zap className="w-3 h-3 mr-1" /> Único
+                              </Button>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="h-8 text-[9px] font-black uppercase tracking-tighter bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+                                onClick={() => onAddServiceToCart(service, true)}
+                              >
+                                <RefreshCw className="w-3 h-3 mr-1" /> Suscribir
+                              </Button>
+                            </div>
                           </motion.div>
                         ))}
                         {subscriptionServices.filter(s => s.isActive).length === 0 && (

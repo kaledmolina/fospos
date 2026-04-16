@@ -47,6 +47,7 @@ export const usePOS = (session: any) => {
     price: number; 
     quantity: number; 
     type: "PRODUCT" | "SERVICE"; 
+    isSubscription?: boolean;
     data: any 
   }[]>([])
   const [cartCustomer, setCartCustomer] = useState<CustomerData | null>(null)
@@ -516,7 +517,7 @@ export const usePOS = (session: any) => {
     }
   }
 
-  const addServiceToCart = (service: SubscriptionServiceData) => {
+  const addServiceToCart = (service: SubscriptionServiceData, isSubscription: boolean = true) => {
     if (!cartCustomer) {
       toast.error("¡Cliente requerido!", {
         description: "Las suscripciones y servicios deben estar vinculados a un cliente registrado por seguridad y seguimiento.",
@@ -526,16 +527,20 @@ export const usePOS = (session: any) => {
       return
     }
 
-    const existing = cart.find(item => item.id === service.id)
+    // Identificador único para el carrito si el mismo servicio se añade como suscripción y como pago único
+    const compositeId = `${service.id}-${isSubscription ? 'sub' : 'one'}`
+    const existing = cart.find(item => item.id === compositeId)
+
     if (existing) {
-      setCart(cart.map(item => item.id === service.id ? { ...item, quantity: item.quantity + 1 } : item))
+      setCart(cart.map(item => item.id === compositeId ? { ...item, quantity: item.quantity + 1 } : item))
     } else {
       setCart([...cart, { 
-        id: service.id, 
-        name: service.name, 
+        id: compositeId, 
+        name: isSubscription ? `${service.name} (Suscrip.)` : `${service.name} (Pago Único)`,
         price: service.price, 
         quantity: 1, 
         type: "SERVICE", 
+        isSubscription,
         data: service 
       }])
     }
@@ -665,13 +670,18 @@ export const usePOS = (session: any) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerId: cartCustomer?.id,
-          items: cart.map(item => ({ 
-            id: item.id,
-            productId: item.type === "PRODUCT" ? item.id : null, 
-            serviceId: item.type === "SERVICE" ? item.id : null,
-            quantity: item.quantity,
-            type: item.type
-          })),
+          items: cart.map(item => {
+            // Si es un servicio, el ID real está en data.id, item.id es el compositeId
+            const realId = item.type === "SERVICE" ? item.data.id : item.id
+            return { 
+              id: item.id,
+              productId: item.type === "PRODUCT" ? realId : null, 
+              serviceId: item.type === "SERVICE" ? realId : null,
+              quantity: item.quantity,
+              type: item.type,
+              isSubscription: item.isSubscription
+            }
+          }),
           paymentMethod: cartPaymentMethod,
           discount: cartDiscount,
           pointsRedeemed: redeemPoints,

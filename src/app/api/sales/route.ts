@@ -312,24 +312,27 @@ export async function POST(request: NextRequest) {
             subtotal: itemSubtotal
           });
 
-          const nextBilling = new Date();
-          if (service.billingCycle === "MONTHLY") nextBilling.setMonth(nextBilling.getMonth() + 1);
-          else if (service.billingCycle === "YEARLY") nextBilling.setFullYear(nextBilling.getFullYear() + 1);
-          else if (service.billingCycle === "DAILY") nextBilling.setDate(nextBilling.getDate() + 1);
-          else nextBilling.setDate(nextBilling.getDate() + service.billingDays);
+          if (item.isSubscription) {
+            const nextBilling = new Date();
+            if (service.billingCycle === "MONTHLY") nextBilling.setMonth(nextBilling.getMonth() + 1);
+            else if (service.billingCycle === "YEARLY") nextBilling.setFullYear(nextBilling.getFullYear() + 1);
+            else if (service.billingCycle === "DAILY") nextBilling.setDate(nextBilling.getDate() + 1);
+            else if (service.billingCycle === "WEEKLY") nextBilling.setDate(nextBilling.getDate() + 7);
+            else nextBilling.setDate(nextBilling.getDate() + (service.billingDays || 30));
 
-          await tx.customerSubscription.create({
-            data: {
-              tenantId: session.user.tenantId,
-              customerId,
-              serviceId: service.id,
-              startDate: new Date(),
-              nextBillingDate: nextBilling,
-              status: "ACTIVE",
-              agreedPrice: service.price,
-              notes: "Venta POS"
-            }
-          });
+            await tx.customerSubscription.create({
+              data: {
+                tenantId: session.user.tenantId,
+                customerId,
+                serviceId: service.id,
+                startDate: new Date(),
+                nextBillingDate: nextBilling,
+                status: "ACTIVE",
+                agreedPrice: service.price,
+                notes: "Activada vía Venta POS"
+              }
+            });
+          }
         }
       }
 
