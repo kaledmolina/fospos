@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Receipt } from "../Receipt"
-import { Printer, Download, CheckCircle2 } from "lucide-react"
+import { Printer, Download, CheckCircle2, Ticket } from "lucide-react"
 import { useRef } from "react"
 import { useReactToPrint } from "react-to-print"
 
@@ -12,9 +12,10 @@ interface ReceiptDialogProps {
   onOpenChange: (open: boolean) => void
   sale: any
   tenant: any
+  onPrintGiftCard?: (card: any) => void
 }
 
-export const ReceiptDialog = ({ open, onOpenChange, sale, tenant }: ReceiptDialogProps) => {
+export const ReceiptDialog = ({ open, onOpenChange, sale, tenant, onPrintGiftCard }: ReceiptDialogProps) => {
   const componentRef = useRef<HTMLDivElement>(null)
 
   const handlePrint = () => {
@@ -81,6 +82,31 @@ export const ReceiptDialog = ({ open, onOpenChange, sale, tenant }: ReceiptDialo
             Imprimir
           </Button>
         </DialogFooter>
+
+        {/* Gift Card Printing Options */}
+        {sale.items?.some((it: any) => it.type === "GIFT_CARD") && onPrintGiftCard && (
+          <div className="px-6 pb-6 pt-0">
+             <Button 
+               variant="secondary"
+               className="w-full bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-500/20"
+               onClick={() => {
+                 const giftCardItem = sale.items.find((it: any) => it.type === "GIFT_CARD")
+                 // We need the ACTUAL GiftCard object from DB, but for now we can simulate with data from item
+                 // or just redirect to the GiftCards management tab. 
+                 // Better: the API should return the cards created in the sale response.
+                 onPrintGiftCard({
+                   code: giftCardItem.data?.code || "PENDIENTE",
+                   balance: giftCardItem.data?.amount || 0,
+                   customer: sale.customer,
+                   createdAt: sale.createdAt
+                 })
+               }}
+             >
+               <Ticket className="w-4 h-4 mr-2" />
+               Imprimir Tarjeta(s) de Regalo
+             </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

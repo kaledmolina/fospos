@@ -24,6 +24,7 @@ import { CashDialog } from "./dialogs/CashDialog"
 import { PaymentDialog } from "./dialogs/PaymentDialog"
 import { ExpenseDialog } from "./dialogs/ExpenseDialog"
 import { BranchDialog } from "./dialogs/BranchDialog"
+import { GiftCardPrintDialog } from "./dialogs/GiftCardPrintDialog"
 import { UserDialog } from "./dialogs/UserDialog"
 import { HistoryDialog } from "./dialogs/HistoryDialog"
 import { BulkUploadDialog } from "./dialogs/BulkUploadDialog"
@@ -271,7 +272,10 @@ export const POSView = ({
             />
           )}
           {pos.posTab === "giftcards" && (
-            <GiftCardsTab giftCards={pos.giftCards} />
+            <GiftCardsTab 
+              giftCards={pos.giftCards} 
+              onPrintCard={pos.handlePrintGiftCard} 
+            />
           )}
         </AnimatePresence>
       </POSDashboard>
@@ -432,6 +436,17 @@ export const POSView = ({
           address: pos.branches.find(b => b.id === session?.user?.branchId)?.address || "Sede Principal",
           phone: pos.branches.find(b => b.id === session?.user?.branchId)?.phone || "Consulte en caja",
           nit: "Régimen Simplificado"
+        }}
+        onPrintGiftCard={pos.handlePrintGiftCard}
+      />
+      <GiftCardPrintDialog
+        open={pos.showGiftCardPrintDialog}
+        onOpenChange={pos.setShowGiftCardPrintDialog}
+        card={pos.selectedGiftCard}
+        tenant={{
+          name: session?.user?.tenantName || "POS COLOMBIA",
+          address: pos.branches.find(b => b.id === session?.user?.branchId)?.address || "Sede Principal",
+          phone: pos.branches.find(b => b.id === session?.user?.branchId)?.phone || "Consulte en caja",
         }}
       />
       <CashReportDialog

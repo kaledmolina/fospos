@@ -143,6 +143,8 @@ export const usePOS = (session: any) => {
     code: "",
     customerId: ""
   })
+  const [showGiftCardPrintDialog, setShowGiftCardPrintDialog] = useState(false)
+  const [selectedGiftCard, setSelectedGiftCard] = useState<any>(null)
   
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
@@ -879,6 +881,11 @@ export const usePOS = (session: any) => {
     toast.success("Tarjeta de regalo añadida al carrito")
   }
 
+  const handlePrintGiftCard = (card: any) => {
+    setSelectedGiftCard(card)
+    setShowGiftCardPrintDialog(true)
+  }
+
 
   const handleOpenCash = async (initialCash: number) => {
     try {
@@ -1384,6 +1391,10 @@ export const usePOS = (session: any) => {
     setGiftCardForm,
     handleAddGiftCardToCart,
     handleValidateGiftCard,
+    showGiftCardPrintDialog,
+    setShowGiftCardPrintDialog,
+    selectedGiftCard,
+    handlePrintGiftCard,
     historyDialog, setHistoryDialog, historyItems, historyTitle, historyDescription,
     handleOpenHistory
   }

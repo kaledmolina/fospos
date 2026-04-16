@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { 
   Ticket, Search, Filter, Calendar, 
   User, CheckCircle2, Clock, XCircle,
-  MoreVertical, ArrowRightLeft
+  MoreVertical, ArrowRightLeft, Eye
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,9 +16,10 @@ import { formatCurrency } from "@/lib/utils"
 
 interface GiftCardsTabProps {
   giftCards: any[]
+  onPrintCard: (card: any) => void
 }
 
-export const GiftCardsTab = ({ giftCards }: GiftCardsTabProps) => {
+export const GiftCardsTab = ({ giftCards, onPrintCard }: GiftCardsTabProps) => {
   const [search, setSearch] = useState("")
 
   const filteredCards = giftCards.filter(card => 
@@ -127,9 +128,19 @@ export const GiftCardsTab = ({ giftCards }: GiftCardsTabProps) => {
                         <span className="text-xs font-medium">{card.customer?.name || "Cliente General"}</span>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full text-blue-600 hover:bg-blue-50"
+                        onClick={() => onPrintCard(card)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="flex items-end justify-between pt-4 border-t border-slate-100 dark:border-zinc-800/50">
