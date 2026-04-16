@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, ShoppingBag, Wallet, CreditCard, 
   FileText, Package, AlertTriangle, RefreshCw,
-  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users
+  Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
