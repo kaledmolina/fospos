@@ -517,6 +517,15 @@ export const usePOS = (session: any) => {
   }
 
   const addServiceToCart = (service: SubscriptionServiceData) => {
+    if (!cartCustomer) {
+      toast.error("¡Cliente requerido!", {
+        description: "Las suscripciones y servicios deben estar vinculados a un cliente registrado por seguridad y seguimiento.",
+        duration: 3000,
+        icon: "👤"
+      })
+      return
+    }
+
     const existing = cart.find(item => item.id === service.id)
     if (existing) {
       setCart(cart.map(item => item.id === service.id ? { ...item, quantity: item.quantity + 1 } : item))

@@ -168,41 +168,80 @@ export const SaleTab = ({
                   </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="services" className="flex-1 overflow-hidden mt-0">
+                <TabsContent value="services" className="flex-1 overflow-hidden mt-0 relative">
                   <ScrollArea className="h-[calc(100vh-350px)]">
-                    <motion.div
-                      className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4"
-                      variants={staggerContainer}
-                      initial="initial"
-                      animate="animate"
-                    >
-                      {subscriptionServices.filter(s => s.isActive).map((service) => (
-                        <motion.div key={service.id} variants={fadeInUp} whileHover={{ scale: 1.03, y: -4 }} whileTap={{ scale: 0.97 }}>
-                          <Button
-                            variant="outline"
-                            className="h-auto p-3 w-full flex flex-col items-start cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-emerald-300"
-                            onClick={() => onAddServiceToCart(service)}
-                          >
-                            <div className="flex items-center justify-between w-full">
-                              <p className="font-medium text-left truncate flex-1">{service.name}</p>
-                              <Badge className="bg-emerald-500/10 text-emerald-500 border-none dark:bg-emerald-500/20 text-[8px] uppercase">{service.billingCycle}</Badge>
-                            </div>
-                            <div className="flex items-center justify-between w-full mt-1">
-                              <p className="font-bold text-emerald-500">{formatCurrency(service.price)}</p>
-                              <p className="text-[10px] text-muted-foreground">Única vez: {formatCurrency(service.setupFee)}</p>
-                            </div>
-                          </Button>
-                        </motion.div>
-                      ))}
-                      {subscriptionServices.filter(s => s.isActive).length === 0 && (
-                        <div className="col-span-full text-center py-12 text-muted-foreground">
-                          <RefreshCw className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                          <p className="text-lg font-medium mb-2">No hay servicios</p>
-                          <p className="text-sm">Agrega servicios de suscripción para comenzar</p>
+                    {!cartCustomer ? (
+                      <div className="flex flex-col items-center justify-center h-[300px] text-center p-8 bg-background/50 backdrop-blur-sm rounded-xl border border-dashed border-border m-4">
+                        <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-4">
+                          <Users className="w-8 h-8 text-blue-500" />
                         </div>
-                      )}
-                    </motion.div>
+                        <h3 className="text-lg font-black uppercase tracking-tighter text-foreground">Cliente Requerido</h3>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-[250px]">
+                          Para gestionar suscripciones y servicios, es obligatorio vincular un cliente registrado primero.
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-4 border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all font-bold gap-2"
+                          onClick={() => onSetCustomerDialog(true)}
+                        >
+                          <UserPlus className="w-4 h-4" /> Registrar Cliente
+                        </Button>
+                      </div>
+                    ) : (
+                      <motion.div
+                        className="grid grid-cols-2 lg:grid-cols-3 gap-4 p-4 pb-20"
+                        variants={staggerContainer}
+                        initial="initial"
+                        animate="animate"
+                      >
+                        {subscriptionServices.filter(s => s.isActive).map((service) => (
+                          <motion.div key={service.id} variants={fadeInUp} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
+                            <Button
+                              variant="outline"
+                              className="h-auto p-0 w-full flex flex-col items-stretch overflow-hidden group cursor-pointer border-blue-500/10 hover:border-blue-500/50 hover:shadow-xl transition-all duration-300"
+                              onClick={() => onAddServiceToCart(service)}
+                            >
+                              <div className="bg-gradient-to-br from-blue-600/90 to-indigo-600/90 p-3 text-white">
+                                <div className="flex items-center justify-between mb-1">
+                                  <Badge className="bg-white/20 text-white border-none text-[8px] font-black uppercase tracking-tighter">
+                                    {service.billingCycle}
+                                  </Badge>
+                                  <RefreshCw className="w-3 h-3 text-white/50 group-hover:rotate-180 transition-transform duration-500" />
+                                </div>
+                                <p className="font-black text-sm text-left truncate tracking-tight">{service.name}</p>
+                              </div>
+                              <div className="p-3 bg-card space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold text-muted-foreground uppercase">Mensualidad</span>
+                                  <p className="font-black text-blue-600 dark:text-blue-400">{formatCurrency(service.price)}</p>
+                                </div>
+                                <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                                  <div className="flex items-center gap-1">
+                                    <Plus className="w-2.5 h-2.5 text-indigo-500" />
+                                    <span className="text-[9px] font-bold text-muted-foreground">Inscripción</span>
+                                  </div>
+                                  <p className="text-[10px] font-black text-indigo-500">{formatCurrency(service.setupFee)}</p>
+                                </div>
+                              </div>
+                            </Button>
+                          </motion.div>
+                        ))}
+                        {subscriptionServices.filter(s => s.isActive).length === 0 && (
+                          <div className="col-span-full text-center py-12 text-muted-foreground flex flex-col items-center">
+                            <RefreshCw className="w-16 h-16 mx-auto mb-4 text-gray-300 animate-spin-slow" />
+                            <p className="text-lg font-medium mb-2">No hay servicios activos</p>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
                   </ScrollArea>
+                  {cartCustomer && (
+                    <div className="absolute bottom-2 left-4 right-4 p-2 bg-blue-500/10 backdrop-blur-md rounded-lg border border-blue-500/20 flex items-center justify-center gap-2">
+                       <CheckCircle2 className="w-3 h-3 text-blue-500" />
+                       <span className="text-[9px] font-black uppercase text-blue-600/70 tracking-widest">Suscripción Segura Certificada</span>
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

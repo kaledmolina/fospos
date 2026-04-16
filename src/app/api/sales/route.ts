@@ -375,6 +375,9 @@ export async function POST(request: NextRequest) {
 
           if (!service) throw new Error(`Servicio ${item.serviceId} no encontrado`)
 
+          // SEGURIDAD: Los servicios TIENEN que estar vinculados a un cliente
+          if (!customerId) throw new Error(`El servicio "${service.name}" requiere un cliente registrado para activar la suscripción.`)
+
           const itemSubtotal = service.price * item.quantity + (service.setupFee || 0)
           subtotal += itemSubtotal
 
@@ -389,26 +392,24 @@ export async function POST(request: NextRequest) {
             subtotal: itemSubtotal
           })
 
-          if (customerId) {
-            const nextBilling = new Date()
-            if (service.billingCycle === "MONTHLY") nextBilling.setMonth(nextBilling.getMonth() + 1)
-            else if (service.billingCycle === "YEARLY") nextBilling.setFullYear(nextBilling.getFullYear() + 1)
-            else if (service.billingCycle === "DAILY") nextBilling.setDate(nextBilling.getDate() + 1)
-            else nextBilling.setDate(nextBilling.getDate() + service.billingDays)
+          const nextBilling = new Date()
+          if (service.billingCycle === "MONTHLY") nextBilling.setMonth(nextBilling.getMonth() + 1)
+          else if (service.billingCycle === "YEARLY") nextBilling.setFullYear(nextBilling.getFullYear() + 1)
+          else if (service.billingCycle === "DAILY") nextBilling.setDate(nextBilling.getDate() + 1)
+          else nextBilling.setDate(nextBilling.getDate() + service.billingDays)
 
-            await tx.customerSubscription.create({
-              data: {
-                tenantId: session.user.tenantId,
-                customerId,
-                serviceId: service.id,
-                startDate: new Date(),
-                nextBillingDate: nextBilling,
-                status: "ACTIVE",
-                agreedPrice: service.price,
-                notes: "Activada mediante venta POS"
-              }
-            })
-          }
+          await tx.customerSubscription.create({
+            data: {
+              tenantId: session.user.tenantId,
+              customerId,
+              serviceId: service.id,
+              startDate: new Date(),
+              nextBillingDate: nextBilling,
+              status: "ACTIVE",
+              agreedPrice: service.price,
+              notes: "Activada mediante venta POS"
+            }
+          })
         }
       }
 
