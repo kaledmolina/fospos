@@ -54,6 +54,7 @@ model Tenant {
   pointConfig     PointConfig?
   coupons         Coupon[]
   activationCode  ActivationCode?
+  giftCards       GiftCard[]
   
   @@map("tenants")
 }
@@ -329,6 +330,7 @@ model Customer {
   sales         Sale[]
   credits       Credit[]
   subscriptions CustomerSubscription[]
+  giftCards     GiftCard[]
   
   @@unique([tenantId, document])
   @@map("customers")
@@ -378,6 +380,10 @@ model Sale {
   // Notas
   notes         String?
   
+  // Relaciones Gift Cards
+  giftCardRedemptions GiftCardRedemption[]
+  giftCardSold    GiftCard[] @relation("GiftCardSold")
+  
   // Timestamps
   createdAt     DateTime @default(now())
   
@@ -413,6 +419,7 @@ enum PaymentMethod {
   TRANSFER   // Transferencia
   CREDIT     // Fiado/Crédito
   MIXED      // Pago mixto
+  GIFT_CARD  // Tarjeta de Regalo
 }
 
 enum PaymentStatus {
@@ -518,6 +525,7 @@ model CashRegister {
   totalCard      Float   @default(0)
   totalTransfer  Float   @default(0)
   totalCredit    Float   @default(0)
+  totalGiftCard  Float   @default(0)
   
   // Gastos de caja
   totalExpenses  Float   @default(0)
@@ -803,4 +811,59 @@ model ActivationCode {
   updatedAt       DateTime @updatedAt
 
   @@map("activation_codes")
+}
+
+// ==================== GIFT CARDS ====================
+
+/// Tarjeta de regalo emitida por una tienda
+model GiftCard {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  code            String   @unique
+  balance         Float
+  initialAmount   Float
+  
+  status          GiftCardStatus @default(ACTIVE)
+  expiresAt       DateTime?
+  isActive        Boolean  @default(true)
+  
+  // Venta donde se compró la tarjeta
+  saleId          String?
+  sale            Sale?    @relation("GiftCardSold", fields: [saleId], references: [id], onDelete: SetNull)
+  
+  // Uso de la tarjeta
+  redemptions     GiftCardRedemption[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([tenantId, code])
+  @@map("gift_cards")
+}
+
+/// Registro de cada vez que se usa una tarjeta de regalo
+model GiftCardRedemption {
+  id              String   @id @default(cuid())
+  giftCardId      String
+  giftCard        GiftCard @relation(fields: [giftCardId], references: [id], onDelete: Cascade)
+  
+  saleId          String
+  sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  amountUsed      Float
+  createdAt       DateTime @default(now())
+  
+  @@map("gift_card_redemptions")
+}
+
+enum GiftCardStatus {
+  ACTIVE
+  EXPIRED
+  USED_UP
+  CANCELLED
 }

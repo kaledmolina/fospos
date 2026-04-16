@@ -15,6 +15,7 @@ import { SubscriptionsTab } from "./tabs/SubscriptionsTab"
 import { TransactionsTab } from "./tabs/TransactionsTab"
 import { CategoriesTab } from "./tabs/CategoriesTab"
 import { LoyaltyConfigTab } from "./tabs/LoyaltyConfigTab"
+import { GiftCardsTab } from "./tabs/GiftCardsTab"
 import { StockAdjustmentDialog } from "./dialogs/StockAdjustmentDialog"
 import { ProductDialog } from "./dialogs/ProductDialog"
 import { CategoryDialog } from "./dialogs/CategoryDialog"
@@ -71,6 +72,9 @@ export const POSView = ({
           if (tab === "loyalty") {
             pos.fetchLoyaltyConfig()
             pos.fetchCoupons()
+          }
+          if (tab === "giftcards") {
+            pos.fetchGiftCards()
           }
         }}
         sidebarOpen={sidebarOpen}
@@ -132,6 +136,13 @@ export const POSView = ({
               change={pos.change}
               onSetChange={pos.setChange}
               onSetCustomerDialog={pos.setCustomerDialog}
+              giftCardForm={pos.giftCardForm}
+              onSetGiftCardForm={pos.setGiftCardForm}
+              onAddGiftCardToCart={pos.handleAddGiftCardToCart}
+              giftCardCode={pos.giftCardCode}
+              onSetGiftCardCode={pos.setGiftCardCode}
+              onValidateGiftCard={pos.handleValidateGiftCard}
+              appliedGiftCard={pos.appliedGiftCard}
             />
           )}
           {pos.posTab === "loyalty" && (
@@ -258,6 +269,9 @@ export const POSView = ({
               saleSearch={pos.saleSearch}
               onSetSaleSearch={pos.setSaleSearch}
             />
+          )}
+          {pos.posTab === "giftcards" && (
+            <GiftCardsTab giftCards={pos.giftCards} />
           )}
         </AnimatePresence>
       </POSDashboard>

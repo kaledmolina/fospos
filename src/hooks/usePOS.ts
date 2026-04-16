@@ -133,6 +133,17 @@ export const usePOS = (session: any) => {
   const [couponCode, setCouponCode] = useState<string>("")
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
   
+  // Gift Cards state
+  const [giftCards, setGiftCards] = useState<any[]>([])
+  const [giftCardCode, setGiftCardCode] = useState<string>("")
+  const [appliedGiftCard, setAppliedGiftCard] = useState<any>(null)
+  const [giftCardDialog, setGiftCardDialog] = useState(false)
+  const [giftCardForm, setGiftCardForm] = useState({
+    amount: "",
+    code: "",
+    customerId: ""
+  })
+  
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     title: string;
@@ -197,6 +208,9 @@ export const usePOS = (session: any) => {
       if (statsRes.ok) setDashboardStats((await statsRes.json()).data)
       if (cashRes.ok) setCashRegister((await cashRes.json()).data)
       if (creditsRes.ok) setCredits((await creditsRes.json()).data)
+      
+      const giftCardsRes = await fetch("/api/gift-cards")
+      if (giftCardsRes.ok) setGiftCards((await giftCardsRes.json()).data)
     } catch (error) {
       console.error("Error fetching POS data:", error)
     }
@@ -692,6 +706,24 @@ export const usePOS = (session: any) => {
       return
     }
 
+    // Validación de Tarjeta Regalo: Requiere código y saldo
+    if (cartPaymentMethod === "GIFT_CARD") {
+      if (!appliedGiftCard) {
+        toast.error("¡Tarjeta no validada!", {
+          description: "Debes ingresar y validar un código de tarjeta de regalo.",
+          duration: 5000
+        })
+        return
+      }
+      if (appliedGiftCard.balance < total) {
+        toast.error("¡Saldo insuficiente!", {
+          description: `La tarjeta solo tiene ${formatCurrency(appliedGiftCard.balance)}. Por favor elige otro método o reduce el carrito.`,
+          duration: 5000
+        })
+        return
+      }
+    }
+
     try {
       const res = await fetch("/api/sales", {
         method: "POST",
@@ -714,6 +746,7 @@ export const usePOS = (session: any) => {
           discount: cartDiscount,
           pointsRedeemed: redeemPoints,
           couponCode: appliedCoupon?.code,
+          giftCardCode: appliedGiftCard?.code,
           cashRegisterId: cashRegister?.id,
           cashReceived,
           change,
@@ -745,6 +778,10 @@ export const usePOS = (session: any) => {
         fetchSales()
         fetchSubscriptionServices()
         fetchSubscriptions()
+        
+        // Clear Gift Card state
+        setAppliedGiftCard(null)
+        setGiftCardCode("")
       } else {
         toast.error("Error al procesar la venta", {
           description: data.error || "Ocurrió un error inesperado al guardar la venta."
@@ -796,6 +833,50 @@ export const usePOS = (session: any) => {
         setAppliedCoupon(null)
       }
     } catch { toast.error("Error al validar cupón") }
+  }
+
+  const fetchGiftCards = async () => {
+    try {
+      const res = await fetch("/api/gift-cards")
+      const data = await res.json()
+      if (data.success) setGiftCards(data.data)
+    } catch (error) { console.error("Error fetching gift cards:", error) }
+  }
+
+  const handleValidateGiftCard = async () => {
+    if (!giftCardCode) return
+    try {
+      const res = await fetch(`/api/gift-cards?code=${giftCardCode}`)
+      const data = await res.json()
+      if (data.success) {
+        setAppliedGiftCard(data.data)
+        toast.success("Tarjeta de regalo validada")
+      } else {
+        toast.error(data.error || "Tarjeta inválida o sin saldo")
+        setAppliedGiftCard(null)
+      }
+    } catch { toast.error("Error al validar tarjeta") }
+  }
+
+  const handleAddGiftCardToCart = () => {
+    const amount = parseFloat(giftCardForm.amount)
+    if (!amount || amount <= 0) {
+      toast.error("Ingresa un monto válido")
+      return
+    }
+
+    const item = {
+      id: `GIFT-${Date.now()}`,
+      name: `Tarjeta Regalo ${formatCurrency(amount)}`,
+      price: amount,
+      quantity: 1,
+      type: "GIFT_CARD",
+      data: { ...giftCardForm, amount }
+    }
+
+    setCart([...cart, item as any])
+    setGiftCardForm({ amount: "", code: "", customerId: "" })
+    toast.success("Tarjeta de regalo añadida al carrito")
   }
 
 
@@ -1291,6 +1372,18 @@ export const usePOS = (session: any) => {
       if (!loyaltyConfig || !loyaltyConfig.isActive) return 0
       return points * loyaltyConfig.redemptionValue
     },
+    // Gift Cards
+    giftCards,
+    giftCardCode,
+    setGiftCardCode,
+    appliedGiftCard,
+    setAppliedGiftCard,
+    giftCardDialog,
+    setGiftCardDialog,
+    giftCardForm,
+    setGiftCardForm,
+    handleAddGiftCardToCart,
+    handleValidateGiftCard,
     historyDialog, setHistoryDialog, historyItems, historyTitle, historyDescription,
     handleOpenHistory
   }

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Store, X, LogOut, Menu, Bell, Package, AlertCircle, 
   Clock, BarChart3, ShoppingBag, Users, CreditCard, 
-  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe
+  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe, Ticket
 } from "lucide-react"
 import { BranchSelector } from "./shared/BranchSelector"
 import { Button } from "@/components/ui/button"
@@ -80,7 +80,7 @@ export const POSDashboard = ({
           </Button>
         </div>
         
-        <ScrollArea className="flex-1 px-4 py-4">
+        <ScrollArea className="flex-1 px-4 py-4 min-h-0">
           <nav className="space-y-1">
             {[
               { id: "dashboard", icon: BarChart3, label: "Dashboard" },
@@ -93,6 +93,7 @@ export const POSDashboard = ({
               { id: "expenses", icon: Receipt, label: "Gastos" },
               { id: "cash", icon: Wallet, label: "Caja" },
               { id: "subscriptions", icon: RefreshCw, label: "Suscripciones" },
+              { id: "giftcards", icon: Ticket, label: "Gift Cards" },
               ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "loyalty", icon: Star, label: "Fidelización" }] : []),
               ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "branches", icon: Building2, label: "Sucursales" }] : []),
               ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "users", icon: Users, label: "Usuarios" }] : [])

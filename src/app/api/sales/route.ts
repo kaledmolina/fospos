@@ -231,7 +231,8 @@ export async function POST(request: NextRequest) {
       customerId, items, paymentMethod, 
       discount, cashRegisterId,
       pointsRedeemed, couponCode,
-      cashReceived, change
+      cashReceived, change,
+      giftCardCode
     } = body;
     const userBranchId = body.branchId || session.user.branchId;
 
@@ -333,6 +334,33 @@ export async function POST(request: NextRequest) {
               }
             });
           }
+        } else if (item.type === "GIFT_CARD") {
+          const cardCode = item.giftCardCode || `GIFT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+          const cardAmount = Number(item.unitPrice) * Number(item.quantity);
+          
+          subtotal += cardAmount;
+
+          saleItems.push({
+            productId: null,
+            productName: "Tarjeta de Regalo",
+            productCode: cardCode,
+            unitPrice: Number(item.unitPrice),
+            quantity: Number(item.quantity),
+            unit: "unidad",
+            discount: 0,
+            subtotal: cardAmount
+          });
+
+          await tx.giftCard.create({
+            data: {
+              tenantId: session.user.tenantId,
+              code: cardCode,
+              initialAmount: cardAmount,
+              balance: cardAmount,
+              customerId: customerId || null,
+              status: "ACTIVE"
+            }
+          });
         }
       }
 
@@ -370,6 +398,25 @@ export async function POST(request: NextRequest) {
         if (!customer) throw new Error("Cliente no encontrado");
         const currentDebt = customer.credits.reduce((sum, c) => sum + c.balance, 0);
         if (customer.creditLimit > 0 && (currentDebt + finalTotal) > customer.creditLimit) throw new Error("Límite de crédito excedido");
+      }
+
+      if (paymentMethod === "GIFT_CARD") {
+        if (!giftCardCode) throw new Error("Código de tarjeta de regalo requerido");
+        const card = await tx.giftCard.findUnique({
+          where: { tenantId_code: { tenantId: session.user.tenantId, code: giftCardCode.toUpperCase() } }
+        });
+        if (!card || card.status !== "ACTIVE" || !card.isActive) throw new Error("Tarjeta de regalo inválida o inactiva");
+        if (card.balance < finalTotal) throw new Error(`Saldo insuficiente en la tarjeta de regalo (Saldo: ${card.balance})`);
+
+        await tx.giftCard.update({
+          where: { id: card.id },
+          data: { 
+            balance: { decrement: finalTotal },
+            status: card.balance - finalTotal <= 0 ? "USED_UP" : "ACTIVE"
+          }
+        });
+        
+        // El registro de redención se hace después de crear la venta
       }
 
       const sale = await tx.sale.create({
@@ -422,6 +469,23 @@ export async function POST(request: NextRequest) {
         else if (paymentMethod === "CARD") updateData.totalCard = { increment: finalTotal };
         else if (paymentMethod === "TRANSFER") updateData.totalTransfer = { increment: finalTotal };
         else if (paymentMethod === "CREDIT") updateData.totalCredit = { increment: finalTotal };
+        else if (paymentMethod === "GIFT_CARD") {
+          updateData.totalGiftCard = { increment: finalTotal };
+          
+          const card = await tx.giftCard.findUnique({
+            where: { tenantId_code: { tenantId: session.user.tenantId, code: giftCardCode!.toUpperCase() } }
+          });
+          
+          if (card) {
+            await tx.giftCardRedemption.create({
+              data: {
+                giftCardId: card.id,
+                saleId: sale.id,
+                amountUsed: finalTotal
+              }
+            });
+          }
+        }
 
         await tx.cashRegister.update({ where: { id: cashRegisterId }, data: updateData });
       }

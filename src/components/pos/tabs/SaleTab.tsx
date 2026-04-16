@@ -54,6 +54,14 @@ interface SaleTabProps {
   change: number
   onSetChange: (amount: number) => void
   onSetCustomerDialog: (open: boolean) => void
+  // Gift Cards
+  giftCardForm: any
+  onSetGiftCardForm: (form: any) => void
+  onAddGiftCardToCart: () => void
+  giftCardCode: string
+  onSetGiftCardCode: (code: string) => void
+  onValidateGiftCard: () => void
+  appliedGiftCard: any
 }
 
 export const SaleTab = ({
@@ -88,7 +96,14 @@ export const SaleTab = ({
   onCashReceivedChange,
   change,
   onSetChange,
-  onSetCustomerDialog
+  onSetCustomerDialog,
+  giftCardForm,
+  onSetGiftCardForm,
+  onAddGiftCardToCart,
+  giftCardCode,
+  onSetGiftCardCode,
+  onValidateGiftCard,
+  appliedGiftCard
 }: SaleTabProps) => {
   useEffect(() => {
     if (cartPaymentMethod === "CASH" && cashReceived > 0) {
@@ -120,12 +135,15 @@ export const SaleTab = ({
             <CardContent className="flex-1 overflow-hidden p-0">
               <Tabs defaultValue="products" className="h-full flex flex-col">
                 <div className="px-4 pt-2">
-                  <TabsList className="grid grid-cols-2 w-full">
+                  <TabsList className="grid grid-cols-3 w-full">
                     <TabsTrigger value="products" className="gap-2">
                       <Package className="w-4 h-4" /> Productos
                     </TabsTrigger>
                     <TabsTrigger value="services" className="gap-2">
                       <RefreshCw className="w-4 h-4" /> Servicios
+                    </TabsTrigger>
+                    <TabsTrigger value="giftcards" className="gap-2 text-[10px] sm:text-xs">
+                      <Ticket className="w-4 h-4" /> Gift Cards
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -261,6 +279,64 @@ export const SaleTab = ({
                        <span className="text-[9px] font-black uppercase text-blue-600/70 tracking-widest">Suscripción Segura Certificada</span>
                     </div>
                   )}
+                </TabsContent>
+
+                <TabsContent value="giftcards" className="flex-1 overflow-hidden mt-0 p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="mx-auto max-w-sm">
+                    <Card className="border-blue-500/20 shadow-xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm">
+                      <CardHeader className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-b border-blue-500/10 p-4">
+                        <CardTitle className="flex items-center text-blue-600 text-sm font-black uppercase tracking-tighter">
+                          <Ticket className="mr-2 h-4 w-4" />
+                          Emitir Tarjeta Regalo
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6 space-y-6">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Monto de la Tarjeta</Label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">$</span>
+                            <Input
+                              type="number"
+                              placeholder="0"
+                              className="pl-7 h-12 text-lg font-black border-blue-500/20 focus:border-blue-500 transition-all"
+                              value={giftCardForm.amount}
+                              onChange={(e) => onSetGiftCardForm({ ...giftCardForm, amount: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Código Personalizado (Opcional)</Label>
+                          <Input
+                            placeholder="Dejar vacío para autogenerar"
+                            className="h-10 text-xs font-bold border-blue-500/10 focus:border-blue-500 transition-all uppercase"
+                            value={giftCardForm.code}
+                            onChange={(e) => onSetGiftCardForm({ ...giftCardForm, code: e.target.value })}
+                          />
+                        </div>
+
+                        <Button 
+                          className="w-full h-12 text-xs font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+                          onClick={onAddGiftCardToCart}
+                        >
+                          <Plus className="mr-2 h-4 w-4 shrink-0" />
+                          Añadir al Carrito
+                        </Button>
+
+                        <div className="rounded-xl bg-blue-500/5 p-4 border border-blue-500/10">
+                          <div className="flex items-start gap-3">
+                            <Star className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                            <div>
+                               <p className="text-[9px] font-black uppercase text-blue-600/70 tracking-widest">Estrategia POS</p>
+                               <p className="text-[10px] text-muted-foreground italic leading-relaxed mt-1">
+                                Las tarjetas de regalo aumentan la recurrencia un 40%. ¡Ideal para captar nuevos clientes!
+                               </p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -450,7 +526,9 @@ export const SaleTab = ({
                   {[
                     { id: "CASH", label: "Efectivo", icon: Wallet },
                     { id: "CARD", label: "Tarjeta", icon: CreditCard },
-                    { id: "CREDIT", label: "Crédito", icon: FileText }
+                    { id: "TRANSFER", label: "Transf.", icon: RefreshCw },
+                    { id: "CREDIT", label: "Crédito", icon: FileText },
+                    { id: "GIFT_CARD", label: "Regalo", icon: Ticket }
                   ].map(method => (
                     <motion.div key={method.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                       <Button
@@ -499,6 +577,42 @@ export const SaleTab = ({
                     </div>
                   </div>
                 </div>
+
+                {cartPaymentMethod === "GIFT_CARD" && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="p-3 bg-blue-500/5 rounded-lg border border-blue-500/20 space-y-3 mb-4"
+                  >
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-blue-600">Código de Tarjeta de Regalo</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Ticket className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-500" />
+                          <Input 
+                            placeholder="GIFT-XXXX"
+                            value={giftCardCode}
+                            onChange={(e) => onSetGiftCardCode(e.target.value)}
+                            className="h-8 pl-7 bg-background border-blue-500/30 font-bold text-blue-600 uppercase" 
+                          />
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="h-8 px-3 text-[10px] font-black uppercase bg-blue-600 shadow-md"
+                          onClick={onValidateGiftCard}
+                        >
+                          {appliedGiftCard ? "OK" : "LISTO"}
+                        </Button>
+                      </div>
+                      {appliedGiftCard && (
+                        <p className="text-[9px] font-black text-emerald-600 flex items-center gap-1 mt-1">
+                          <CheckCircle2 className="w-2.5 h-2.5" /> 
+                          SALDO: {formatCurrency(appliedGiftCard.balance)}
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
 
                 {cartPaymentMethod === "CASH" && (
                   <motion.div 
