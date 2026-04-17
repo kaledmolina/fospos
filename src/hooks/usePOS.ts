@@ -126,6 +126,7 @@ export const usePOS = (session: any) => {
   const [showFreezeDialog, setShowFreezeDialog] = useState(false)
   const [freezeDays, setFreezeDays] = useState("30")
   const [showConfetti, setShowConfetti] = useState(false)
+  const [activityLogs, setActivityLogs] = useState<any[]>([])
   const [lastSale, setLastSale] = useState<any>(null)
   const [receiptDialog, setReceiptDialog] = useState(false)
   const [cashReportDialog, setCashReportDialog] = useState(false)
@@ -1430,6 +1431,18 @@ export const usePOS = (session: any) => {
     }
   }
 
+  const fetchActivityLogs = async () => {
+    try {
+      const res = await fetch("/api/logs")
+      const data = await res.json()
+      if (data.success) {
+        setActivityLogs(data.data)
+      }
+    } catch (error) {
+      console.error("Error fetching logs:", error)
+    }
+  }
+
   // Helper values
   const unreadNotifications = notifications.filter(n => !n.isRead).length
   const overdueCredits = credits.filter(c => c.status === "OVERDUE")
@@ -1468,8 +1481,8 @@ export const usePOS = (session: any) => {
     setNotificationsOpen, expenses, branches, setBranches,
     sales, filteredSales, fetchSales,
     selectedBranch, setSelectedBranch, creditFilter, setCreditFilter,
-    creditSearch, setCreditSearch,
     saleSearch, setSaleSearch,
+    activityLogs, fetchActivityLogs,
     tenantUsers, cart, setCart, cartCustomer, setCartCustomer,
     cartPaymentMethod, setCartPaymentMethod: handleSetCartPaymentMethod, cartDiscount, setCartDiscount,
     productDialog, setProductDialog, categoryDialog, setCategoryDialog,

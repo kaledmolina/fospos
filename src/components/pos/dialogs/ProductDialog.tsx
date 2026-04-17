@@ -25,6 +25,7 @@ interface ProductDialogProps {
   categories: any []
   onSubmit: (e: React.FormEvent) => void
   editingProduct?: any
+  userRole?: string
 }
 
 export const ProductDialog = ({
@@ -34,7 +35,8 @@ export const ProductDialog = ({
   onProductFormChange,
   categories,
   onSubmit,
-  editingProduct
+  editingProduct,
+  userRole
 }: ProductDialogProps) => {
   const [uploading, setUploading] = useState(false)
   const [activeTab, setActiveTab] = useState("general")
@@ -86,6 +88,8 @@ export const ProductDialog = ({
     const margin = (profit / sale) * 100
     return { profit, margin }
   }, [productForm.costPrice, productForm.salePrice])
+
+  const isAdmin = userRole === "TENANT_ADMIN" || userRole === "SUPER_ADMIN"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -296,8 +300,10 @@ export const ProductDialog = ({
                           value={productForm.costPrice} 
                           onChange={e => onProductFormChange({ ...productForm, costPrice: parseFloat(e.target.value) || 0 })} 
                           className="pl-10 h-12 text-lg font-black rounded-xl" 
+                          disabled={!isAdmin}
                         />
                       </div>
+                      {!isAdmin && <p className="text-[9px] text-red-500 font-bold italic mt-1">Solo administradores pueden editar costos.</p>}
                     </div>
 
                     <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-5 rounded-3xl border border-emerald-100 dark:border-emerald-800/30 shadow-sm space-y-3 relative overflow-hidden group">
@@ -315,8 +321,10 @@ export const ProductDialog = ({
                           onChange={e => onProductFormChange({ ...productForm, salePrice: parseFloat(e.target.value) || 0 })} 
                           className="pl-3 h-12 text-2xl font-black rounded-xl border-emerald-200 focus:ring-emerald-500" 
                           required 
+                          disabled={!isAdmin}
                         />
                       </div>
+                      {!isAdmin && <p className="text-[9px] text-red-500 font-bold italic mt-1">Solo administradores pueden editar precios.</p>}
                     </div>
 
                     <div className="bg-white dark:bg-zinc-950 p-5 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm space-y-3 italic">
@@ -331,6 +339,7 @@ export const ProductDialog = ({
                           value={productForm.wholesalePrice} 
                           onChange={e => onProductFormChange({ ...productForm, wholesalePrice: parseFloat(e.target.value) || 0 })} 
                           className="pl-10 h-12 text-lg font-bold rounded-xl text-slate-400" 
+                          disabled={!isAdmin}
                         />
                       </div>
                     </div>

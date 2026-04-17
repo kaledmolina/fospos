@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { recordActivity } from "@/lib/audit"
 
 // POST - Registrar movimiento de inventario
 export async function POST(request: NextRequest) {
@@ -123,6 +124,20 @@ export async function POST(request: NextRequest) {
       where: { id: productId },
       data: { stock: totalStock._sum.stock || 0 }
     })
+
+    // REGISTRO DE AUDITORÍA: Si es un movimiento manual (sin referenceId) o un ajuste
+    if (!referenceId || type === "ADJUSTMENT") {
+      await recordActivity({
+        tenantId: session.user.tenantId,
+        userId: session.user.id,
+        action: "STOCK_ADJUSTMENT",
+        entity: "inventory",
+        entityId: productId,
+        oldValue: { stock: previousStock },
+        newValue: { stock: newStock },
+        notes: `Ajuste de stock: ${type}. Razón: ${reason || 'N/A'}. Notas: ${notes || 'N/A'}`
+      })
+    }
 
     return NextResponse.json({
       success: true,

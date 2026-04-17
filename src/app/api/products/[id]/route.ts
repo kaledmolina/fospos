@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { recordActivity } from "@/lib/audit"
 
 // GET - Obtener producto específico
 export async function GET(
@@ -89,6 +90,17 @@ export async function PATCH(
       )
     }
 
+    // SEGURIDAD: Solo el administrador puede cambiar precios o costos
+    const isChangingPrice = (costPrice !== undefined && costPrice !== existing.costPrice) || 
+                             (salePrice !== undefined && salePrice !== existing.salePrice)
+    
+    if (isChangingPrice && session.user.role !== "TENANT_ADMIN" && session.user.role !== "SUPER_ADMIN") {
+      return NextResponse.json(
+        { success: false, error: "No tienes permisos para modificar los precios de este producto. Contacta al administrador." },
+        { status: 403 }
+      )
+    }
+
     // Si se cambia el código, verificar que no exista
     if (code && code !== existing.code) {
       const codeExists = await db.product.findFirst({
@@ -126,6 +138,30 @@ export async function PATCH(
         category: true
       }
     })
+
+    // REGISTRO DE AUDITORÍA: Si hubo cambios sensibles
+    if (isChangingPrice) {
+      await recordActivity({
+        tenantId: session.user.tenantId,
+        userId: session.user.id,
+        action: "PRICE_CHANGE",
+        entity: "product",
+        entityId: id,
+        oldValue: { cost: existing.costPrice, sale: existing.salePrice },
+        newValue: { cost: product.costPrice, sale: product.salePrice },
+        notes: `Precio cambiado por ${session.user.name}`
+      })
+    } else if (name !== existing.name || code !== existing.code) {
+      await recordActivity({
+        tenantId: session.user.tenantId,
+        userId: session.user.id,
+        action: "PRODUCT_UPDATE",
+        entity: "product",
+        entityId: id,
+        oldValue: { name: existing.name, code: existing.code },
+        newValue: { name: product.name, code: product.code }
+      })
+    }
 
     return NextResponse.json({
       success: true,
@@ -179,6 +215,15 @@ export async function DELETE(
 
     await db.product.delete({
       where: { id }
+    })
+
+    await recordActivity({
+      tenantId: session.user.tenantId,
+      userId: session.user.id,
+      action: "PRODUCT_DELETE",
+      entity: "product",
+      entityId: id,
+      notes: `Producto con ID ${id} eliminado por ${session.user.name}`
     })
 
     return NextResponse.json({

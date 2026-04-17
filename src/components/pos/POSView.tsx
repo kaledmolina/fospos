@@ -343,6 +343,7 @@ export const POSView = ({
         onSubmit={pos.editingProduct ? pos.handleUpdateProduct : pos.handleAddProduct}
         categories={pos.categories}
         editingProduct={pos.editingProduct}
+        userRole={pos.session?.user?.role}
       />
       <CategoryDialog
         open={pos.categoryDialog}
