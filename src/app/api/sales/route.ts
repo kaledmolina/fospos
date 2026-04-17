@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+// Version: 1.0.1 - Force rebuild
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -104,26 +105,11 @@ export async function GET(request: NextRequest) {
           _sum: { balance: true }
         });
 
-        const giftCards = await db.giftCard.findMany({
-          where: { tenantId: session.user.tenantId },
-          include: { 
-            customer: true,
-            redemptions: {
-              include: {
-                sale: {
-                  include: { customer: true }
-                }
-              },
-              orderBy: { createdAt: "desc" }
-            }
-          },
-          orderBy: { createdAt: "desc" }
-        });
-
         const products = await db.product.findMany({
           where: { 
             tenantId: session.user.tenantId, 
             isActive: true,
+            ...(branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "" ? { branchId } : {})
           },
           include: { stockByBranch: true }
         });
@@ -151,7 +137,7 @@ export async function GET(request: NextRequest) {
           return { ...p, currentStock, currentMinStock };
         }).filter(Boolean) as any[];
 
-        const lowStockItems = mappedProducts
+        const stockItems = mappedProducts
           .filter(p => p.currentStock < p.currentMinStock)
           .map(p => ({
             id: p.id,
@@ -160,7 +146,7 @@ export async function GET(request: NextRequest) {
             minStock: p.currentMinStock
           }));
 
-        const lowStockProducts = mappedProducts.filter(p => p.currentStock < p.currentMinStock).length;
+        const lowStockProducts = stockItems.length;
 
         const now = new Date();
         const sevenDaysFromNow = new Date();
@@ -220,8 +206,8 @@ export async function GET(request: NextRequest) {
             topProducts,
             recentSales,
             pendingCredits: pendingCredits._sum.balance || 0,
-            lowStockProducts: lowStockItems.length,
-            lowStockItems,
+            lowStockProducts,
+            stockItems,
             expiredCount,
             nearExpiryCount,
             monthlyGoal: targetMonthlyGoal,

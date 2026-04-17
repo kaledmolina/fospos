@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 
 // GET - Obtener notificaciones del tenant
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
@@ -15,6 +15,8 @@ export async function GET() {
       )
     }
 
+    const { searchParams } = new URL(request.url)
+    const branchId = searchParams.get("branchId")
     const tenantId = session.user.tenantId
 
     // 1. Obtener notificaciones guardadas en DB (incluyendo "dismissals" de alertas dinámicas)

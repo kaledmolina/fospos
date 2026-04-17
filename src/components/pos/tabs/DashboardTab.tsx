@@ -184,14 +184,14 @@ export const DashboardTab = ({
                       Tienes {dashboardStats?.lowStockProducts} productos agotándose {dashboardStats?.isGlobalView ? "en todo el negocio" : "en esta sede"}:
                     </p>
                     <div className="flex flex-col gap-1 mb-3">
-                      {dashboardStats?.lowStockItems?.slice(0, 3).map((item: any) => (
+                      {dashboardStats?.stockItems?.slice(0, 3).map((item: any) => (
                         <div key={item.id} className="text-[11px] font-bold bg-yellow-500/5 px-2 py-1 rounded border border-yellow-500/10 flex justify-between items-center text-yellow-700 dark:text-yellow-300">
                           <span className="truncate mr-2">{item.name}</span>
                           <span className="shrink-0">{item.stock} / {item.minStock}</span>
                         </div>
                       ))}
-                      {(dashboardStats?.lowStockItems?.length || 0) > 3 && (
-                        <p className="text-[10px] text-yellow-600/60 font-medium italic">...y {(dashboardStats?.lowStockItems?.length || 0) - 3} más.</p>
+                      {(dashboardStats?.stockItems?.length || 0) > 3 && (
+                        <p className="text-[10px] text-yellow-600/60 font-medium italic">...y {(dashboardStats?.stockItems?.length || 0) - 3} más.</p>
                       )}
                     </div>
                     <Button size="sm" variant="outline" className="w-full bg-background/50 border-yellow-500/20 hover:bg-yellow-500/10 cursor-pointer text-yellow-600 dark:text-yellow-400 font-bold h-8 text-xs" onClick={() => onPosTabChange("products")}>Corregir Inventario</Button>
