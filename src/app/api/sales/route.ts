@@ -124,32 +124,41 @@ export async function GET(request: NextRequest) {
           where: { 
             tenantId: session.user.tenantId, 
             isActive: true,
-            ...(branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "" ? { 
-              stockByBranch: {
-                some: { branchId }
-              }
-            } : {})
           },
           include: { stockByBranch: true }
         });
 
+        const isGlobalView = !branchId || branchId === "null" || branchId === "undefined" || branchId === "";
+
         const mappedProducts = products.map(p => {
-          let stock = p.stock;
-          let minStock = p.minStock;
+          let currentStock = 0;
+          let currentMinStock = p.minStock;
           
-          if (branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "") {
+          if (!isGlobalView) {
             const bs = p.stockByBranch.find(s => s.branchId === branchId);
-            // Si el producto está asignado a la sede, tomamos sus valores específicos
-            if (bs) {
-              stock = bs.stock;
-              minStock = bs.minStock ?? p.minStock;
-            } else {
-              // Si no está asignado (aunque el filtro findMany debería evitar esto), ignoramos
-              return null;
-            }
+            if (!bs) return null; // Ignorar productos no asignados a esta sede
+            currentStock = bs.stock;
+            currentMinStock = bs.minStock ?? p.minStock;
+          } else {
+            // Vista Global: Solo incluir si tiene al menos una asignación de sede
+            if (p.stockByBranch.length === 0) return null;
+            // Sumamos el stock de todas las sedes asignadas
+            currentStock = p.stockByBranch.reduce((sum, s) => sum + s.stock, 0);
+            // El minStock global es el máximo de los minStocks definidos o el base
+            currentMinStock = Math.max(...p.stockByBranch.map(s => s.minStock ?? p.minStock), p.minStock);
           }
-          return { ...p, currentStock: stock, currentMinStock: minStock };
+          
+          return { ...p, currentStock, currentMinStock };
         }).filter(Boolean) as any[];
+
+        const lowStockItems = mappedProducts
+          .filter(p => p.currentStock < p.currentMinStock)
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            stock: p.currentStock,
+            minStock: p.currentMinStock
+          }));
 
         const lowStockProducts = mappedProducts.filter(p => p.currentStock < p.currentMinStock).length;
 
@@ -226,7 +235,8 @@ export async function GET(request: NextRequest) {
             nearExpiryCount,
             monthlyGoal: targetMonthlyGoal,
             dailyGoal: targetDailyGoal,
-            weeklySales
+            weeklySales,
+            isGlobalView
           }
         });
       } catch (statsError: any) {

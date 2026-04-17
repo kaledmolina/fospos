@@ -176,10 +176,13 @@ export const DashboardTab = ({
                 <Card className="border-yellow-500/20 bg-yellow-500/10 backdrop-blur-sm">
                   <CardContent className="p-4 flex flex-col gap-3">
                     <div className="flex items-center gap-3">
-                      <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                      <p className="text-yellow-500 font-medium">Stock Bajo</p>
+                      <p className={dashboardStats?.isGlobalView ? "text-orange-500 font-medium" : "text-yellow-500 font-medium"}>
+                        {dashboardStats?.isGlobalView ? "Stock Bajo (Global)" : "Stock Bajo"}
+                      </p>
                     </div>
-                    <p className="text-sm text-yellow-500/80 mb-2">Tienes {dashboardStats?.lowStockProducts} productos agotándose en esta sede:</p>
+                    <p className="text-sm opacity-80 mb-2">
+                      Tienes {dashboardStats?.lowStockProducts} productos agotándose {dashboardStats?.isGlobalView ? "en todo el negocio" : "en esta sede"}:
+                    </p>
                     <div className="flex flex-col gap-1 mb-3">
                       {dashboardStats?.lowStockItems?.slice(0, 3).map((item: any) => (
                         <div key={item.id} className="text-[11px] font-bold bg-yellow-500/5 px-2 py-1 rounded border border-yellow-500/10 flex justify-between items-center text-yellow-700 dark:text-yellow-300">

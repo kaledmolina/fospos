@@ -299,10 +299,13 @@ export const usePOS = (session: any) => {
       const data = await res.json()
       if (data.success) {
         setBranches(data.data)
-        // Si no hay sede seleccionada, seleccionar la principal o la primera
+        // Auto-seleccionar sede si no hay una (Admin entrando por primera vez)
         if (!selectedBranch && data.data.length > 0) {
           const main = data.data.find((b: any) => b.isMain) || data.data[0]
           setSelectedBranch(main.id)
+          // Refrescar datos con la nueva sede inmediatamente
+          fetchPOSData() 
+          fetchNotifications()
         }
       }
     } catch (error) {
