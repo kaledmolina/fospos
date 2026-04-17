@@ -115,6 +115,8 @@ export const SaleTab = ({
 }: SaleTabProps) => {
   const isAdmin = userRole === "TENANT_ADMIN"
   const giftCardInputRef = useRef<HTMLInputElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
     if (cartPaymentMethod === "GIFT_CARD") {
@@ -129,6 +131,101 @@ export const SaleTab = ({
       onSetChange(0)
     }
   }, [cashReceived, total, cartPaymentMethod])
+
+  // Play Beep sound locally
+  const playBeep = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {
+      console.warn("Audio Context not supported or blocked by browser policy");
+    }
+  };
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Avoid triggering shortcuts when typing in inputs (unless F keys)
+      const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+
+      // F2: Focus Search
+      if (e.key === "F2") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+
+      // F8: Complete Sale / Pay
+      if (e.key === "F8") {
+        e.preventDefault();
+        onHandleSale();
+        return;
+      }
+
+      // ESC: Clear Cart (only if not focused on an input or if it's the search input)
+      if (e.key === "Escape" && (!isInput || e.target === searchInputRef.current)) {
+        if (cart.length > 0) {
+          e.preventDefault();
+          // Implementacion de la confirmación rápida
+          if (window.confirm("¿Seguro que deseas vaciar el carrito?")) {
+            onClearCart();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [cart, onHandleSale, onClearCart]);
+
+  // Barcode Scanner Logic (on Enter in search)
+  const handleProductSearch = (value: string) => {
+    setSearchTerm(value);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const cleanSearch = searchTerm.trim();
+      if (!cleanSearch) return;
+
+      // Search for exact match in barcode (code) or SKU
+      const foundProduct = products.find(p => 
+        p.isActive && (
+          p.code === cleanSearch || 
+          p.sku === cleanSearch || 
+          p.name.toLowerCase() === cleanSearch.toLowerCase()
+        )
+      );
+
+      if (foundProduct) {
+        if (foundProduct.stock > 0) {
+          onAddToCart(foundProduct);
+          setSearchTerm("");
+          playBeep();
+        } else {
+          toast.error("Producto agotado");
+        }
+        e.preventDefault();
+      }
+    }
+  };
+
+  const filteredProducts = products.filter(p => 
+    p.isActive && (
+      searchTerm === "" || 
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
   return (
     <motion.div key="sale" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-[calc(100vh-120px)]">
       {!cashRegister && (
@@ -144,9 +241,24 @@ export const SaleTab = ({
         <div className="lg:col-span-2">
           <Card className="h-full flex flex-col">
             <CardHeader className="pb-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input placeholder="Buscar producto..." className="pl-9" />
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                <Input 
+                  ref={searchInputRef}
+                  placeholder="Buscar producto o escanear [F2]..." 
+                  className="pl-9 h-12 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-emerald-500" 
+                  value={searchTerm}
+                  onChange={(e) => handleProductSearch(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                   <Badge variant="outline" className="text-[9px] font-black opacity-40">ENTER PARA AGREGAR</Badge>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest opacity-60">
+                 <div className="flex items-center gap-1"><span className="bg-slate-200 dark:bg-zinc-800 px-1 rounded text-slate-600 dark:text-zinc-400">F2</span> Buscar</div>
+                 <div className="flex items-center gap-1"><span className="bg-slate-200 dark:bg-zinc-800 px-1 rounded text-slate-600 dark:text-zinc-400">F8</span> Cobrar</div>
+                 <div className="flex items-center gap-1"><span className="bg-slate-200 dark:bg-zinc-800 px-1 rounded text-slate-600 dark:text-zinc-400 text-red-500">ESC</span> Limpiar Carrito</div>
               </div>
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden p-0">
@@ -173,7 +285,7 @@ export const SaleTab = ({
                       initial="initial"
                       animate="animate"
                     >
-                      {products.filter(p => p.isActive).map((product) => (
+                      {filteredProducts.map((product) => (
                         <motion.div key={product.id} variants={fadeInUp} whileHover={{ scale: 1.03, y: -4 }} whileTap={{ scale: 0.97 }}>
                           <Button
                             variant="outline"
@@ -215,7 +327,7 @@ export const SaleTab = ({
                           </Button>
                         </motion.div>
                       ))}
-                      {products.filter(p => p.isActive).length === 0 && (
+                      {filteredProducts.length === 0 && (
                         <div className="col-span-full text-center py-12 text-muted-foreground">
                           <Package className="w-16 h-16 mx-auto mb-4 text-gray-300" />
                           <p className="text-lg font-medium mb-2">No hay productos</p>
