@@ -113,19 +113,23 @@ export const StockAdjustmentDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notas / Razón</Label>
+            <Label htmlFor="notes" className="text-red-500 font-bold">Justificación Obligatoria *</Label>
             <Textarea 
               id="notes"
               value={notes} 
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ej: Ajuste por merma, entrada de proveedor..."
+              placeholder="Explique el motivo técnico o legal de este ajuste (ej: Merma por daño, error de digitación anterior...)"
               rows={3}
+              required
             />
+            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium italic">
+              ⚠️ Este ajuste quedará registrado permanentemente con su nombre y cargo en el Kardex de auditoría.
+            </p>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" className="bg-emerald-500 hover:bg-emerald-600" disabled={loading}>
+            <Button type="submit" className="bg-emerald-500 hover:bg-emerald-600" disabled={loading || !notes.trim()}>
               {loading ? "Guardando..." : "Confirmar Ajuste"}
             </Button>
           </DialogFooter>

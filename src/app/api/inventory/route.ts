@@ -22,6 +22,22 @@ export async function POST(request: NextRequest) {
       unitCost, notes, reason 
     } = body
 
+    // Seguridad: Solo el administrador puede hacer ajustes manuales
+    if (type === "ADJUSTMENT" && session.user.role !== "TENANT_ADMIN") {
+      return NextResponse.json(
+        { success: false, error: "Solo el administrador puede realizar ajustes manuales de inventario" },
+        { status: 403 }
+      )
+    }
+
+    // Seguridad: Otras entradas/salidas manuales también requieren privilegios
+    if ((type === "IN" || type === "OUT") && !referenceId && session.user.role !== "TENANT_ADMIN") {
+       return NextResponse.json(
+        { success: false, error: "Este tipo de movimiento manual requiere privilegios de administrador" },
+        { status: 403 }
+      )
+    }
+
     if (!productId || !branchId || !type || quantity === undefined) {
       return NextResponse.json(
         { success: false, error: "Producto, sucursal, tipo y cantidad son requeridos" },
@@ -152,7 +168,8 @@ export async function GET(request: NextRequest) {
       include: {
         product: { select: { id: true, name: true, code: true } },
         branch: { select: { id: true, name: true } },
-        supplier: { select: { id: true, name: true } }
+        supplier: { select: { id: true, name: true } },
+        creator: { select: { name: true } }
       },
       orderBy: { createdAt: "desc" },
       take: 100

@@ -135,6 +135,9 @@ model User {
   openedRegisters CashRegister[] @relation("OpenedBy")
   closedRegisters CashRegister[] @relation("ClosedBy")
   
+  // Movimientos de inventario registrados
+  inventoryMovements InventoryMovement[]
+  
   @@map("users")
 }
 
@@ -295,6 +298,7 @@ model InventoryMovement {
   notes         String?
   reason        String?    // Motivo del ajuste (ej: "Dañado", "Error de conteo")
   createdBy     String     // ID del usuario
+  creator       User       @relation(fields: [createdBy], references: [id])
   
   createdAt     DateTime   @default(now())
   

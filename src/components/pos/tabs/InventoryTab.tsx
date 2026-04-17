@@ -13,13 +13,12 @@ import { formatCurrency } from "@/lib/utils"
 interface InventoryTabProps {
   products: any[]
   categories: any[]
-  onSetProductDialog: (open: boolean) => void
-  onSetCategoryDialog: (open: boolean) => void
   onSetBulkUploadDialog: (open: boolean) => void
   onSetStockAdjustmentDialog: (open: boolean) => void
   onSetSelectedProductForStock: (product: any) => void
   onSetEditingProduct: (product: any) => void
   onSetProductForm: (form: any) => void
+  userRole?: string
 }
 
 export const InventoryTab = ({
@@ -31,7 +30,8 @@ export const InventoryTab = ({
   onSetStockAdjustmentDialog,
   onSetSelectedProductForStock,
   onSetEditingProduct,
-  onSetProductForm
+  onSetProductForm,
+  userRole
 }: InventoryTabProps) => {
   return (
     <motion.div key="products" variants={fadeInUp} initial="initial" animate="animate" exit="exit">
@@ -91,7 +91,7 @@ export const InventoryTab = ({
                   </div>
                 )}
                 <div className="absolute top-3 right-3 flex flex-col gap-2">
-                   {product.category && (
+                  {product.category && (
                     <Badge 
                       className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-none shadow-sm text-[10px] font-black uppercase text-slate-700 dark:text-zinc-300"
                       style={{ borderLeft: `3px solid ${product.category.color || '#10b981'}` }}
@@ -99,45 +99,49 @@ export const InventoryTab = ({
                       {product.category.name}
                     </Badge>
                   )}
-                   <Button 
-                    variant="secondary" 
-                    size="icon" 
-                    className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onSetSelectedProductForStock(product)
-                      onSetStockAdjustmentDialog(true)
-                    }}
-                  >
-                    <Settings2 className="w-4 h-4" />
-                  </Button>
-                   <Button 
-                    variant="secondary" 
-                    size="icon" 
-                    className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onSetEditingProduct(product)
-                      onSetProductForm({
-                        code: product.code || "",
-                        sku: product.sku || "",
-                        name: product.name,
-                        costPrice: product.costPrice,
-                        salePrice: product.salePrice,
-                        wholesalePrice: product.wholesalePrice || 0,
-                        stock: product.stock,
-                        minStock: product.minStock,
-                        unit: product.unit,
-                        categoryId: product.categoryId || "",
-                        isActive: product.isActive,
-                        expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : "",
-                        imageUrl: product.imageUrl || ""
-                      })
-                      onSetProductDialog(true)
-                    }}
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
+                  {userRole === "TENANT_ADMIN" && (
+                    <>
+                      <Button 
+                        variant="secondary" 
+                        size="icon" 
+                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onSetSelectedProductForStock(product)
+                          onSetStockAdjustmentDialog(true)
+                        }}
+                      >
+                        <Settings2 className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="icon" 
+                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onSetEditingProduct(product)
+                          onSetProductForm({
+                            code: product.code || "",
+                            sku: product.sku || "",
+                            name: product.name,
+                            costPrice: product.costPrice,
+                            salePrice: product.salePrice,
+                            wholesalePrice: product.wholesalePrice || 0,
+                            stock: product.stock,
+                            minStock: product.minStock,
+                            unit: product.unit,
+                            categoryId: product.categoryId || "",
+                            isActive: product.isActive,
+                            expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : "",
+                            imageUrl: product.imageUrl || ""
+                          })
+                          onSetProductDialog(true)
+                        }}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
                 {product.stock < product.minStock && (
                   <div className="absolute bottom-0 left-0 right-0 bg-red-500/90 backdrop-blur-sm p-1.5 text-center">

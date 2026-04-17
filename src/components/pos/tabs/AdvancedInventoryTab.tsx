@@ -183,7 +183,8 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                         <th className="px-4 py-3 text-right">Cant.</th>
                         <th className="px-4 py-3 text-right">Anterior</th>
                         <th className="px-4 py-3 text-right">Nuevo</th>
-                        <th className="px-4 py-3 text-left">Referencia</th>
+                        <th className="px-4 py-3 text-left">Responsable</th>
+                        <th className="px-4 py-3 text-left">Referencia / Motivo</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -216,8 +217,17 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                           <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{m.previousStock}</td>
                           <td className="px-4 py-3 text-right tabular-nums font-bold">{m.newStock}</td>
                           <td className="px-4 py-3">
-                            <div className="font-medium text-xs truncate max-w-[150px]">{m.referenceId || "Directo"}</div>
-                            <div className="text-[10px] text-muted-foreground italic truncate max-w-[150px]">{m.notes}</div>
+                            <div className="font-bold text-xs text-slate-700 dark:text-zinc-300">
+                              {m.creator?.name || "Sistema"}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-[10px] truncate max-w-[150px] text-slate-600 dark:text-zinc-400">
+                              {m.referenceId || "Ajuste Directo"}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground italic truncate max-w-[150px]">
+                              {m.reason || m.notes || "-"}
+                            </div>
                           </td>
                         </tr>
                       ))}

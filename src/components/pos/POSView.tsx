@@ -175,6 +175,7 @@ export const POSView = ({
               onSetSelectedProductForStock={pos.setSelectedProductForStock}
               onSetEditingProduct={pos.setEditingProduct}
               onSetProductForm={pos.setProductForm}
+              userRole={pos.session?.user?.role}
             />
           )}
           {pos.posTab === "categories" && (
