@@ -230,13 +230,14 @@ export const usePOS = (session: any) => {
   const fetchNotifications = useCallback(async () => {
     if (!session?.user?.tenantId) return
     try {
-      const res = await fetch("/api/notifications")
+      const query = selectedBranch ? `?branchId=${selectedBranch}` : ""
+      const res = await fetch(`/api/notifications${query}`)
       const data = await res.json()
       if (data.success) setNotifications(data.data)
     } catch (error) {
       console.error("Error fetching notifications:", error)
     }
-  }, [session])
+  }, [session, selectedBranch])
 
   const handleClearNotifications = async () => {
     if (notifications.length === 0) return
@@ -427,7 +428,9 @@ export const usePOS = (session: any) => {
         description: "Los productos de una sucursal no pueden venderse en otra."
       })
     }
-  }, [selectedBranch])
+    // Forzar actualización de notificaciones al cambiar de sede
+    fetchNotifications()
+  }, [selectedBranch, fetchNotifications])
 
   // Handlers
   const handleAddProduct = async (e: React.FormEvent) => {

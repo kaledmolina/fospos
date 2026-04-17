@@ -98,6 +98,7 @@ export async function GET(request: NextRequest) {
         const pendingCredits = await db.credit.aggregate({
           where: {
             tenantId: session.user.tenantId,
+            ...(branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "" ? { branchId } : {}),
             status: { in: ["PENDING", "PARTIAL"] }
           },
           _sum: { balance: true }
@@ -120,20 +121,35 @@ export async function GET(request: NextRequest) {
         });
 
         const products = await db.product.findMany({
-          where: { tenantId: session.user.tenantId, isActive: true },
+          where: { 
+            tenantId: session.user.tenantId, 
+            isActive: true,
+            ...(branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "" ? { 
+              stockByBranch: {
+                some: { branchId }
+              }
+            } : {})
+          },
           include: { stockByBranch: true }
         });
 
         const mappedProducts = products.map(p => {
           let stock = p.stock;
           let minStock = p.minStock;
+          
           if (branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "") {
             const bs = p.stockByBranch.find(s => s.branchId === branchId);
-            stock = bs?.stock || 0;
-            minStock = bs?.minStock || p.minStock;
+            // Si el producto está asignado a la sede, tomamos sus valores específicos
+            if (bs) {
+              stock = bs.stock;
+              minStock = bs.minStock ?? p.minStock;
+            } else {
+              // Si no está asignado (aunque el filtro findMany debería evitar esto), ignoramos
+              return null;
+            }
           }
           return { ...p, currentStock: stock, currentMinStock: minStock };
-        });
+        }).filter(Boolean) as any[];
 
         const lowStockProducts = mappedProducts.filter(p => p.currentStock < p.currentMinStock).length;
 
@@ -185,6 +201,15 @@ export async function GET(request: NextRequest) {
           });
         }
 
+        const lowStockItems = mappedProducts
+          .filter(p => p.currentStock < p.currentMinStock)
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            stock: p.currentStock,
+            minStock: p.currentMinStock
+          }));
+
         return NextResponse.json({
           success: true,
           data: {
@@ -195,7 +220,8 @@ export async function GET(request: NextRequest) {
             topProducts,
             recentSales,
             pendingCredits: pendingCredits._sum.balance || 0,
-            lowStockProducts,
+            lowStockProducts: lowStockItems.length,
+            lowStockItems,
             expiredCount,
             nearExpiryCount,
             monthlyGoal: targetMonthlyGoal,

@@ -33,28 +33,45 @@ export async function GET() {
 
     // Generar notificaciones dinámicas basadas en el estado actual
     
-    // 2. Productos con stock bajo
-    const lowStockProducts = await db.product.findMany({
-      where: {
-        tenantId,
+    // 2. Productos con stock bajo (Filtrados por sede)
+    const products = await db.product.findMany({
+      where: { 
+        tenantId, 
         isActive: true,
-        stock: { lt: db.product.fields.minStock } // Native query logic maybe? Prisma lt doesn't compare fields directly easily
+        ...(branchId && branchId !== "null" && branchId !== "undefined" ? {
+          stockByBranch: {
+            some: { branchId }
+          }
+        } : {})
       },
-      select: { id: true, name: true, stock: true, minStock: true }
+      include: {
+        stockByBranch: branchId && branchId !== "null" && branchId !== "undefined" ? {
+          where: { branchId }
+        } : true
+      }
     })
     
-    // Fix: Prisma lt can't compare two columns directly in a simple where. We need to filter in JS or use raw.
-    // Re-fetching without the lt filter to be safe or assuming the previous filter was slightly different.
-    const allActiveProducts = await db.product.findMany({
-      where: { tenantId, isActive: true },
-      select: { id: true, name: true, stock: true, minStock: true }
+    const productsWithLowStock = products.map(p => {
+      let stock = p.stock
+      let minStock = p.minStock
+      if (branchId && branchId !== "null" && branchId !== "undefined") {
+        const bs = p.stockByBranch.find(s => s.branchId === branchId)
+        if (bs) {
+          stock = bs.stock
+          minStock = bs.minStock ?? p.minStock
+        } else {
+          return null
+        }
+      }
+      return { ...p, currentStock: stock, currentMinStock: minStock }
     })
-    const productsWithLowStock = allActiveProducts.filter(p => p.stock < p.minStock && !readIds.has(p.id))
+    .filter((p): p is any => p !== null && p.currentStock < p.currentMinStock && !readIds.has(p.id))
 
-    // 3. Créditos vencidos
+    // 3. Créditos vencidos (Filtrados por sede)
     const overdueCredits = await db.credit.findMany({
       where: {
         tenantId,
+        ...(branchId && branchId !== "null" && branchId !== "undefined" ? { branchId } : {}),
         status: "OVERDUE",
         balance: { gt: 0 }
       },
@@ -69,6 +86,7 @@ export async function GET() {
     const dueSoonCredits = await db.credit.findMany({
       where: {
         tenantId,
+        ...(branchId && branchId !== "null" && branchId !== "undefined" ? { branchId } : {}),
         status: { in: ["PENDING", "PARTIAL"] },
         dueDate: {
           gte: new Date(),
@@ -86,7 +104,7 @@ export async function GET() {
         id: `low-stock-${p.id}`,
         type: "LOW_STOCK" as const,
         title: "Stock Bajo",
-        message: `${p.name} tiene ${p.stock} unidades (mínimo: ${p.minStock})`,
+        message: `${p.name} tiene ${p.currentStock} unidades (mínimo: ${p.currentMinStock})`,
         referenceType: "product",
         referenceId: p.id,
         isRead: false,

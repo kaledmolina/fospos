@@ -137,7 +137,7 @@ export const DashboardTab = ({
                       <AlertCircle className="w-5 h-5 text-red-500" />
                       <p className="text-red-500 font-medium">Productos Vencidos</p>
                     </div>
-                    <p className="text-sm text-red-500/80">Tienes {dashboardStats?.expiredCount} productos que ya caducaron.</p>
+                    <p className="text-sm text-red-500/80">Tienes {dashboardStats?.expiredCount} productos que ya caducaron en esta sede.</p>
                     <Button 
                       size="sm" 
                       variant="outline" 
@@ -158,7 +158,7 @@ export const DashboardTab = ({
                       <AlertTriangle className="w-5 h-5 text-orange-500" />
                       <p className="text-orange-500 font-medium">Por Vencer Pronto</p>
                     </div>
-                    <p className="text-sm text-orange-500/80">Tienes {dashboardStats?.nearExpiryCount} productos por vencer en los próximos 7 días.</p>
+                    <p className="text-sm text-orange-500/80">Tienes {dashboardStats?.nearExpiryCount} productos por vencer pronto en esta sede.</p>
                     <Button 
                       size="sm" 
                       variant="outline" 
@@ -179,7 +179,7 @@ export const DashboardTab = ({
                       <AlertTriangle className="w-5 h-5 text-yellow-500" />
                       <p className="text-yellow-500 font-medium">Stock Bajo</p>
                     </div>
-                    <p className="text-sm text-yellow-500/80">Tienes {dashboardStats?.lowStockProducts} productos agotándose.</p>
+                    <p className="text-sm text-yellow-500/80">Tienes {dashboardStats?.lowStockProducts} productos agotándose en esta sede.</p>
                     <Button size="sm" variant="outline" className="w-full bg-background/50 border-yellow-500/20 hover:bg-yellow-500/10 cursor-pointer text-yellow-600 dark:text-yellow-400" onClick={() => onPosTabChange("products")}>Ver Inventario</Button>
                   </CardContent>
                 </Card>
@@ -193,7 +193,7 @@ export const DashboardTab = ({
                       <AlertCircle className="w-5 h-5 text-red-500" />
                       <p className="text-red-500 font-medium">Créditos Vencidos</p>
                     </div>
-                    <p className="text-sm text-red-500/80">Hay {overdueCredits.length} créditos que requieren cobro inmediato.</p>
+                    <p className="text-sm text-red-500/80">Hay {overdueCredits.length} créditos vencidos en esta sede que requieren cobro.</p>
                     <Button size="sm" variant="outline" className="w-full bg-background/50 border-red-500/20 hover:bg-red-500/10 cursor-pointer text-red-600 dark:text-red-400" onClick={() => { onPosTabChange("credits"); setCreditFilter("overdue") }}>Gestionar Cobros</Button>
                   </CardContent>
                 </Card>
