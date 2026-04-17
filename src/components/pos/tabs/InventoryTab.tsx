@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { 
-  Upload, Plus, FolderOpen, Settings2, Package, Pencil 
+  Upload, Plus, FolderOpen, Settings2, Package, Pencil, Trash2 
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -18,6 +18,7 @@ interface InventoryTabProps {
   onSetSelectedProductForStock: (product: any) => void
   onSetEditingProduct: (product: any) => void
   onSetProductForm: (form: any) => void
+  onDeleteProduct: (id: string) => void
   userRole?: string
 }
 
@@ -31,6 +32,7 @@ export const InventoryTab = ({
   onSetSelectedProductForStock,
   onSetEditingProduct,
   onSetProductForm,
+  onDeleteProduct,
   userRole
 }: InventoryTabProps) => {
   return (
@@ -99,12 +101,12 @@ export const InventoryTab = ({
                       {product.category.name}
                     </Badge>
                   )}
-                  {userRole === "TENANT_ADMIN" && (
+                  {(userRole === "TENANT_ADMIN" || userRole === "SUPER_ADMIN" || userRole === "WAREHOUSE") && (
                     <>
                       <Button 
                         variant="secondary" 
                         size="icon" 
-                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
+                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation()
                           onSetSelectedProductForStock(product)
@@ -116,7 +118,7 @@ export const InventoryTab = ({
                       <Button 
                         variant="secondary" 
                         size="icon" 
-                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
+                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation()
                           onSetEditingProduct(product)
@@ -124,6 +126,7 @@ export const InventoryTab = ({
                             code: product.code || "",
                             sku: product.sku || "",
                             name: product.name,
+                            description: product.description || "",
                             costPrice: product.costPrice,
                             salePrice: product.salePrice,
                             wholesalePrice: product.wholesalePrice || 0,
@@ -139,6 +142,17 @@ export const InventoryTab = ({
                         }}
                       >
                         <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="icon" 
+                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDeleteProduct(product.id)
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </>
                   )}

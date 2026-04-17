@@ -72,7 +72,7 @@ export const usePOS = (session: any) => {
   
   // Form states
   const [productForm, setProductForm] = useState({
-    code: "", sku: "", name: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
+    code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
     stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
     expiryDate: "", imageUrl: ""
   })
@@ -444,6 +444,8 @@ export const usePOS = (session: any) => {
         ...productForm,
         code: productForm.code?.trim() || null,
         sku: productForm.sku?.trim() || null,
+        name: productForm.name,
+        description: productForm.description,
         costPrice: parseFloat(String(productForm.costPrice)) || 0,
         salePrice: parseFloat(String(productForm.salePrice)) || 0,
         wholesalePrice: productForm.wholesalePrice ? parseFloat(String(productForm.wholesalePrice)) : null,
@@ -464,7 +466,7 @@ export const usePOS = (session: any) => {
         toast.success("Producto creado con éxito")
         setProductDialog(false)
         setProductForm({ 
-          code: "", sku: "", name: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
+          code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
           expiryDate: "", imageUrl: ""
         })
@@ -483,6 +485,9 @@ export const usePOS = (session: any) => {
         ...productForm,
         code: productForm.code?.trim() || null,
         sku: productForm.sku?.trim() || null,
+        name: productForm.name,
+        description: productForm.description,
+        imageUrl: productForm.imageUrl,
         costPrice: parseFloat(String(productForm.costPrice)) || 0,
         salePrice: parseFloat(String(productForm.salePrice)) || 0,
         wholesalePrice: productForm.wholesalePrice ? parseFloat(String(productForm.wholesalePrice)) : null,
@@ -503,7 +508,7 @@ export const usePOS = (session: any) => {
         setProductDialog(false)
         setEditingProduct(null)
         setProductForm({ 
-          code: "", sku: "", name: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
+          code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
           expiryDate: "", imageUrl: ""
         })
@@ -512,6 +517,26 @@ export const usePOS = (session: any) => {
         toast.error(data.error || "Error al actualizar")
       }
     } catch { toast.error("Error de conexión") }
+  }
+
+  const handleDeleteProduct = async (id: string) => {
+    askConfirm(
+      "¿Eliminar producto?",
+      "Esta acción eliminará el producto o lo desactivará si tiene transacciones vinculadas para preservar la integridad de los datos.",
+      async () => {
+        try {
+          const res = await fetch(`/api/products/${id}`, { method: "DELETE" })
+          const data = await res.json()
+          if (data.success) {
+            toast.success(data.message || "Producto eliminado")
+            fetchPOSData()
+            setConfirmDialog(prev => ({ ...prev, open: false }))
+          } else {
+            toast.error(data.error || "No se pudo eliminar")
+          }
+        } catch { toast.error("Error de conexión") }
+      }
+    )
   }
 
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -1437,6 +1462,7 @@ export const usePOS = (session: any) => {
   })
 
   return {
+    session,
     posTab, setPosTab, products, categories, customers, credits,
     dashboardStats, cashRegister, notifications, notificationsOpen, 
     setNotificationsOpen, expenses, branches, setBranches,
@@ -1451,7 +1477,7 @@ export const usePOS = (session: any) => {
     cashDialog, setCashDialog, expenseDialog, setExpenseDialog,
     branchDialog, setBranchDialog, bulkUploadDialog, setBulkUploadDialog,
     userDialog, setUserDialog, productForm, setProductForm,
-    editingProduct, setEditingProduct, handleUpdateProduct,
+    editingProduct, setEditingProduct, handleUpdateProduct, handleDeleteProduct,
     addServiceToCart,
     stockAdjustmentDialog, setStockAdjustmentDialog,
     selectedProductForStock, setSelectedProductForStock,

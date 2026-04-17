@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ImagePlus, X, Loader2, Package } from "lucide-react"
+import { ImagePlus, X, Loader2, Package, AlignLeft } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 
 interface ProductDialogProps {
@@ -16,6 +17,7 @@ interface ProductDialogProps {
   onProductFormChange: (form: any) => void
   categories: any []
   onSubmit: (e: React.FormEvent) => void
+  editingProduct?: any
 }
 
 export const ProductDialog = ({
@@ -24,7 +26,8 @@ export const ProductDialog = ({
   productForm,
   onProductFormChange,
   categories,
-  onSubmit
+  onSubmit,
+  editingProduct
 }: ProductDialogProps) => {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -71,9 +74,11 @@ export const ProductDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Nuevo Producto</DialogTitle>
+          <DialogTitle>{editingProduct ? "Editar Producto" : "Nuevo Producto"}</DialogTitle>
           <DialogDescription>
-            Registra un nuevo producto en tu inventario. Los campos marcados con * son obligatorios.
+            {editingProduct 
+              ? "Modifica la información del producto seleccionado." 
+              : "Registra un nuevo producto en tu inventario. Los campos marcados con * son obligatorios."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
@@ -142,6 +147,17 @@ export const ProductDialog = ({
                    <p className="text-[10px] text-muted-foreground italic">Se recomienda una imagen cuadrada (1:1) de al menos 400x400px.</p>
                 </div>
             </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase font-black tracking-widest flex items-center gap-2">
+                <AlignLeft className="w-3 h-3" /> Descripción
+              </Label>
+              <Textarea 
+                value={productForm.description || ""} 
+                onChange={e => onProductFormChange({ ...productForm, description: e.target.value })} 
+                placeholder="Describe brevemente el producto..." 
+                className="resize-none min-h-[80px]"
+              />
+            </div>
           </div>
             <div className="space-y-2">
               <Label>Precio Costo</Label>
@@ -206,7 +222,7 @@ export const ProductDialog = ({
             </div>
           </div>
           <Button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 mt-4 h-12 text-lg font-bold">
-            Guardar Producto
+            {editingProduct ? "Actualizar Producto" : "Guardar Producto"}
           </Button>
         </form>
       </DialogContent>

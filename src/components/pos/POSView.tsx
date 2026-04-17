@@ -177,6 +177,7 @@ export const POSView = ({
               onSetSelectedProductForStock={pos.setSelectedProductForStock}
               onSetEditingProduct={pos.setEditingProduct}
               onSetProductForm={pos.setProductForm}
+              onDeleteProduct={pos.handleDeleteProduct}
               userRole={pos.session?.user?.role}
             />
           )}
@@ -341,6 +342,7 @@ export const POSView = ({
         onProductFormChange={pos.setProductForm}
         onSubmit={pos.editingProduct ? pos.handleUpdateProduct : pos.handleAddProduct}
         categories={pos.categories}
+        editingProduct={pos.editingProduct}
       />
       <CategoryDialog
         open={pos.categoryDialog}
