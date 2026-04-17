@@ -5,7 +5,8 @@ import { useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle,
-  LayoutGrid, ArrowRightLeft, Minus, Search, Package, RefreshCw
+  LayoutGrid, ArrowRightLeft, Minus, Search, Package, RefreshCw, ShoppingBag, 
+  AlertTriangle, Wallet, CreditCard, FileText, DollarSign
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -67,12 +68,12 @@ interface SaleTabProps {
 export const SaleTab = ({
   cashRegister,
   onOpenCashDialog,
-  products,
-  cart,
+  products = [],
+  cart = [],
   onAddToCart,
   onUpdateCartQuantity,
   onClearCart,
-  customers,
+  customers = [],
   cartCustomer,
   onSetCartCustomer,
   cartPaymentMethod,
@@ -81,7 +82,7 @@ export const SaleTab = ({
   tax,
   total,
   onHandleSale,
-  subscriptionServices,
+  subscriptionServices = [],
   onAddServiceToCart,
   loyaltyConfig,
   redeemPoints,
@@ -105,7 +106,7 @@ export const SaleTab = ({
   onValidateGiftCard,
   appliedGiftCard,
   onPrintGiftCard,
-  cartPayments,
+  cartPayments = [],
   onAddPayment,
   onRemovePayment,
   onUpdatePayment
