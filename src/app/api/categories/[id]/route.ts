@@ -75,18 +75,25 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Categoría no encontrada" }, { status: 404 })
     }
 
-    // Verificar si tiene productos
-    const productCount = await db.product.count({
-      where: { categoryId: id }
-    })
-
-    if (productCount > 0) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "No se puede eliminar una categoría que contiene productos" 
-      }, { status: 400 })
+    // Verificar si tiene productos o servicios vinculados
+    const [productCount, serviceCount] = await Promise.all([
+      db.product.count({ where: { categoryId: id } }),
+      db.subscriptionService.count({ where: { categoryId: id } })
+    ])
+ 
+    if (productCount > 0 || serviceCount > 0) {
+      // En lugar de eliminar, archivar para preservar reportes
+      await db.category.update({
+        where: { id: id },
+        data: { isActive: false }
+      })
+ 
+      return NextResponse.json({
+        success: true,
+        message: "Categoría archivada exitosamente (contiene datos vinculados)"
+      })
     }
-
+ 
     await db.category.delete({
       where: { id: id }
     })

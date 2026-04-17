@@ -157,21 +157,23 @@ export async function DELETE(
       )
     }
 
-    // Verificar si tiene ventas
-    const salesCount = await db.saleItem.count({
-      where: { productId: id }
-    })
-
-    if (salesCount > 0) {
+    // Verificar si tiene ventas, movimientos o está en OCs
+    const [salesCount, movementsCount, ocItemsCount] = await Promise.all([
+      db.saleItem.count({ where: { productId: id } }),
+      db.inventoryMovement.count({ where: { productId: id } }),
+      db.purchaseOrderItem.count({ where: { productId: id } })
+    ])
+ 
+    if (salesCount > 0 || movementsCount > 0 || ocItemsCount > 0) {
       // En lugar de eliminar, desactivar
       await db.product.update({
         where: { id },
         data: { isActive: false }
       })
-
+ 
       return NextResponse.json({
         success: true,
-        message: "Producto desactivado (tiene ventas asociadas)"
+        message: "Producto desactivado (tiene historial de transacciones)"
       })
     }
 
