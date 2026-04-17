@@ -154,6 +154,7 @@ export const POSView = ({
               onAddPayment={pos.handleAddPayment}
               onRemovePayment={pos.handleRemovePayment}
               onUpdatePayment={pos.handleUpdatePayment}
+              userRole={pos.session?.user?.role}
             />
           )}
           {pos.posTab === "loyalty" && (
@@ -249,6 +250,7 @@ export const POSView = ({
               onSetExpenseDialog={pos.setExpenseDialog}
               onPrintSummary={() => pos.setCashReportDialog(true)}
               cashHistory={pos.cashHistory}
+              userRole={pos.session?.user?.role}
             />
           )}
 
@@ -363,6 +365,7 @@ export const POSView = ({
         todayExpenses={pos.todayExpenses}
         paymentAmount={pos.paymentAmount}
         onPaymentAmountChange={pos.setPaymentAmount}
+        userRole={pos.session?.user?.role}
       />
       <PaymentDialog
         open={pos.paymentDialog}

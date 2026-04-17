@@ -191,6 +191,7 @@ model Category {
   color       String?  // Color para identificación visual
   icon        String?  // Emoji o icono
   imageUrl    String?  // URL de la imagen de la categoría
+  isActive    Boolean  @default(true)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

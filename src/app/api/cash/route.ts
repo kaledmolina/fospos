@@ -163,8 +163,8 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    // Calcular el efectivo esperado
-    const expectedCash = openCash.initialCash + openCash.totalCash
+    // Calcular el efectivo esperado: Inicial + Ventas Efectivo - Gastos
+    const expectedCash = openCash.initialCash + openCash.totalCash - (openCash.totalExpenses || 0)
     const difference = finalCash - expectedCash
 
     const closedCash = await db.cashRegister.update({

@@ -16,6 +16,7 @@ interface CashTabProps {
   onSetExpenseDialog: (open: boolean) => void
   onPrintSummary: () => void
   cashHistory: any[]
+  userRole?: string
 }
 
 export const CashTab = ({
@@ -24,8 +25,10 @@ export const CashTab = ({
   todayExpenses,
   onSetExpenseDialog,
   onPrintSummary,
-  cashHistory
+  cashHistory,
+  userRole
 }: CashTabProps) => {
+  const isAdmin = userRole === "TENANT_ADMIN"
   return (
     <motion.div key="cash" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
       <h1 className="text-2xl font-bold text-foreground mb-6">Control de Caja</h1>
@@ -59,22 +62,32 @@ export const CashTab = ({
                     <p className="text-sm text-muted-foreground">Efectivo Inicial</p>
                     <p className="text-2xl font-bold">{formatCurrency(cashRegister.initialCash)}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ventas Totales</p>
-                    <p className="text-2xl font-bold text-emerald-500">{formatCurrency(cashRegister.totalSales)}</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Efectivo</span><span className="font-bold">{formatCurrency(cashRegister.totalCash)}</span></div>
-                  <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Tarjeta</span><span className="font-bold">{formatCurrency(cashRegister.totalCard)}</span></div>
-                  <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Transferencia</span><span className="font-bold">{formatCurrency(cashRegister.totalTransfer)}</span></div>
-                  <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Créditos</span><span className="font-bold">{formatCurrency(cashRegister.totalCredit)}</span></div>
-                  <Separator />
-                  <div className="flex justify-between p-3 bg-emerald-500/10 rounded-lg">
-                    <span className="font-medium">Efectivo Esperado</span>
-                    <span className="font-bold text-emerald-500">{formatCurrency(cashRegister.initialCash + cashRegister.totalCash - todayExpenses)}</span>
-                  </div>
-                </div>
+                  {isAdmin && (
+                    <>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Ventas Totales</p>
+                        <p className="text-2xl font-bold text-emerald-500">{formatCurrency(cashRegister.totalSales)}</p>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Efectivo</span><span className="font-bold">{formatCurrency(cashRegister.totalCash)}</span></div>
+                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Tarjeta</span><span className="font-bold">{formatCurrency(cashRegister.totalCard)}</span></div>
+                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Transferencia</span><span className="font-bold">{formatCurrency(cashRegister.totalTransfer)}</span></div>
+                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Créditos</span><span className="font-bold">{formatCurrency(cashRegister.totalCredit)}</span></div>
+                        <Separator />
+                        <div className="flex justify-between p-3 bg-emerald-500/10 rounded-lg">
+                          <span className="font-medium">Efectivo Esperado</span>
+                          <span className="font-bold text-emerald-500">{formatCurrency(cashRegister.initialCash + cashRegister.totalCash - todayExpenses)}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {!isAdmin && (
+                    <div className="p-4 bg-emerald-500/5 rounded-xl border border-dashed border-emerald-500/20 text-center">
+                       <Receipt className="w-8 h-8 text-emerald-500/40 mx-auto mb-2" />
+                       <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Caja en curso</p>
+                       <p className="text-[10px] text-muted-foreground italic">Los reportes detallados están restringidos al Administrador.</p>
+                    </div>
+                  )}
               </div>
             </CardContent>
           </Card>
@@ -111,7 +124,7 @@ export const CashTab = ({
                     <th className="px-6 py-4">Inicial</th>
                     <th className="px-6 py-4">Ventas</th>
                     <th className="px-6 py-4">Final</th>
-                    <th className="px-6 py-4">Diferencia</th>
+                    {isAdmin && <th className="px-6 py-4">Diferencia</th>}
                     <th className="px-6 py-4">Estado</th>
                   </tr>
                 </thead>
@@ -129,13 +142,15 @@ export const CashTab = ({
                       <td className="px-6 py-4 font-medium">{formatCurrency(item.initialCash)}</td>
                       <td className="px-6 py-4 text-emerald-600 font-bold">{formatCurrency(item.totalSales)}</td>
                       <td className="px-6 py-4 font-bold">{item.finalCash ? formatCurrency(item.finalCash) : "-"}</td>
-                      <td className="px-6 py-4">
-                        {item.status === "CLOSED" ? (
-                          <span className={`${item.difference === 0 ? "text-emerald-500" : item.difference > 0 ? "text-blue-500" : "text-red-500"} font-bold`}>
-                            {formatCurrency(item.difference || 0)}
-                          </span>
-                        ) : "-"}
-                      </td>
+                      {isAdmin && (
+                        <td className="px-6 py-4">
+                          {item.status === "CLOSED" ? (
+                            <span className={`${item.difference === 0 ? "text-emerald-500" : item.difference > 0 ? "text-blue-500" : "text-red-500"} font-bold`}>
+                              {formatCurrency(item.difference || 0)}
+                            </span>
+                          ) : "-"}
+                        </td>
+                      )}
                       <td className="px-6 py-4">
                         <Badge variant={item.status === "OPEN" ? "success" : "secondary"}>
                           {item.status === "OPEN" ? "Abierta" : "Cerrada"}
