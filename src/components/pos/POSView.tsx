@@ -19,6 +19,7 @@ import { GiftCardsTab } from "./tabs/GiftCardsTab"
 import { AdvancedInventoryTab } from "./tabs/AdvancedInventoryTab"
 import { SuppliersTab } from "./tabs/SuppliersTab"
 import { SettingsTab } from "./tabs/SettingsTab"
+import { LogsTab } from "./tabs/LogsTab"
 import { StockAdjustmentDialog } from "./dialogs/StockAdjustmentDialog"
 import { ProductDialog } from "./dialogs/ProductDialog"
 import { CategoryDialog } from "./dialogs/CategoryDialog"
@@ -83,6 +84,9 @@ export const POSView = ({
           }
           if (tab === "suppliers") {
             pos.fetchPOSData() // Reutilizamos para cargar proveedores
+          }
+          if (tab === "logs") {
+            pos.fetchActivityLogs()
           }
         }}
         sidebarOpen={sidebarOpen}
@@ -320,6 +324,12 @@ export const POSView = ({
             <GiftCardsTab 
               giftCards={pos.giftCards} 
               onPrintCard={pos.handlePrintGiftCard} 
+            />
+          )}
+          {pos.posTab === "logs" && (
+            <LogsTab 
+              logs={pos.activityLogs}
+              fetchLogs={pos.fetchActivityLogs}
             />
           )}
           {pos.posTab === "advanced-inventory" && (
