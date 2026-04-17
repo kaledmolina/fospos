@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { 
-  Upload, Plus, FolderOpen, Settings2, Package
+  Upload, Plus, FolderOpen, Settings2, Package, Pencil 
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -18,6 +18,8 @@ interface InventoryTabProps {
   onSetBulkUploadDialog: (open: boolean) => void
   onSetStockAdjustmentDialog: (open: boolean) => void
   onSetSelectedProductForStock: (product: any) => void
+  onSetEditingProduct: (product: any) => void
+  onSetProductForm: (form: any) => void
 }
 
 export const InventoryTab = ({
@@ -27,7 +29,9 @@ export const InventoryTab = ({
   onSetCategoryDialog,
   onSetBulkUploadDialog,
   onSetStockAdjustmentDialog,
-  onSetSelectedProductForStock
+  onSetSelectedProductForStock,
+  onSetEditingProduct,
+  onSetProductForm
 }: InventoryTabProps) => {
   return (
     <motion.div key="products" variants={fadeInUp} initial="initial" animate="animate" exit="exit">
@@ -106,6 +110,33 @@ export const InventoryTab = ({
                     }}
                   >
                     <Settings2 className="w-4 h-4" />
+                  </Button>
+                   <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSetEditingProduct(product)
+                      onSetProductForm({
+                        code: product.code || "",
+                        sku: product.sku || "",
+                        name: product.name,
+                        costPrice: product.costPrice,
+                        salePrice: product.salePrice,
+                        wholesalePrice: product.wholesalePrice || 0,
+                        stock: product.stock,
+                        minStock: product.minStock,
+                        unit: product.unit,
+                        categoryId: product.categoryId || "",
+                        isActive: product.isActive,
+                        expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : "",
+                        imageUrl: product.imageUrl || ""
+                      })
+                      onSetProductDialog(true)
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" />
                   </Button>
                 </div>
                 {product.stock < product.minStock && (

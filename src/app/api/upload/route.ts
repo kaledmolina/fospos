@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get("file") as File | null
+    const folder = (formData.get("folder") as string) || "products"
 
     if (!file) {
       return NextResponse.json(
@@ -50,14 +51,14 @@ export async function POST(request: NextRequest) {
     const filename = `${uuidv4()}.${extension}`
     
     // Ruta de guardado
-    const uploadDir = join(process.cwd(), "public", "uploads", "products")
+    const uploadDir = join(process.cwd(), "public", "uploads", folder)
     const path = join(uploadDir, filename)
 
     // Escribir archivo
     await writeFile(path, buffer)
 
     // Retornar la URL relativa
-    const imageUrl = `/uploads/products/${filename}`
+    const imageUrl = `/uploads/${folder}/${filename}`
 
     return NextResponse.json({
       success: true,

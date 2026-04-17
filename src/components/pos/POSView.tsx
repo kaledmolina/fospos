@@ -173,6 +173,8 @@ export const POSView = ({
               onSetBulkUploadDialog={pos.setBulkUploadDialog}
               onSetStockAdjustmentDialog={pos.setStockAdjustmentDialog}
               onSetSelectedProductForStock={pos.setSelectedProductForStock}
+              onSetEditingProduct={pos.setEditingProduct}
+              onSetProductForm={pos.setProductForm}
             />
           )}
           {pos.posTab === "categories" && (
@@ -324,10 +326,13 @@ export const POSView = ({
       {/* Dialogs */}
       <ProductDialog
         open={pos.productDialog}
-        onOpenChange={pos.setProductDialog}
+        onOpenChange={(open) => {
+          pos.setProductDialog(open)
+          if (!open) pos.setEditingProduct(null)
+        }}
         productForm={pos.productForm}
         onProductFormChange={pos.setProductForm}
-        onSubmit={pos.handleAddProduct}
+        onSubmit={pos.editingProduct ? pos.handleUpdateProduct : pos.handleAddProduct}
         categories={pos.categories}
       />
       <CategoryDialog

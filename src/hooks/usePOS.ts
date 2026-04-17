@@ -74,9 +74,9 @@ export const usePOS = (session: any) => {
   const [productForm, setProductForm] = useState({
     code: "", sku: "", name: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
     stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
-    expiryDate: ""
+    expiryDate: "", imageUrl: ""
   })
-  const [categoryForm, setCategoryForm] = useState({ name: "", description: "", color: "#10B981", icon: "🏷️" })
+  const [categoryForm, setCategoryForm] = useState({ name: "", description: "", color: "#10B981", icon: "🏷️", imageUrl: "" })
   const [customerForm, setCustomerForm] = useState({ name: "", document: "", phone: "", email: "", address: "", creditLimit: 0 })
   const [supplierForm, setSupplierForm] = useState({ name: "", nit: "", phone: "", email: "", address: "", notes: "" })
   const [editingSupplier, setEditingSupplier] = useState<any | null>(null)
@@ -97,6 +97,7 @@ export const usePOS = (session: any) => {
   const [editingBranch, setEditingBranch] = useState<BranchData | null>(null)
   const [editingUser, setEditingUser] = useState<TenantUserData | null>(null)
   const [editingCategory, setEditingCategory] = useState<any | null>(null)
+  const [editingProduct, setEditingProduct] = useState<any | null>(null)
   const [userForm, setUserForm] = useState({
     name: "", email: "", password: "", role: "CASHIER", branchId: "", phone: ""
   })
@@ -459,13 +460,52 @@ export const usePOS = (session: any) => {
         setProductForm({ 
           code: "", sku: "", name: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
-          expiryDate: ""
+          expiryDate: "", imageUrl: ""
         })
         fetchPOSData()
       } else {
         toast.error(data.error || "Error al crear producto", { duration: 4000 })
       }
     } catch { toast.error("Error de conexión al servidor") }
+  }
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingProduct) return
+    try {
+      const payload = {
+        ...productForm,
+        code: productForm.code?.trim() || null,
+        sku: productForm.sku?.trim() || null,
+        costPrice: parseFloat(String(productForm.costPrice)) || 0,
+        salePrice: parseFloat(String(productForm.salePrice)) || 0,
+        wholesalePrice: productForm.wholesalePrice ? parseFloat(String(productForm.wholesalePrice)) : null,
+        stock: parseInt(String(productForm.stock)) || 0,
+        minStock: parseInt(String(productForm.minStock)) || 5,
+        expiryDate: productForm.expiryDate && productForm.expiryDate !== "" ? productForm.expiryDate : null,
+        categoryId: productForm.categoryId || null
+      }
+
+      const res = await fetch(`/api/products/${editingProduct.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("Producto actualizado")
+        setProductDialog(false)
+        setEditingProduct(null)
+        setProductForm({ 
+          code: "", sku: "", name: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
+          stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
+          expiryDate: "", imageUrl: ""
+        })
+        fetchPOSData()
+      } else {
+        toast.error(data.error || "Error al actualizar")
+      }
+    } catch { toast.error("Error de conexión") }
   }
 
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -483,7 +523,7 @@ export const usePOS = (session: any) => {
       if (data.success) {
         toast.success("Categoría creada con éxito")
         setCategoryDialog(false)
-        setCategoryForm({ name: "", description: "", color: "#10B981", icon: "🏷️" })
+        setCategoryForm({ name: "", description: "", color: "#10B981", icon: "🏷️", imageUrl: "" })
         fetchPOSData()
       } else {
         toast.error(data.error || "Error al crear categoría")
@@ -505,7 +545,7 @@ export const usePOS = (session: any) => {
         toast.success("Categoría actualizada")
         setCategoryDialog(false)
         setEditingCategory(null)
-        setCategoryForm({ name: "", description: "", color: "#10B981", icon: "🏷️" })
+        setCategoryForm({ name: "", description: "", color: "#10B981", icon: "🏷️", imageUrl: "" })
         fetchPOSData()
       } else {
         toast.error(data.error || "Error al actualizar")
@@ -1405,6 +1445,7 @@ export const usePOS = (session: any) => {
     cashDialog, setCashDialog, expenseDialog, setExpenseDialog,
     branchDialog, setBranchDialog, bulkUploadDialog, setBulkUploadDialog,
     userDialog, setUserDialog, productForm, setProductForm,
+    editingProduct, setEditingProduct, handleUpdateProduct,
     addServiceToCart,
     stockAdjustmentDialog, setStockAdjustmentDialog,
     selectedProductForStock, setSelectedProductForStock,

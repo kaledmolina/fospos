@@ -28,7 +28,7 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { name, description, color, icon } = body
+    const { name, description, color, icon, imageUrl } = body
 
     const category = await db.category.update({
       where: { id: id },
@@ -36,7 +36,8 @@ export async function PATCH(
         name,
         description,
         color,
-        icon
+        icon,
+        imageUrl
       }
     })
 

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, description, color, icon } = body
+    const { name, description, color, icon, imageUrl } = body
 
     if (!name) {
       return NextResponse.json(
@@ -93,7 +93,8 @@ export async function POST(request: NextRequest) {
         name,
         description,
         color,
-        icon
+        icon,
+        imageUrl
       }
     })
 

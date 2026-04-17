@@ -60,24 +60,30 @@ export const CategoriesTab = ({
           >
             <Card className="overflow-hidden border-l-4" style={{ borderLeftColor: cat.color }}>
               <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shadow-sm"
-                      style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
-                    >
-                      {cat.icon || "🏷️"}
-                    </div>
-                    <div>
-                      <h3 className="font-bold">{cat.name}</h3>
-                      <p className="text-xs text-muted-foreground truncate max-w-[150px]">
-                        {cat.description || "Sin descripción"}
-                      </p>
+                <div className="flex gap-4">
+                  <div 
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner overflow-hidden shrink-0"
+                    style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
+                  >
+                    {cat.imageUrl ? (
+                      <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover" />
+                    ) : (
+                      cat.icon || "🏷️"
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-black text-slate-800 dark:text-zinc-100 truncate">{cat.name}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          {cat.description || "Sin descripción"}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm text-[10px] font-black uppercase text-slate-500 shadow-sm">
+                        {cat._count?.products || 0} Prod.
+                      </Badge>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    {cat._count?.products || 0} Productos
-                  </Badge>
                 </div>
 
                 <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 relative z-20">
