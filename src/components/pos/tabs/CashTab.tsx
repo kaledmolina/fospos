@@ -63,31 +63,34 @@ export const CashTab = ({
                     <p className="text-2xl font-bold">{formatCurrency(cashRegister.initialCash)}</p>
                   </div>
                   {isAdmin && (
-                    <>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Ventas Totales</p>
-                        <p className="text-2xl font-bold text-emerald-500">{formatCurrency(cashRegister.totalSales)}</p>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Efectivo</span><span className="font-bold">{formatCurrency(cashRegister.totalCash)}</span></div>
-                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Tarjeta</span><span className="font-bold">{formatCurrency(cashRegister.totalCard)}</span></div>
-                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Transferencia</span><span className="font-bold">{formatCurrency(cashRegister.totalTransfer)}</span></div>
-                        <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Créditos</span><span className="font-bold">{formatCurrency(cashRegister.totalCredit)}</span></div>
-                        <Separator />
-                        <div className="flex justify-between p-3 bg-emerald-500/10 rounded-lg">
-                          <span className="font-medium">Efectivo Esperado</span>
-                          <span className="font-bold text-emerald-500">{formatCurrency(cashRegister.initialCash + cashRegister.totalCash - todayExpenses)}</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  {!isAdmin && (
-                    <div className="p-4 bg-emerald-500/5 rounded-xl border border-dashed border-emerald-500/20 text-center">
-                       <Receipt className="w-8 h-8 text-emerald-500/40 mx-auto mb-2" />
-                       <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Caja en curso</p>
-                       <p className="text-[10px] text-muted-foreground italic">Los reportes detallados están restringidos al Administrador.</p>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Ventas Totales</p>
+                      <p className="text-2xl font-bold text-emerald-500">{formatCurrency(cashRegister.totalSales)}</p>
                     </div>
                   )}
+                </div>
+
+                <div className="space-y-3">
+                  {isAdmin ? (
+                    <>
+                      <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Efectivo</span><span className="font-bold">{formatCurrency(cashRegister.totalCash)}</span></div>
+                      <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Tarjeta</span><span className="font-bold">{formatCurrency(cashRegister.totalCard)}</span></div>
+                      <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Transferencia</span><span className="font-bold">{formatCurrency(cashRegister.totalTransfer)}</span></div>
+                      <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Créditos</span><span className="font-bold">{formatCurrency(cashRegister.totalCredit)}</span></div>
+                      <Separator />
+                      <div className="flex justify-between p-3 bg-emerald-500/10 rounded-lg">
+                        <span className="font-medium">Efectivo Esperado</span>
+                        <span className="font-bold text-emerald-500">{formatCurrency(cashRegister.initialCash + cashRegister.totalCash - todayExpenses)}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-6 bg-emerald-500/5 rounded-2xl border border-dashed border-emerald-500/20 text-center flex flex-col items-center justify-center h-full">
+                       <Receipt className="w-10 h-10 text-emerald-500/40 mb-3" />
+                       <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Arqueo Ciego Activo</p>
+                       <p className="text-[10px] text-muted-foreground italic max-w-[180px] mx-auto">Los reportes detallados están restringidos al Administrador por seguridad.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
