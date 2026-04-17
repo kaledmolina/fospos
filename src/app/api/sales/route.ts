@@ -210,15 +210,6 @@ export async function GET(request: NextRequest) {
           });
         }
 
-        const lowStockItems = mappedProducts
-          .filter(p => p.currentStock < p.currentMinStock)
-          .map(p => ({
-            id: p.id,
-            name: p.name,
-            stock: p.currentStock,
-            minStock: p.currentMinStock
-          }));
-
         return NextResponse.json({
           success: true,
           data: {
