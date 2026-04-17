@@ -18,6 +18,7 @@ import { LoyaltyConfigTab } from "./tabs/LoyaltyConfigTab"
 import { GiftCardsTab } from "./tabs/GiftCardsTab"
 import { AdvancedInventoryTab } from "./tabs/AdvancedInventoryTab"
 import { SuppliersTab } from "./tabs/SuppliersTab"
+import { SettingsTab } from "./tabs/SettingsTab"
 import { StockAdjustmentDialog } from "./dialogs/StockAdjustmentDialog"
 import { ProductDialog } from "./dialogs/ProductDialog"
 import { CategoryDialog } from "./dialogs/CategoryDialog"
@@ -178,6 +179,9 @@ export const POSView = ({
               onSetProductForm={pos.setProductForm}
               userRole={pos.session?.user?.role}
             />
+          )}
+          {pos.posTab === "settings" && (
+            <SettingsTab userRole={pos.session?.user?.role} />
           )}
           {pos.posTab === "categories" && (
             <CategoriesTab
