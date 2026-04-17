@@ -40,11 +40,7 @@ export async function GET(request: NextRequest) {
       where: { 
         tenantId, 
         isActive: true,
-        ...(branchId && branchId !== "null" && branchId !== "undefined" ? {
-          stockByBranch: {
-            some: { branchId }
-          }
-        } : {})
+        ...(branchId && branchId !== "null" && branchId !== "undefined" && branchId !== "" ? { branchId } : {})
       },
       include: {
         stockByBranch: branchId && branchId !== "null" && branchId !== "undefined" ? {
