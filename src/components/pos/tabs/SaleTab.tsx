@@ -175,16 +175,39 @@ export const SaleTab = ({
                           <Button
                             variant="outline"
                             disabled={product.stock <= 0}
-                            className={`h-auto p-3 w-full flex flex-col items-start cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-emerald-300 ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
+                            className={`h-auto p-0 w-full flex flex-col items-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-emerald-400 overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border-slate-100 dark:border-zinc-800 ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
                             onClick={() => onAddToCart(product)}
                           >
-                            <div className="flex items-center justify-between w-full">
-                              <p className="font-medium text-left truncate flex-1">{product.name}</p>
-                              {product.stock <= 0 && <Badge variant="destructive" className="ml-2 text-[8px] uppercase font-black">Agotado</Badge>}
+                            <div className="relative w-full aspect-[4/3] bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+                              {product.imageUrl ? (
+                                <img 
+                                  src={product.imageUrl} 
+                                  alt={product.name} 
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-zinc-700">
+                                  <Package className="w-8 h-8 opacity-20" />
+                                </div>
+                              )}
+                              {product.stock <= 0 && (
+                                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                                  <Badge variant="destructive" className="text-[10px] font-black uppercase tracking-widest shadow-lg">Agotado</Badge>
+                                </div>
+                              )}
+                              <div className="absolute top-2 right-2">
+                                <Badge className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-[10px] font-black text-emerald-600 border-none shadow-sm">
+                                  {formatCurrency(product.salePrice)}
+                                </Badge>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between w-full mt-1">
-                              <p className={`font-bold ${product.stock <= 0 ? 'text-muted-foreground' : 'text-emerald-500'}`}>{formatCurrency(product.salePrice)}</p>
-                              <Badge variant="outline" className={`text-xs ${product.stock < 10 ? 'border-red-500/50 text-red-500 bg-red-500/5' : 'text-muted-foreground'}`}>{product.stock} {product.unit}</Badge>
+                            
+                            <div className="p-3 w-full space-y-1 bg-white dark:bg-zinc-900">
+                              <p className="font-bold text-xs text-left truncate w-full text-slate-800 dark:text-zinc-200">{product.name}</p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">{product.category?.name || "Sin cat."}</span>
+                                <span className={`text-[10px] font-black ${product.stock < 10 ? 'text-red-500' : 'text-emerald-500'}`}>{product.stock} {product.unit}</span>
+                              </div>
                             </div>
                           </Button>
                         </motion.div>

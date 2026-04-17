@@ -72,54 +72,69 @@ export const InventoryTab = ({
             whileHover={{ scale: 1.02, y: -4 }}
             transition={{ duration: 0.2 }}
           >
-            <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 ${!product.isActive ? "opacity-50" : ""}`}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
+            <Card className={`group cursor-pointer transition-all duration-300 hover:shadow-2xl hover:border-emerald-500/30 overflow-hidden rounded-[2rem] border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/50 backdrop-blur-sm ${!product.isActive ? "opacity-50" : ""}`}>
+              <div className="relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-zinc-900">
+                {product.imageUrl ? (
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-zinc-800">
+                    <Package className="w-12 h-12 mb-2 opacity-20" />
+                    <span className="text-[10px] uppercase font-black tracking-widest opacity-20">Sin Imagen</span>
+                  </div>
+                )}
+                <div className="absolute top-3 right-3 flex flex-col gap-2">
+                   {product.category && (
+                    <Badge 
+                      className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-none shadow-sm text-[10px] font-black uppercase text-slate-700 dark:text-zinc-300"
+                      style={{ borderLeft: `3px solid ${product.category.color || '#10b981'}` }}
+                    >
+                      {product.category.name}
+                    </Badge>
+                  )}
+                   <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSetSelectedProductForStock(product)
+                      onSetStockAdjustmentDialog(true)
+                    }}
+                  >
+                    <Settings2 className="w-4 h-4" />
+                  </Button>
+                </div>
+                {product.stock < product.minStock && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-red-500/90 backdrop-blur-sm p-1.5 text-center">
+                    <p className="text-[9px] text-white font-black uppercase tracking-[0.2em]">⚠️ Stock Bajo</p>
+                  </div>
+                )}
+              </div>
+
+              <CardContent className="p-5">
+                <div className="space-y-3">
                   <div>
-                    <p className="font-medium">{product.name}</p>
-                    <div className="flex flex-col gap-0.5">
-                      {product.code && <p className="text-xs text-muted-foreground">Barras: {product.code}</p>}
-                      {product.sku && <p className="text-xs text-blue-500 font-medium">SKU: {product.sku}</p>}
+                    <h3 className="font-black text-slate-800 dark:text-zinc-100 leading-tight truncate">{product.name}</h3>
+                    <div className="flex gap-2 mt-1">
+                       {product.sku && <Badge variant="secondary" className="text-[8px] bg-blue-500/10 text-blue-600 border-none font-black">{product.sku}</Badge>}
+                       {product.code && <Badge variant="secondary" className="text-[8px] bg-slate-100 dark:bg-zinc-800 text-slate-500 border-none font-bold italic">{product.code}</Badge>}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {product.category && (
-                      <Badge variant="outline" style={{ borderColor: product.category.color || undefined }}>
-                        {product.category.name}
-                      </Badge>
-                    )}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="w-7 h-7 rounded-full hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onSetSelectedProductForStock(product)
-                        onSetStockAdjustmentDialog(true)
-                      }}
-                    >
-                      <Settings2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-lg font-bold text-emerald-500">{formatCurrency(product.salePrice)}</p>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{product.stock} {product.unit}</p>
-                    <div className="flex flex-col items-end mt-1">
-                      {product.stock < product.minStock && <p className="text-[10px] text-red-500 font-bold uppercase tracking-wider">⚠️ Stock bajo</p>}
-                      {product.expiryDate && (
-                        (() => {
-                          const expiry = new Date(product.expiryDate);
-                          const now = new Date();
-                          const diff = expiry.getTime() - now.getTime();
-                          const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                          
-                          if (days < 0) return <p className="text-[10px] text-red-600 font-bold uppercase tracking-wider animate-pulse">🚫 Vencido</p>;
-                          if (days <= 7) return <p className="text-[10px] text-orange-500 font-bold uppercase tracking-wider">⏳ Vence pronto</p>;
-                          return null;
-                        })()
-                      )}
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-zinc-900">
+                    <div>
+                      <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest">Precio</p>
+                      <p className="text-lg font-black text-emerald-500">{formatCurrency(product.salePrice)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest">Stock</p>
+                      <p className={`font-black ${product.stock < product.minStock ? 'text-red-500' : 'text-slate-700 dark:text-zinc-300'}`}>
+                        {product.stock} <span className="text-[10px] font-bold text-muted-foreground">{product.unit}</span>
+                      </p>
                     </div>
                   </div>
                 </div>
