@@ -59,11 +59,48 @@ export const BranchDialog = ({
               Este valor define el 100% de cumplimiento en el gráfico del Dashboard.
             </p>
           </div>
+          <div className="space-y-4 pt-2 border-t">
+            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Identidad Visual</Label>
+            
+            <div className="space-y-2">
+              <Label>URL del Logo de la Sede</Label>
+              <Input 
+                value={branchForm.logoUrl || ""} 
+                onChange={e => onBranchFormChange({ ...branchForm, logoUrl: e.target.value })} 
+                placeholder="https://ejemplo.com/logo-sede.png" 
+              />
+              <p className="text-[9px] text-muted-foreground">Si se deja vacío, se usará el logo principal del negocio.</p>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Color de Marca de la Sede</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { name: 'Esmeralda', hex: '#10b981' },
+                  { name: 'Rojo', hex: '#ef4444' },
+                  { name: 'Azul', hex: '#3b82f6' },
+                  { name: 'Violeta', hex: '#8b5cf6' },
+                  { name: 'Ámbar', hex: '#f59e0b' },
+                  { name: 'Rosa', hex: '#ec4899' },
+                ].map((color) => (
+                  <button
+                    key={color.hex}
+                    type="button"
+                    onClick={() => onBranchFormChange({ ...branchForm, themeColor: color.hex })}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${branchForm.themeColor === color.hex ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-transparent hover:scale-105'}`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center gap-2">
             <Switch checked={branchForm.isMain} onCheckedChange={v => onBranchFormChange({ ...branchForm, isMain: v })} />
             <Label>Sucursal Principal</Label>
           </div>
-          <Button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200">
+          <Button type="submit" className="w-full bg-primary hover:opacity-90 cursor-pointer transition-all duration-200 shadow-lg shadow-primary/20">
             {editingBranch ? "Actualizar Sucursal" : "Crear Sucursal"}
           </Button>
         </form>

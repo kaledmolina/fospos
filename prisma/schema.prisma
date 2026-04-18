@@ -83,6 +83,8 @@ model Branch {
   isActive      Boolean  @default(true)
   isMain        Boolean  @default(false) // Sucursal principal
   monthlyGoal   Float    @default(0)     // Meta de ventas mensual
+  logoUrl       String?  // Logo específico de la sede
+  themeColor    String?  @default("#10b981") // Color de marca de la sede (Emerald-500 por defecto)
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

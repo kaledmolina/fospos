@@ -91,7 +91,8 @@ export const usePOS = (session: any) => {
     date: new Date().toISOString().split('T')[0], notes: ""
   })
   const [branchForm, setBranchForm] = useState({
-    name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0
+    name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0,
+    logoUrl: "", themeColor: "#10b981"
   })
   const [bulkUploadData, setBulkUploadData] = useState("")
   const [editingBranch, setEditingBranch] = useState<BranchData | null>(null)
@@ -547,6 +548,38 @@ export const usePOS = (session: any) => {
       setCartPayments([{ method: cartPaymentMethod, amount: total }])
     }
   }, [cart.length, cartDiscount, redeemPoints, appliedCoupon, cartPaymentMethod])
+
+  // Aplicar tema de la sede dinámicamente
+  useEffect(() => {
+    if (!selectedBranch || branches.length === 0) return
+    const branch = branches.find((b: any) => b.id === selectedBranch)
+    if (branch?.themeColor) {
+      document.documentElement.style.setProperty('--primary', hexToOklch(branch.themeColor))
+      // Opcional: --sidebar-primary también
+      document.documentElement.style.setProperty('--sidebar-primary', hexToOklch(branch.themeColor))
+    } else {
+      // Valor por defecto (Emerald-500 premium approx en oklch)
+      document.documentElement.style.setProperty('--primary', 'oklch(0.65 0.18 160)')
+      document.documentElement.style.setProperty('--sidebar-primary', 'oklch(0.65 0.18 160)')
+    }
+  }, [selectedBranch, branches])
+
+  // Helper para convertir HEX a OKLCH (simplificado para el tema del POS)
+  function hexToOklch(hex: string) {
+    // Para simplificar, si es el verde estándar devolvemos el valor premium exacto
+    if (hex.toLowerCase() === '#10b981') return 'oklch(0.65 0.18 160)'
+    
+    // Mapeo básico de colores premium si el usuario elige otros comunes
+    const matches: Record<string, string> = {
+      '#ef4444': 'oklch(0.6 0.25 25)',  // Rojo
+      '#3b82f6': 'oklch(0.6 0.18 250)', // Azul
+      '#8b5cf6': 'oklch(0.6 0.18 290)', // Violeta
+      '#f59e0b': 'oklch(0.7 0.15 60)',  // Ámbar
+      '#ec4899': 'oklch(0.65 0.2 330)', // Rosa
+    }
+    
+    return matches[hex.toLowerCase()] || 'oklch(0.65 0.18 160)'
+  }
 
   // Handlers
   const handleAddProduct = async (e: React.FormEvent) => {
@@ -1274,7 +1307,7 @@ export const usePOS = (session: any) => {
         toast.success(editingBranch ? "Sucursal actualizada" : "Sucursal creada")
         setBranchDialog(false)
         setEditingBranch(null)
-        setBranchForm({ name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0 })
+        setBranchForm({ name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0, logoUrl: "", themeColor: "#10b981" })
         fetchBranches()
       } else {
         toast.error(data.error || "Error al procesar sucursal")

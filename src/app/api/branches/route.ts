@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, address, phone, city, isMain, monthlyGoal } = body
+    const { name, address, phone, city, isMain, monthlyGoal, logoUrl, themeColor } = body
 
     if (!name) {
       return NextResponse.json({ success: false, error: "El nombre es requerido" }, { status: 400 })
@@ -75,7 +75,9 @@ export async function POST(request: NextRequest) {
         phone,
         city,
         isMain: shouldBeMain,
-        monthlyGoal: parseFloat(monthlyGoal) || 0
+        monthlyGoal: parseFloat(monthlyGoal) || 0,
+        logoUrl: logoUrl || null,
+        themeColor: themeColor || "#10b981"
       }
     })
 
@@ -116,7 +118,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { id, name, address, phone, city, isMain, monthlyGoal } = body
+    const { id, name, address, phone, city, isMain, monthlyGoal, logoUrl, themeColor } = body
 
     if (!id || !name) {
       return NextResponse.json({ success: false, error: "ID y nombre son requeridos" }, { status: 400 })
@@ -138,7 +140,9 @@ export async function PUT(request: NextRequest) {
         phone,
         city,
         isMain,
-        monthlyGoal: parseFloat(monthlyGoal) || 0
+        monthlyGoal: parseFloat(monthlyGoal) || 0,
+        logoUrl: logoUrl !== undefined ? logoUrl : undefined,
+        themeColor: themeColor !== undefined ? themeColor : undefined
       }
     })
 
