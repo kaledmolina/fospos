@@ -343,6 +343,7 @@ export const POSView = ({
             <AdvancedInventoryTab 
               products={pos.products}
               branches={pos.branches}
+              onRefreshData={pos.fetchPOSData}
             />
           )}
         </AnimatePresence>

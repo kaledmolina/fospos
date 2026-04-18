@@ -23,9 +23,10 @@ import { toast } from "sonner"
 interface AdvancedInventoryTabProps {
   products: any[]
   branches: any[]
+  onRefreshData?: () => void
 }
 
-export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTabProps) => {
+export const AdvancedInventoryTab = ({ products, branches, onRefreshData }: AdvancedInventoryTabProps) => {
   const [activeTab, setActiveTab] = useState("kardex")
   const [movements, setMovements] = useState<any[]>([])
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([])
@@ -110,6 +111,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
       if (data.success) {
         toast.success("Mercancía recibida y stock actualizado")
         fetchPurchaseOrders()
+        if (onRefreshData) onRefreshData()
       } else {
         toast.error(data.error)
       }

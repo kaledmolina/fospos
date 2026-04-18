@@ -62,7 +62,7 @@ export async function PATCH(
               tenantId: session.user.tenantId,
               productId: item.productId,
               branchId: po.branchId || "",
-              type: "PURCHASE",
+              type: "IN",
               quantity: item.quantity,
               previousStock,
               newStock,
