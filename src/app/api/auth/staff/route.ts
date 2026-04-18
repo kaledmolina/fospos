@@ -37,6 +37,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Buscar sucursales activas
+    const branches = await db.branch.findMany({
+      where: { tenantId: tenant.id, isActive: true },
+      select: { id: true, name: true, isMain: true },
+      orderBy: { isMain: "desc" }
+    })
+
     // Buscar usuarios que no sean administradores (CASHIER, WAREHOUSE)
     const staff = await db.user.findMany({
       where: { 
@@ -48,7 +55,10 @@ export async function GET(request: NextRequest) {
         id: true,
         name: true,
         role: true,
-        email: true // Necesario para el login automático con el PIN
+        email: true,
+        branches: {
+          select: { id: true }
+        }
       },
       orderBy: { name: "asc" }
     })
@@ -57,7 +67,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         businessName: tenant.businessName,
-        staff: staff
+        staff: staff,
+        branches: branches
       }
     })
   } catch (error) {

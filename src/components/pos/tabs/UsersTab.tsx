@@ -70,7 +70,7 @@ export const UsersTab = ({
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Usuarios</h1>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 shadow-md shadow-emerald-500/25" onClick={() => { onSetEditingUser(null); onSetUserForm({ name: "", email: "", password: "", role: "CASHIER", branchId: "", phone: "" }); onSetUserDialog(true) }}>
+          <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 shadow-md shadow-emerald-500/25" onClick={() => { onSetEditingUser(null); onSetUserForm({ name: "", email: "", password: "", role: "CASHIER", branchIds: [], phone: "" }); onSetUserDialog(true) }}>
             <Plus className="w-4 h-4 mr-2" />Nuevo Usuario
           </Button>
         </motion.div>
@@ -132,8 +132,12 @@ export const UsersTab = ({
                           {!user.isActive && <Badge variant="outline" className="border-red-500/20 text-red-500 bg-red-500/10"><XCircle className="w-3 h-3 mr-1" /> Inactivo</Badge>}
                         </div>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
-                        <div className="flex items-center gap-4 mt-1">
-                          {user.branch && <p className="text-xs text-muted-foreground flex items-center gap-1"><Building2 className="w-3 h-3" /> {user.branch.name}</p>}
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          {user.branches && user.branches.map((b: any) => (
+                            <p key={b.id} className="text-[10px] font-bold text-muted-foreground flex items-center gap-1 bg-muted px-1.5 py-0.5 rounded-full">
+                              <Building2 className="w-2.5 h-2.5" /> {b.name}
+                            </p>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -143,7 +147,18 @@ export const UsersTab = ({
                           <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => onToggleUserActive(user.id, user.isActive)}>
                             {user.isActive ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                           </Button>
-                          <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => { onSetEditingUser(user); onSetUserForm({ name: user.name, email: user.email, password: "", role: user.role, branchId: user.branch?.id || "", phone: user.phone || "" }); onSetUserDialog(true) }}>
+                          <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => { 
+                            onSetEditingUser(user); 
+                            onSetUserForm({ 
+                              name: user.name, 
+                              email: user.email, 
+                              password: "", 
+                              role: user.role, 
+                              branchIds: user.branches?.map((b: any) => b.id) || [], 
+                              phone: user.phone || "" 
+                            }); 
+                            onSetUserDialog(true) 
+                          }}>
                             <Edit className="w-4 h-4" />
                           </Button>
                           <Button variant="outline" size="sm" className="text-red-600 cursor-pointer" onClick={() => onDeleteUser(user.id)}>

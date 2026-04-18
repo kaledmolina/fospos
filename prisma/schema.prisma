@@ -90,7 +90,7 @@ model Branch {
   cashRegisters CashRegister[]
   sales         Sale[]
   inventoryMovements InventoryMovement[]
-  users         User[]
+  users         User[]   @relation("UserBranches")
   credits       Credit[]
   expenses      Expense[]
   purchaseOrders PurchaseOrder[]
@@ -116,9 +116,8 @@ model User {
   tenantId      String?
   tenant        Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
-  // Sucursal asignada (para cajeros y usuarios de sucursal)
-  branchId      String?
-  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  // Sucursales asignadas (para cajeros y usuarios de sucursal)
+  branches      Branch[] @relation("UserBranches")
   
   // Estado del usuario
   isActive      Boolean  @default(true)

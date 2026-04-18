@@ -16,18 +16,24 @@ interface StaffAccessViewProps {
 }
 
 export const StaffAccessView = ({ onLogin, loading }: StaffAccessViewProps) => {
-  const [step, setStep] = useState<"nit" | "staff" | "pin">("nit")
+  const [step, setStep] = useState<"nit" | "branch" | "staff" | "pin">("nit")
   const [nit, setNit] = useState("")
   const [businessName, setBusinessName] = useState("")
+  const [branches, setBranches] = useState<any[]>([])
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null)
   const [staffList, setStaffList] = useState<any[]>([])
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [searching, setSearching] = useState(false)
 
-  // Cargar NIT guardado
+  // Cargar NIT y Sucursal guardados
   useEffect(() => {
     const savedNit = localStorage.getItem("fostpos_last_nit")
+    const savedBranchId = localStorage.getItem("fostpos_last_branch_id")
     if (savedNit) {
       setNit(savedNit)
+    }
+    if (savedBranchId) {
+      setSelectedBranchId(savedBranchId)
     }
   }, [])
 
@@ -42,8 +48,17 @@ export const StaffAccessView = ({ onLogin, loading }: StaffAccessViewProps) => {
       if (data.success) {
         setStaffList(data.data.staff)
         setBusinessName(data.data.businessName)
+        setBranches(data.data.branches)
         localStorage.setItem("fostpos_last_nit", nit)
-        setStep("staff")
+        
+        if (data.data.branches?.length > 1) {
+          setStep("branch")
+        } else {
+          const mainBranchId = data.data.branches?.[0]?.id || null
+          setSelectedBranchId(mainBranchId)
+          if (mainBranchId) localStorage.setItem("fostpos_last_branch_id", mainBranchId)
+          setStep("staff")
+        }
       } else {
         toast.error(data.error || "Negocio no encontrado")
       }
@@ -62,6 +77,19 @@ export const StaffAccessView = ({ onLogin, loading }: StaffAccessViewProps) => {
   const handlePinComplete = async (pin: string) => {
     await onLogin(selectedUser.email, pin)
   }
+
+  const handleBranchSelect = (branchId: string) => {
+    setSelectedBranchId(branchId)
+    localStorage.setItem("fostpos_last_branch_id", branchId)
+    setStep("staff")
+  }
+
+  const filteredStaff = staffList.filter(user => 
+    !user.branches || 
+    user.branches.length === 0 || 
+    user.branches.some((b: any) => b.id === selectedBranchId) || 
+    user.role === "WAREHOUSE"
+  )
 
   return (
     <div className="w-full">
@@ -103,6 +131,47 @@ export const StaffAccessView = ({ onLogin, loading }: StaffAccessViewProps) => {
           </motion.div>
         )}
 
+        {step === "branch" && (
+          <motion.div 
+            key="branch-step"
+            variants={fadeInUp} initial="initial" animate="animate" exit="exit"
+            className="space-y-6"
+          >
+            <div className="flex items-center justify-between">
+               <div>
+                  <h3 className="text-lg font-black tracking-tight text-foreground">{businessName}</h3>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Selecciona tu Sucursal</p>
+               </div>
+               <Button variant="ghost" size="sm" onClick={() => setStep("nit")} className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-500/10 rounded-full h-8">
+                  <RefreshCw className="w-3 h-3 mr-1" /> Reiniciar
+               </Button>
+            </div>
+
+            <div className="space-y-3">
+              {branches.map((branch) => (
+                <motion.button
+                  key={branch.id}
+                  whileHover={{ x: 5 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleBranchSelect(branch.id)}
+                  className="w-full p-4 rounded-2xl bg-card border hover:border-emerald-500 transition-all text-left flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-muted group-hover:bg-emerald-500/10 group-hover:text-emerald-600 flex items-center justify-center transition-colors">
+                      <Building2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-black text-sm">{branch.name}</p>
+                      {branch.isMain && <Badge variant="outline" className="text-[8px] h-4 bg-emerald-500/5 text-emerald-600 border-emerald-500/20">Principal</Badge>}
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {step === "staff" && (
           <motion.div 
             key="staff-step"
@@ -111,19 +180,28 @@ export const StaffAccessView = ({ onLogin, loading }: StaffAccessViewProps) => {
           >
             <div className="flex items-center justify-between">
                <div>
-                  <h3 className="text-lg font-black tracking-tight text-foreground">{businessName}</h3>
+                  <h3 className="text-lg font-black tracking-tight text-foreground">
+                    {branches.find(b => b.id === selectedBranchId)?.name || businessName}
+                  </h3>
                   <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Selecciona tu perfil</p>
                </div>
-               <Button variant="ghost" size="sm" onClick={() => setStep("nit")} className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-500/10 rounded-full h-8">
-                  <RefreshCw className="w-3 h-3 mr-1" /> Cambiar
-               </Button>
+               <div className="flex gap-1">
+                 {branches.length > 1 && (
+                   <Button variant="ghost" size="sm" onClick={() => setStep("branch")} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted rounded-full h-8">
+                      Sedes
+                   </Button>
+                 )}
+                 <Button variant="ghost" size="sm" onClick={() => setStep("nit")} className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-500/10 rounded-full h-8">
+                    <RefreshCw className="w-3 h-3 mr-1" /> Reiniciar
+                 </Button>
+               </div>
             </div>
 
             <motion.div 
               className="grid grid-cols-2 gap-3"
               variants={staggerContainer}
             >
-              {staffList.map((user) => (
+              {filteredStaff.map((user) => (
                 <motion.button
                   key={user.id}
                   variants={fadeInUp}

@@ -19,7 +19,7 @@ export async function GET() {
     const users = await db.user.findMany({
       where: { tenantId: session.user.tenantId },
       include: {
-        branch: {
+        branches: {
           select: { id: true, name: true }
         }
       },
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, email, password, role, branchId, phone, isQuickAccess } = body
+    const { name, email, password, role, branchIds, phone, isQuickAccess } = body
 
     if (!name || (!email && !isQuickAccess) || !password || !role) {
       return NextResponse.json(
@@ -75,10 +75,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Si es cajero, debe tener una sucursal asignada
-    if (role === "CASHIER" && !branchId) {
+    // Si es cajero, debe tener al menos una sucursal asignada
+    if (role === "CASHIER" && (!branchIds || branchIds.length === 0)) {
       return NextResponse.json(
-        { success: false, error: "Los cajeros deben tener una sucursal asignada" },
+        { success: false, error: "Los cajeros deben tener al menos una sucursal asignada" },
         { status: 400 }
       )
     }
@@ -131,11 +131,13 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         role,
         tenantId: session.user.tenantId,
-        branchId: role === "CASHIER" ? branchId : null,
+        branches: {
+          connect: branchIds ? branchIds.map((id: string) => ({ id })) : []
+        },
         phone
       },
       include: {
-        branch: {
+        branches: {
           select: { id: true, name: true }
         }
       }
@@ -155,5 +157,63 @@ export async function POST(request: NextRequest) {
       { success: false, error: "Error interno del servidor" },
       { status: 500 }
     )
+  }
+}
+
+// PUT - Actualizar usuario
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user.tenantId || session.user.role !== "TENANT_ADMIN") {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { id, name, email, password, role, branchIds, phone, isQuickAccess } = body
+
+    const updateData: any = { name, role, phone }
+    if (email) updateData.email = email
+    if (password) updateData.password = await bcrypt.hash(password, 10)
+    
+    // Actualizar sucursales
+    updateData.branches = {
+      set: branchIds ? branchIds.map((id: string) => ({ id })) : []
+    }
+
+    const user = await db.user.update({
+      where: { id, tenantId: session.user.tenantId },
+      data: updateData,
+      include: {
+        branches: { select: { id: true, name: true } }
+      }
+    })
+
+    return NextResponse.json({ success: true, data: user })
+  } catch (error) {
+    console.error("Error updating user:", error)
+    return NextResponse.json({ success: false, error: "Error al actualizar" }, { status: 500 })
+  }
+}
+
+// DELETE - Eliminar usuario
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user.tenantId || session.user.role !== "TENANT_ADMIN") {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+
+    if (!id) return NextResponse.json({ success: false, error: "ID requerido" }, { status: 400 })
+
+    await db.user.delete({
+      where: { id, tenantId: session.user.tenantId }
+    })
+
+    return NextResponse.json({ success: true, message: "Usuario eliminado" })
+  } catch (error) {
+    return NextResponse.json({ success: false, error: "Error al eliminar" }, { status: 500 })
   }
 }
