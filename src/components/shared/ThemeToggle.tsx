@@ -33,8 +33,8 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-transparent">
-        <div className="w-5 h-5" />
+      <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full bg-transparent">
+        <div className="w-4.5 h-4.5" />
       </Button>
     )
   }
@@ -45,7 +45,7 @@ export function ThemeToggle() {
         variant="ghost"
         size="icon"
         onClick={toggleTheme}
-        className="w-10 h-10 rounded-full bg-muted hover:bg-accent transition-colors border border-border relative overflow-hidden group shadow-sm"
+        className="w-9 h-9 rounded-full bg-muted hover:bg-accent transition-colors border border-border relative overflow-hidden group shadow-sm flex items-center justify-center"
       >
         <AnimatePresence mode="wait">
           {theme === "dark" ? (
@@ -56,7 +56,7 @@ export function ThemeToggle() {
               exit={{ y: -20, opacity: 0, rotate: 40 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <Moon className="w-5 h-5 text-blue-400 group-hover:text-blue-300 transition-colors fill-blue-400/20" />
+              <Moon className="w-4.5 h-4.5 text-blue-400 group-hover:text-blue-300 transition-colors fill-blue-400/20" />
             </motion.div>
           ) : (
             <motion.div
@@ -66,7 +66,7 @@ export function ThemeToggle() {
               exit={{ y: -20, opacity: 0, rotate: 40 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <Sun className="w-5 h-5 text-amber-500 group-hover:text-amber-400 transition-colors fill-amber-500/20" />
+              <Sun className="w-4.5 h-4.5 text-amber-500 group-hover:text-amber-400 transition-colors fill-amber-500/20" />
             </motion.div>
           )}
         </AnimatePresence>

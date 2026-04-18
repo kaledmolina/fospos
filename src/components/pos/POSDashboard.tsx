@@ -122,25 +122,25 @@ export const POSDashboard = ({
           ${sidebarOpen ? "w-64 translate-x-0" : "w-16 -translate-x-[calc(100%+2rem)] lg:translate-x-0"}
           bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-2xl overflow-hidden`}
       >
-        <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-4 border-b border-white/5 shrink-0 h-14`}>
+        <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-3 border-b border-white/5 shrink-0 h-14`}>
           <div className="flex items-center gap-3 overflow-hidden">
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
-              className="w-10 h-10 shrink-0 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 border-2 border-white/20"
+              className="w-9 h-9 shrink-0 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 border-2 border-white/20"
             >
               {currentBranch?.logoUrl ? (
                 <img src={currentBranch.logoUrl} alt="Logo" className="w-full h-full object-cover" />
               ) : session?.user?.logoUrl ? (
                 <img src={session.user.logoUrl} alt="Logo" className="w-full h-full object-cover" />
               ) : (
-                <Store className="w-6 h-6 text-white" />
+                <Store className="w-5 h-5 text-white" />
               )}
             </motion.div>
             {sidebarOpen && (
               <motion.div 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="min-w-0"
+                className="min-w-0 flex-1"
               >
                 <BranchSelector 
                   branches={branches}
@@ -175,9 +175,9 @@ export const POSDashboard = ({
           </Button>
         </div>
         
-        <ScrollArea className="flex-1 px-3 py-4 min-h-0">
+        <ScrollArea className="flex-1 px-2.5 py-4 min-h-0">
           <TooltipProvider delayDuration={0}>
-            <nav className="space-y-1">
+            <nav className="space-y-2">
               {[
                 { id: "dashboard", icon: BarChart3, label: "Dashboard" },
                 { id: "sale", icon: ShoppingBag, label: "Nueva Venta" },
@@ -207,13 +207,13 @@ export const POSDashboard = ({
                     <TooltipTrigger asChild>
                       <Button
                         variant={posTab === item.id ? "default" : "ghost"}
-                        className={`w-full ${sidebarOpen ? "justify-start px-2.5" : "justify-center px-0"} cursor-pointer h-9 transition-all duration-200 relative group rounded-xl
+                        className={`w-full ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} cursor-pointer h-10 transition-all duration-200 relative group rounded-xl
                           ${posTab === item.id 
                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
                             : "hover:bg-primary/10 text-muted-foreground hover:text-primary"}`}
                         onClick={() => onTabChangeWithEffects(item.id)}
                       >
-                        <item.icon className={`${sidebarOpen ? "w-4.5 h-4.5 mr-2.5" : "w-5.5 h-5.5"} shrink-0 transition-transform group-hover:scale-110`} />
+                        <item.icon className={`${sidebarOpen ? "w-4.5 h-4.5 mr-3" : "w-5 h-5"} shrink-0 transition-transform group-hover:scale-110`} />
                         {sidebarOpen && (
                           <motion.span
                             initial={{ opacity: 0, x: -10 }}
@@ -226,7 +226,7 @@ export const POSDashboard = ({
                         {posTab === item.id && (
                           <motion.div
                             layoutId="activePill"
-                            className="absolute left-0 top-3 bottom-3 w-1 bg-primary-foreground rounded-r-full"
+                            className="absolute left-0 top-2 bottom-2 w-1 bg-primary-foreground rounded-r-full"
                           />
                         )}
                       </Button>
@@ -243,7 +243,7 @@ export const POSDashboard = ({
           </TooltipProvider>
         </ScrollArea>
         
-        <div className="p-4 bg-primary/5 backdrop-blur-md shrink-0">
+        <div className="p-3 bg-primary/5 backdrop-blur-md shrink-0">
           <div 
             className={`flex items-center ${sidebarOpen ? "gap-3" : "justify-center"} p-3 rounded-[1.5rem] bg-white dark:bg-zinc-900 border border-white/10 hover:shadow-xl cursor-pointer transition-all duration-300 group overflow-hidden`}
             onClick={onProfileOpen}
@@ -281,7 +281,7 @@ export const POSDashboard = ({
       <main className="flex-1 h-screen flex flex-col overflow-hidden relative z-10">
         {/* Modern Floating Header */}
         <header className="h-14 flex items-center shrink-0 px-3 mt-2 md:px-6 print:hidden relative z-40">
-          <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl h-10 px-3 shadow-xl shadow-black/5">
+          <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl h-11 px-3 shadow-xl shadow-black/5">
             <div className="flex items-center gap-4">
               {!sidebarOpen && (
                 <Button 
@@ -313,11 +313,11 @@ export const POSDashboard = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="rounded-xl hover:bg-accent hidden sm:flex h-8 w-8 transition-all active:scale-95"
+                className="rounded-xl hover:bg-accent hidden sm:flex h-9 w-9 transition-all active:scale-95"
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Salir de Pantalla Completa" : "Pantalla Completa"}
               >
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                {isFullscreen ? <Minimize2 className="w-4.5 h-4.5" /> : <Maximize2 className="w-4.5 h-4.5" />}
               </Button>
 
               <div className="w-px h-6 bg-border mx-1" />
@@ -325,10 +325,10 @@ export const POSDashboard = ({
               
               <Popover onOpenChange={onNotificationsOpenChange}>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-8 h-8 transition-all active:scale-95">
-                    <Bell className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-9 h-9 transition-all active:scale-95">
+                    <Bell className="w-4.5 h-4.5" />
                     {unreadNotifications > 0 && (
-                      <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
                     )}
                   </Button>
                 </PopoverTrigger>
