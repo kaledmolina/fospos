@@ -242,13 +242,13 @@ export const SaleTab = ({
       <div className="grid lg:grid-cols-3 gap-3 flex-1 min-h-0">
         <div className="lg:col-span-2">
           <Card className="h-full flex flex-col">
-            <CardHeader className="pb-2">
+            <CardHeader className="p-2 pb-1 bg-white dark:bg-zinc-900/50">
               <div className="relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
                 <Input 
                   ref={searchInputRef}
                   placeholder="Buscar producto o escanear [F2]..." 
-                  className="pl-9 h-10 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-primary text-xs" 
+                  className="pl-9 h-8 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-primary text-[11px]" 
                   value={searchTerm}
                   onChange={(e) => handleProductSearch(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
@@ -499,13 +499,13 @@ export const SaleTab = ({
         
         <div className="lg:col-span-1">
           <Card className="h-full flex flex-col">
-            <CardHeader className="pb-2">
+            <CardHeader className="p-2 pb-1 px-3 mb-0.5">
               <CardTitle className="flex items-center justify-between">
-                <span>Carrito</span>
-                {cart.length > 0 && <Button variant="ghost" size="sm" onClick={onClearCart}>Limpiar</Button>}
+                <span className="text-sm font-black uppercase tracking-tight">Carrito</span>
+                {cart.length > 0 && <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold" onClick={onClearCart}>Limpiar</Button>}
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col overflow-hidden p-3">
+            <CardContent className="flex-1 flex flex-col overflow-hidden p-2">
               <div className="mb-2">
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -633,9 +633,9 @@ export const SaleTab = ({
                 </div>
               )}
               
-              <ScrollArea className="flex-1 mb-4">
+              <ScrollArea className="flex-1 mb-1.5">
                 <AnimatePresence mode="popLayout">
-                  <div className="space-y-3">
+                  <div className="space-y-1">
                     {cart.map((item, index) => (
                       <motion.div
                         key={`${item.type}-${item.id}`}

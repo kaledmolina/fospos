@@ -33,12 +33,12 @@ export const DashboardTab = ({
 }: DashboardTabProps) => {
   return (
     <motion.div key="dashboard" variants={fadeInUp} initial="initial" animate="animate" exit="exit">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
         <h1 className="text-xl font-black text-foreground uppercase tracking-tight">Resumen General</h1>
       </div>
       
       {/* Quick Stats */}
-      <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4" variants={staggerContainer} initial="initial" animate="animate">
+      <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-2.5" variants={staggerContainer} initial="initial" animate="animate">
         {[
           { 
             icon: TrendingUp, label: "Ventas Hoy", value: dashboardStats?.todaySales || 0, 
@@ -60,7 +60,7 @@ export const DashboardTab = ({
           <motion.div key={stat.label} variants={fadeInUp} whileHover={{ scale: 1.02, y: -4 }}>
             <Card className="cursor-pointer border-none shadow-lg shadow-black/5 dark:shadow-primary/5 transition-all duration-300 hover:shadow-xl overflow-hidden relative group h-full">
               <div className={`absolute inset-0 bg-gradient-to-br from-${stat.color}-500/10 via-${stat.color}-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-              <CardContent className="p-3 relative">
+              <CardContent className="p-2 relative">
                 <div className="flex items-center justify-between mb-2">
                   <div className={`w-9 h-9 bg-${stat.color}-500/10 dark:bg-${stat.color}-500/20 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300`}>
                     <stat.icon className={`w-4.5 h-4.5 text-${stat.color}-600 dark:text-${stat.color}-400`} />
@@ -89,9 +89,9 @@ export const DashboardTab = ({
       </motion.div>
 
       {/* Goal Widget */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-4">
-        <Card className="bg-gradient-to-r from-primary to-primary/60 text-white border-none shadow-lg shadow-primary/20 overflow-hidden">
-          <CardContent className="p-3">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-2.5">
+        <Card className="bg-gradient-to-r from-primary to-primary/80 dark:to-primary/60 text-white border-none shadow-lg shadow-primary/20 overflow-hidden">
+          <CardContent className="p-2">
             <div className="flex items-center justify-between gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -135,7 +135,7 @@ export const DashboardTab = ({
               <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Tendencia de Ventas (7 días)</CardTitle>
               <BarChart3 className="w-4 h-4 text-primary/40" />
             </CardHeader>
-            <CardContent className="px-2 pb-2">
+            <CardContent className="px-2 pb-2 h-[200px]">
               <SalesChart data={dashboardStats?.weeklySales || []} />
             </CardContent>
           </Card>

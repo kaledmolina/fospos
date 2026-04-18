@@ -313,11 +313,11 @@ export const POSDashboard = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="rounded-xl hover:bg-accent hidden sm:flex h-10 w-10 transition-all active:scale-95"
+                className="rounded-xl hover:bg-accent hidden sm:flex h-8 w-8 transition-all active:scale-95"
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Salir de Pantalla Completa" : "Pantalla Completa"}
               >
-                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </Button>
 
               <div className="w-px h-6 bg-border mx-1" />
@@ -325,10 +325,10 @@ export const POSDashboard = ({
               
               <Popover onOpenChange={onNotificationsOpenChange}>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-10 h-10 transition-all active:scale-95">
-                    <Bell className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-8 h-8 transition-all active:scale-95">
+                    <Bell className="w-4 h-4" />
                     {unreadNotifications > 0 && (
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
+                      <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
                     )}
                   </Button>
                 </PopoverTrigger>
