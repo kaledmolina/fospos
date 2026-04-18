@@ -17,7 +17,7 @@ interface SalesChartProps {
 
 export const SalesChart = ({ data }: SalesChartProps) => {
   return (
-    <div className="h-[300px] w-full mt-4">
+    <div className="h-[220px] w-full mt-2">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
           <XAxis 

@@ -247,8 +247,8 @@ export const DashboardTab = ({
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader><CardTitle className="text-lg">Productos Más Vendidos</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          <CardContent className="p-4">
+            <div className="space-y-2">
               {dashboardStats?.topProducts.map((product, i) => (
                 <div key={product.id || i} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
@@ -274,8 +274,8 @@ export const DashboardTab = ({
         <Card>
           <CardHeader><CardTitle className="text-lg">Ventas Recientes</CardTitle></CardHeader>
           <CardContent>
-            <ScrollArea className="h-64">
-              <div className="space-y-3">
+            <ScrollArea className="h-56">
+              <div className="space-y-2">
                 {dashboardStats?.recentSales.map(sale => (
                   <div key={sale.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors">
                     <div>

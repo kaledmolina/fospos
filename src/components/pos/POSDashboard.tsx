@@ -379,7 +379,7 @@ export const POSDashboard = ({
         </header>
 
         {/* Content Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={posTab}
