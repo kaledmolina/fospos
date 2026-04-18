@@ -229,7 +229,7 @@ export const SaleTab = ({
     )
   );
   return (
-    <motion.div key="sale" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-[calc(100vh-120px)]">
+    <motion.div key="sale" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-[calc(100vh-5rem)] flex flex-col">
       {!cashRegister && (
         <Card className="mb-4 border-yellow-500/20 bg-yellow-500/10 backdrop-blur-sm">
           <CardContent className="p-4 flex items-center gap-3">
@@ -239,7 +239,7 @@ export const SaleTab = ({
           </CardContent>
         </Card>
       )}
-      <div className="grid lg:grid-cols-3 gap-4 h-full">
+      <div className="grid lg:grid-cols-3 gap-3 flex-1 min-h-0">
         <div className="lg:col-span-2">
           <Card className="h-full flex flex-col">
             <CardHeader className="pb-2">
@@ -248,7 +248,7 @@ export const SaleTab = ({
                 <Input 
                   ref={searchInputRef}
                   placeholder="Buscar producto o escanear [F2]..." 
-                  className="pl-9 h-12 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-primary" 
+                  className="pl-9 h-10 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-primary text-xs" 
                   value={searchTerm}
                   onChange={(e) => handleProductSearch(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
@@ -265,24 +265,24 @@ export const SaleTab = ({
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden p-0">
               <Tabs defaultValue="products" className="h-full flex flex-col">
-                <div className="px-4 pt-2">
-                  <TabsList className="grid grid-cols-3 w-full">
-                    <TabsTrigger value="products" className="gap-2">
-                      <Package className="w-4 h-4" /> Productos
+                <div className="px-4 pt-1">
+                  <TabsList className="grid grid-cols-3 w-full h-8">
+                    <TabsTrigger value="products" className="gap-1.5 text-[10px]">
+                      <Package className="w-3.5 h-3.5" /> Productos
                     </TabsTrigger>
-                    <TabsTrigger value="services" className="gap-2">
-                      <RefreshCw className="w-4 h-4" /> Servicios
+                    <TabsTrigger value="services" className="gap-1.5 text-[10px]">
+                      <RefreshCw className="w-3.5 h-3.5" /> Servicios
                     </TabsTrigger>
-                    <TabsTrigger value="giftcards" className="gap-2 text-[10px] sm:text-xs">
-                      <Ticket className="w-4 h-4" /> Gift Cards
+                    <TabsTrigger value="giftcards" className="gap-1.5 text-[10px]">
+                      <Ticket className="w-3.5 h-3.5" /> Gift Cards
                     </TabsTrigger>
                   </TabsList>
                 </div>
 
                 <TabsContent value="products" className="flex-1 overflow-hidden mt-0">
-                  <ScrollArea className="h-[calc(100vh-350px)]">
+                  <ScrollArea className="h-full">
                     <motion.div
-                      className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4"
+                      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-2"
                       variants={staggerContainer}
                       initial="initial"
                       animate="animate"
@@ -295,7 +295,7 @@ export const SaleTab = ({
                             className={`h-auto p-0 w-full flex flex-col items-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-primary overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border-slate-100 dark:border-zinc-800 ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
                             onClick={() => onAddToCart(product)}
                           >
-                            <div className="relative w-full aspect-[4/3] bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+                            <div className="relative w-full aspect-video bg-slate-100 dark:bg-zinc-800 overflow-hidden">
                               {product.imageUrl ? (
                                 <img 
                                   src={product.imageUrl} 
@@ -319,11 +319,11 @@ export const SaleTab = ({
                               </div>
                             </div>
                             
-                            <div className="p-3 w-full space-y-1 bg-white dark:bg-zinc-900">
-                              <p className="font-bold text-xs text-left truncate w-full text-slate-800 dark:text-zinc-200">{product.name}</p>
+                            <div className="p-1 w-full space-y-0.5 bg-white dark:bg-zinc-900 border-t border-slate-50 dark:border-zinc-800/50">
+                              <p className="font-black text-[9px] text-left truncate w-full text-foreground uppercase tracking-tight">{product.name}</p>
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">{product.category?.name || "Sin cat."}</span>
-                                <span className={`text-[10px] font-black ${product.stock < 10 ? 'text-red-500' : 'text-primary'}`}>{product.stock} {product.unit}</span>
+                                <span className="text-[8px] font-bold text-muted-foreground uppercase opacity-60 truncate mr-2">{product.category?.name || "Sin cat."}</span>
+                                <span className={`text-[8px] font-black shrink-0 ${product.stock < 10 ? 'text-red-500' : 'text-primary'}`}>{product.stock} {product.unit}</span>
                               </div>
                             </div>
                           </Button>
@@ -505,8 +505,8 @@ export const SaleTab = ({
                 {cart.length > 0 && <Button variant="ghost" size="sm" onClick={onClearCart}>Limpiar</Button>}
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col overflow-hidden p-4">
-              <div className="mb-4">
+            <CardContent className="flex-1 flex flex-col overflow-hidden p-3">
+              <div className="mb-2">
                 <div className="flex gap-2">
                   <div className="flex-1">
                     <Select value={cartCustomer?.id || "none"} onValueChange={(v) => onSetCartCustomer(v === "none" ? null : customers.find(c => c.id === v) || null)}>
@@ -532,16 +532,16 @@ export const SaleTab = ({
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }} 
                     animate={{ opacity: 1, scale: 1 }} 
-                    className="mt-3 overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm shadow-primary/10"
+                    className="mt-2 overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm shadow-primary/10"
                   >
-                    <div className="p-3 space-y-2.5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20">
-                          <Users className="w-5 h-5 text-primary" />
+                    <div className="p-2 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20">
+                          <Users className="w-4 h-4 text-primary" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] uppercase font-black tracking-widest text-primary/60 leading-none mb-1">Cliente Seleccionado</p>
-                          <p className="text-sm font-black text-primary dark:text-primary truncate">{cartCustomer.name}</p>
+                          <p className="text-[9px] uppercase font-black tracking-widest text-primary/60 leading-none mb-1">Cliente</p>
+                          <p className="text-xs font-black text-primary dark:text-primary truncate">{cartCustomer.name}</p>
                         </div>
                       </div>
                       
@@ -549,15 +549,10 @@ export const SaleTab = ({
                         <motion.div 
                           initial={{ opacity: 0, height: 0 }} 
                           animate={{ opacity: 1, height: "auto" }}
-                          className="pt-2 border-t border-primary/10 flex items-center justify-between"
+                          className="pt-1.5 border-t border-primary/10 flex items-center justify-between"
                         >
-                          <div className="flex items-center gap-2">
-                             <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/10">
-                                <Wallet className="w-3 h-3 text-blue-500" />
-                             </div>
-                             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Crédito Disponible</span>
-                          </div>
-                          <span className={`text-xs font-black px-2 py-0.5 rounded-full ${ (cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0)) > 0 ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-red-500/10 text-red-500" }`}>
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Crédito libre</span>
+                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${ (cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0)) > 0 ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-red-500/10 text-red-500" }`}>
                             {formatCurrency(cartCustomer.creditLimit - (cartCustomer.pendingBalance || 0))}
                           </span>
                         </motion.div>
@@ -581,7 +576,7 @@ export const SaleTab = ({
                         </TabsTrigger>
                       </TabsList>
                       
-                      <TabsContent value="loyalty" className="mt-2 space-y-2 p-3 bg-muted/20 rounded-lg border border-dashed border-border/60">
+                      <TabsContent value="loyalty" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
@@ -596,13 +591,13 @@ export const SaleTab = ({
                         <div className="flex gap-2 items-center">
                           <Input 
                             type="number" 
-                            placeholder="Puntos a redimir..." 
-                            className="h-8 text-xs bg-background/50 border-amber-500/20 focus-visible:ring-amber-500/30"
+                            placeholder="Pts..." 
+                            className="h-7 text-xs bg-background/50 border-amber-500/20 focus-visible:ring-amber-500/30"
                             value={redeemPoints || ""}
                             max={cartCustomer?.points || 0}
                             onChange={(e) => onSetRedeemPoints(Math.min(parseInt(e.target.value) || 0, cartCustomer?.points || 0))}
                           />
-                          <div className="shrink-0 px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[10px] font-black border border-amber-500/20">
+                          <div className="shrink-0 px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[9px] font-black border border-amber-500/20">
                             -{formatCurrency(loyaltyDiscount)}
                           </div>
                         </div>
@@ -648,27 +643,27 @@ export const SaleTab = ({
                         initial={{ opacity: 0, x: 50, scale: 0.8 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: -50, scale: 0.8 }}
-                        className="group flex items-center gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-xl border border-transparent hover:border-border transition-all shadow-sm"
+                        className="group flex items-center gap-2 p-2 bg-muted/30 hover:bg-muted/50 rounded-xl border border-transparent hover:border-border transition-all shadow-sm"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border text-muted-foreground group-hover:text-primary transition-colors">
-                          {item.type === "PRODUCT" ? <Package className="w-5 h-5" /> : <RefreshCw className="w-5 h-5" />}
+                        <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center border text-muted-foreground group-hover:text-primary transition-colors">
+                          {item.type === "PRODUCT" ? <Package className="w-4 h-4" /> : <RefreshCw className="w-4 h-4" />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-sm truncate">{item.name}</p>
                           <p className="text-[10px] text-muted-foreground">{formatCurrency(item.price)} x {item.quantity}</p>
                         </div>
                         <div className="flex items-center bg-background rounded-lg border p-0.5 shadow-sm">
-                          <Button size="icon" variant="ghost" className="w-6 h-6 h-auto" onClick={() => onUpdateCartQuantity(item.id, item.quantity - 1)}>-</Button>
-                          <span className="w-8 text-center text-xs font-black text-primary">{item.quantity}</span>
-                          <Button size="icon" variant="ghost" className="w-6 h-6 h-auto" onClick={() => onUpdateCartQuantity(item.id, item.quantity + 1)}>+</Button>
+                          <Button size="icon" variant="ghost" className="w-5 h-5" onClick={() => onUpdateCartQuantity(item.id, item.quantity - 1)}>-</Button>
+                          <span className="w-6 text-center text-[11px] font-black text-primary">{item.quantity}</span>
+                          <Button size="icon" variant="ghost" className="w-5 h-5" onClick={() => onUpdateCartQuantity(item.id, item.quantity + 1)}>+</Button>
                         </div>
                         <Button 
                           size="icon" 
                           variant="ghost" 
-                          className="w-8 h-8 text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100" 
+                          className="w-7 h-7 text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100" 
                           onClick={() => onUpdateCartQuantity(item.id, 0)}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </motion.div>
                     ))}
@@ -683,9 +678,9 @@ export const SaleTab = ({
                 </AnimatePresence>
               </ScrollArea>
               
-              <div className="mb-4">
-                <Label className="text-sm">Método de Pago</Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="mb-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Método de Pago</p>
+                <div className="grid grid-cols-3 gap-1.5 mt-1.5">
                   {[
                     { id: "CASH", label: "Efectivo", icon: Wallet },
                     { id: "CARD", label: "Tarjeta", icon: CreditCard },
@@ -699,50 +694,48 @@ export const SaleTab = ({
                     return enabled.includes(m.id);
                   }).map(method => (
                     <motion.div key={method.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                      <Button
-                        variant={cartPaymentMethod === method.id ? "default" : "outline"}
-                        className={`w-full cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-md" : "hover:border-emerald-300"}`}
-                        onClick={() => onSetCartPaymentMethod(method.id)}
-                      >
-                        <method.icon className="w-4 h-4 mr-1" />{method.label}
-                      </Button>
+                        <Button
+                          variant={cartPaymentMethod === method.id ? "default" : "outline"}
+                          className={`w-full h-8 px-1 text-[10px] font-black uppercase cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-sm" : "hover:border-emerald-300"}`}
+                          onClick={() => onSetCartPaymentMethod(method.id)}
+                        >
+                          <method.icon className="w-3.5 h-3.5 mr-1" />{method.label}
+                        </Button>
                     </motion.div>
                   ))}
                 </div>
               </div>
               
-              <div className="border-t pt-4 space-y-2.5">
-                <div className="flex justify-between text-xs font-medium text-muted-foreground px-1"><span>Subtotal bruto</span><span>{formatCurrency(subtotal)}</span></div>
-                <div className="flex justify-between text-xs font-medium text-muted-foreground px-1"><span>IVA (19%)</span><span>{formatCurrency(tax)}</span></div>
+              <div className="border-t pt-2 space-y-1">
+                <div className="flex justify-between text-[10px] font-medium text-muted-foreground px-1 uppercase tracking-tight"><span>Subtotal bruto</span><span>{formatCurrency(subtotal)}</span></div>
+                <div className="flex justify-between text-[10px] font-medium text-muted-foreground px-1 uppercase tracking-tight"><span>IVA (19%)</span><span>{formatCurrency(tax)}</span></div>
                 
                 {loyaltyDiscount > 0 && (
-                  <div className="flex justify-between text-xs font-bold text-amber-600 px-3 py-1 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200/50 dark:border-amber-900/30">
-                    <span className="flex items-center gap-1.5"><Star className="w-3 h-3 fill-amber-500" /> Descuento Puntos</span>
+                  <div className="flex justify-between text-[10px] font-black text-amber-600 px-2 py-0.5 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200/50 dark:border-amber-900/30 uppercase">
+                    <span className="flex items-center gap-1"><Star className="w-3 h-3 fill-amber-500" /> Puntos</span>
                     <span>-{formatCurrency(loyaltyDiscount)}</span>
                   </div>
                 )}
                 
                 {couponDiscount > 0 && (
-                  <div className="flex justify-between text-xs font-bold text-blue-600 px-3 py-1 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200/50 dark:border-blue-900/30">
-                    <span className="flex items-center gap-1.5"><Ticket className="w-3 h-3 fill-blue-500 border-none" /> Cupón Aplicado</span>
+                  <div className="flex justify-between text-[10px] font-black text-blue-600 px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200/50 dark:border-blue-900/30 uppercase">
+                    <span className="flex items-center gap-1"><Ticket className="w-3 h-3 fill-blue-500 border-none" /> Cupón</span>
                     <span>-{formatCurrency(couponDiscount)}</span>
                   </div>
                 )}
                 
-                <div className="my-2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                <div className="my-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 
-                <div className="flex justify-between items-end p-4 bg-gradient-to-br from-primary to-primary dark:from-primary/20 dark:to-primary/5 rounded-2xl shadow-lg shadow-primary/20 dark:shadow-none group transition-all duration-300">
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase font-black tracking-[0.2em] text-emerald-100 dark:text-primary/70">Total a Pagar</p>
-                    <p className="text-3xl font-black text-white dark:text-primary tabular-nums leading-none drop-shadow-sm">
+                <div className="flex justify-between items-center p-1.5 px-3 bg-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 transition-all duration-300">
+                  <div className="flex flex-col">
+                    <p className="text-[9px] uppercase font-black tracking-widest opacity-60">Total a Pagar</p>
+                    <p className="text-xl font-black tabular-nums leading-none">
                       {formatCurrency(total)}
                     </p>
                   </div>
-                  <div className="text-right pb-1">
-                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 dark:bg-primary/10 backdrop-blur-sm border border-white/10">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
-                      <p className="text-[9px] font-black text-emerald-50 border-none uppercase tracking-tighter">Balance Final</p>
-                    </div>
+                  <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded flex bg-white/20 backdrop-blur-sm">
+                    <div className="w-1 h-1 rounded-full bg-emerald-300 animate-pulse" />
+                    <p className="text-[8px] font-black uppercase tracking-tighter">Balance</p>
                   </div>
                 </div>
 
@@ -917,25 +910,24 @@ export const SaleTab = ({
                 )}
 
               </div>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="mt-4">
+              <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="mt-3">
                 {cartPaymentMethod === "GIFT_CARD" && (
                   (!cartCustomer || !appliedGiftCard || appliedGiftCard.balance < total) && (
-                    <p className="text-[10px] font-black text-red-500 text-center mb-2 uppercase tracking-tight">
+                    <p className="text-[9px] font-black text-red-500 text-center mb-1 uppercase tracking-tight">
                       {!cartCustomer 
-                        ? "Selecciona un cliente para redimir tarjeta" 
+                        ? "Cliente requerido" 
                         : !appliedGiftCard 
-                          ? "Validación de tarjeta requerida" 
-                          : "Saldo de tarjeta insuficiente"}
+                          ? "Tarjeta no validada" 
+                          : "Saldo insuficiente"}
                     </p>
                   )
                 )}
                 <Button 
-                  className={`w-full cursor-pointer transition-all duration-300 shadow-lg ${
+                  className={`w-full h-11 cursor-pointer transition-all duration-300 shadow-md ${
                     cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total || !cartCustomer)
                       ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed shadow-none"
-                      : "bg-primary hover:bg-primary shadow-primary/25"
-                  }`}
-                  size="lg" 
+                      : "bg-primary hover:bg-primary shadow-primary/20"
+                  } font-black uppercase text-xs tracking-widest`}
                   disabled={
                     cart.length === 0 || 
                     !cashRegister ||

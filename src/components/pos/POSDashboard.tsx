@@ -65,6 +65,7 @@ export const POSDashboard = ({
   onProfileOpen
 }: POSDashboardProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [canShowTooltip, setCanShowTooltip] = useState(false)
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -83,6 +84,17 @@ export const POSDashboard = ({
     document.addEventListener("fullscreenchange", handleFsChange);
     return () => document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      setCanShowTooltip(false);
+    } else {
+      const timer = setTimeout(() => {
+        setCanShowTooltip(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [sidebarOpen]);
 
   const currentBranch = branches.find(b => b.id === selectedBranch)
   const displayName = currentBranch ? currentBranch.name : session?.user?.tenantName
@@ -106,11 +118,11 @@ export const POSDashboard = ({
 
       {/* Modern Floating Sidebar */}
       <aside
-        className={`fixed lg:relative z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col h-[calc(100vh-1.5rem)] m-3
-          ${sidebarOpen ? "w-64 translate-x-0" : "w-20 -translate-x-[calc(100%+2rem)] lg:translate-x-0"}
-          bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-3xl overflow-hidden`}
+        className={`fixed lg:relative z-50 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col h-[calc(100vh-1rem)] m-2
+          ${sidebarOpen ? "w-64 translate-x-0" : "w-16 -translate-x-[calc(100%+2rem)] lg:translate-x-0"}
+          bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-2xl overflow-hidden`}
       >
-        <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-4 border-b border-white/10 shrink-0 h-20`}>
+        <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-4 border-b border-white/5 shrink-0 h-14`}>
           <div className="flex items-center gap-3 overflow-hidden">
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
@@ -163,9 +175,9 @@ export const POSDashboard = ({
           </Button>
         </div>
         
-        <ScrollArea className="flex-1 px-4 py-6 min-h-0">
+        <ScrollArea className="flex-1 px-3 py-4 min-h-0">
           <TooltipProvider delayDuration={0}>
-            <nav className="space-y-2">
+            <nav className="space-y-1">
               {[
                 { id: "dashboard", icon: BarChart3, label: "Dashboard" },
                 { id: "sale", icon: ShoppingBag, label: "Nueva Venta" },
@@ -195,7 +207,7 @@ export const POSDashboard = ({
                     <TooltipTrigger asChild>
                       <Button
                         variant={posTab === item.id ? "default" : "ghost"}
-                        className={`w-full ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} cursor-pointer h-10 transition-all duration-300 relative group rounded-xl
+                        className={`w-full ${sidebarOpen ? "justify-start px-2.5" : "justify-center px-0"} cursor-pointer h-9 transition-all duration-200 relative group rounded-xl
                           ${posTab === item.id 
                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
                             : "hover:bg-primary/10 text-muted-foreground hover:text-primary"}`}
@@ -219,8 +231,8 @@ export const POSDashboard = ({
                         )}
                       </Button>
                     </TooltipTrigger>
-                    {!sidebarOpen && (
-                      <TooltipContent side="right" sideOffset={20} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[10px] tracking-widest">
+                    {!sidebarOpen && canShowTooltip && (
+                      <TooltipContent side="right" sideOffset={15} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[10px] tracking-widest shadow-2xl">
                         {item.label}
                       </TooltipContent>
                     )}
@@ -268,8 +280,8 @@ export const POSDashboard = ({
       {/* Main Content Area */}
       <main className="flex-1 h-screen flex flex-col overflow-hidden relative z-10">
         {/* Modern Floating Header */}
-        <header className="h-20 flex items-center shrink-0 px-4 mt-3 md:px-8 print:hidden relative z-40">
-          <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl h-14 px-5 shadow-xl shadow-black/5">
+        <header className="h-14 flex items-center shrink-0 px-3 mt-2 md:px-6 print:hidden relative z-40">
+          <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl h-10 px-3 shadow-xl shadow-black/5">
             <div className="flex items-center gap-4">
               {!sidebarOpen && (
                 <Button 
@@ -379,7 +391,7 @@ export const POSDashboard = ({
         </header>
 
         {/* Content Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-2 md:p-3 custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={posTab}
