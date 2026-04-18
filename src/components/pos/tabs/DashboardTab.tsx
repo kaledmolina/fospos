@@ -90,11 +90,11 @@ export const DashboardTab = ({
 
       {/* Goal Widget */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-6">
-        <Card className="bg-gradient-to-r from-primary to-teal-500 text-white">
+        <Card className="bg-gradient-to-r from-primary to-primary/60 text-white border-none shadow-lg shadow-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-emerald-100 text-sm mb-1">Meta Mensual</p>
+                <p className="text-white/80 text-sm mb-1 font-medium">Meta Mensual</p>
                 <p className="text-2xl font-bold">{formatCurrency(dashboardStats?.monthSales || 0)} / {formatCurrency(dashboardStats?.monthlyGoal || 0)}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
@@ -215,21 +215,21 @@ export const DashboardTab = ({
             )}
           </AnimatePresence>
           
-          <Card className="flex-1 bg-emerald-900 text-white relative overflow-hidden">
+          <Card className="flex-1 bg-primary text-primary-foreground relative overflow-hidden border-none shadow-xl shadow-primary/10">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Target className="w-20 h-20" />
             </div>
             <CardContent className="p-6">
-              <p className="text-emerald-300 text-sm font-medium mb-1">Tu progreso hoy</p>
+              <p className="opacity-80 text-sm font-medium mb-1">Tu progreso hoy</p>
               <h3 className="text-2xl font-bold mb-4">{Math.round(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100)}% de la meta</h3>
               <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-4">
                 <motion.div 
-                  className="h-full bg-primary"
+                  className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100, 100)}%` }}
                 />
               </div>
-              <p className="text-xs text-emerald-200">¡Sigue así! Estás cerca de superar tu promedio diario.</p>
+              <p className="text-xs opacity-70 italic">¡Sigue así! Estás cerca de superar tu promedio diario.</p>
             </CardContent>
           </Card>
         </div>

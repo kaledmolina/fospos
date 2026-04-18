@@ -35,13 +35,13 @@ export const SalesChart = ({ data }: SalesChartProps) => {
             tickFormatter={(value) => `$${value}`}
           />
           <Tooltip 
-            cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
+            cursor={{ fill: 'var(--primary)', fillOpacity: 0.05 }}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 return (
-                  <div className="bg-card p-3 border border-emerald-500/20 shadow-xl rounded-lg">
+                  <div className="bg-card p-3 border border-primary/20 shadow-xl rounded-lg backdrop-blur-md">
                     <p className="text-sm font-bold text-foreground">{payload[0].payload.name}</p>
-                    <p className="text-sm text-emerald-500 font-bold">
+                    <p className="text-sm text-primary font-bold">
                       {formatCurrency(payload[0].value as number)}
                     </p>
                   </div>
@@ -57,8 +57,9 @@ export const SalesChart = ({ data }: SalesChartProps) => {
             {data.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
-                fill={index === data.length - 1 ? "#10B981" : "#10B98140"} 
-                className="transition-all duration-300 hover:fill-emerald-500"
+                fill={index === data.length - 1 ? "var(--primary)" : "var(--primary)"}
+                fillOpacity={index === data.length - 1 ? 1 : 0.25}
+                className="transition-all duration-300 hover:fill-opacity-80"
               />
             ))}
           </Bar>

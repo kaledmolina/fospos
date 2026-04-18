@@ -79,25 +79,25 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.02 210); /* Industrial Deep Dark #020617 equivalent */
+  --background: oklch(0.18 0.015 210); /* Elegant Slate Gray background */
   --foreground: oklch(0.95 0.01 210); /* Slate-100 */
   
-  --card: oklch(0.16 0.02 210); /* Solid surface for clarity */
+  --card: oklch(0.22 0.015 210); /* Lighter gray for cards */
   --card-foreground: oklch(0.95 0.01 210);
   
-  --popover: oklch(0.16 0.02 210);
+  --popover: oklch(0.22 0.015 210);
   --popover-foreground: oklch(0.95 0.01 210);
   
-  --primary: oklch(0.7 0.19 160); /* Glowing Emerald */
+  --primary: oklch(0.75 0.18 160); /* Brighter glow in dark mode */
   --primary-foreground: oklch(0.12 0.02 210);
   
-  --secondary: oklch(0.20 0.03 210); /* Darker Slate surface */
+  --secondary: oklch(0.28 0.02 210); /* Noticeable secondary surfaces */
   --secondary-foreground: oklch(0.95 0.01 210);
   
-  --muted: oklch(0.20 0.03 210);
-  --muted-foreground: oklch(0.65 0.03 210);
+  --muted: oklch(0.28 0.02 210);
+  --muted-foreground: oklch(0.7 0.02 210);
   
-  --accent: oklch(0.25 0.04 210); /* Solid accent for hover states */
+  --accent: oklch(0.3 0.03 210); /* Hover states */
   --accent-foreground: oklch(0.95 0.01 210);
   
   --destructive: oklch(0.5 0.25 25);
