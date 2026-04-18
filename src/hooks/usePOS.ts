@@ -564,21 +564,49 @@ export const usePOS = (session: any) => {
     }
   }, [selectedBranch, branches])
 
-  // Helper para convertir HEX a OKLCH (simplificado para el tema del POS)
+  // Helper para convertir HEX a OKLCH (proporcionando tonos premium balanceados)
   function hexToOklch(hex: string) {
-    // Para simplificar, si es el verde estándar devolvemos el valor premium exacto
-    if (hex.toLowerCase() === '#10b981') return 'oklch(0.65 0.18 160)'
+    if (!hex) return 'oklch(0.65 0.18 160)'
     
-    // Mapeo básico de colores premium si el usuario elige otros comunes
-    const matches: Record<string, string> = {
-      '#ef4444': 'oklch(0.6 0.25 25)',  // Rojo
-      '#3b82f6': 'oklch(0.6 0.18 250)', // Azul
-      '#8b5cf6': 'oklch(0.6 0.18 290)', // Violeta
-      '#f59e0b': 'oklch(0.7 0.15 60)',  // Ámbar
-      '#ec4899': 'oklch(0.65 0.2 330)', // Rosa
+    // Mapeo detallado de colores premium (balanceados para legibilidad y estética)
+    const premiumPalette: Record<string, string> = {
+      '#10b981': 'oklch(0.65 0.18 160)', // Esmeralda (Principal)
+      '#ef4444': 'oklch(0.6 0.25 25)',   // Rojo
+      '#3b82f6': 'oklch(0.6 0.18 250)',  // Azul
+      '#8b5cf6': 'oklch(0.6 0.18 290)',  // Violeta
+      '#f59e0b': 'oklch(0.7 0.15 60)',   // Ámbar
+      '#ec4899': 'oklch(0.65 0.2 330)',  // Rosa
+      '#06b6d4': 'oklch(0.65 0.15 200)', // Cian
+      '#84cc16': 'oklch(0.75 0.2 130)',  // Lima
+      '#6366f1': 'oklch(0.6 0.2 265)',   // Índigo
+      '#f97316': 'oklch(0.65 0.2 40)',   // Naranja
+      '#14b8a6': 'oklch(0.65 0.15 175)', // Teal
+      '#71717a': 'oklch(0.5 0.02 250)',  // Zinc (Dark Gray)
     }
     
-    return matches[hex.toLowerCase()] || 'oklch(0.65 0.18 160)'
+    return premiumPalette[hex.toLowerCase()] || 'oklch(0.65 0.18 160)'
+  }
+
+  // Subida de logo de sede
+  const handleUploadBranchLogo = async (file: File) => {
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("folder", "branches")
+      
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+      const data = await res.json()
+      if (data.success) {
+        setBranchForm(prev => ({ ...prev, logoUrl: data.imageUrl }))
+        toast.success("Logo subido temporalmente")
+        return data.imageUrl
+      } else {
+        toast.error(data.error || "Error al subir logo")
+      }
+    } catch { toast.error("Error de conexión al subir imagen") }
   }
 
   // Handlers
@@ -1644,6 +1672,7 @@ export const usePOS = (session: any) => {
     categoryForm, setCategoryForm, customerForm, setCustomerForm,
     selectedCredit, setSelectedCredit, paymentAmount, setPaymentAmount,
     expenseForm, setExpenseForm, branchForm, setBranchForm,
+    handleUploadBranchLogo,
     bulkUploadData, setBulkUploadData, editingBranch, setEditingBranch,
     editingUser, setEditingUser, userForm, setUserForm,
     subscriptionServices, subscriptions, subscriptionStats,

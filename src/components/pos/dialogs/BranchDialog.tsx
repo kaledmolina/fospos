@@ -1,10 +1,10 @@
-"use client"
-
+import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { ImageIcon, Upload } from "lucide-react"
 
 interface BranchDialogProps {
   open: boolean
@@ -13,6 +13,7 @@ interface BranchDialogProps {
   branchForm: any
   onBranchFormChange: (form: any) => void
   onSubmit: (e: React.FormEvent) => void
+  onUploadLogo: (file: File) => Promise<string | undefined>
 }
 
 export const BranchDialog = ({
@@ -21,13 +22,38 @@ export const BranchDialog = ({
   editingBranch,
   branchForm,
   onBranchFormChange,
-  onSubmit
+  onSubmit,
+  onUploadLogo
 }: BranchDialogProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      await onUploadLogo(file)
+    }
+  }
+
+  const colors = [
+    { name: 'Esmeralda', hex: '#10b981' },
+    { name: 'Rojo', hex: '#ef4444' },
+    { name: 'Azul', hex: '#3b82f6' },
+    { name: 'Violeta', hex: '#8b5cf6' },
+    { name: 'Ámbar', hex: '#f59e0b' },
+    { name: 'Rosa', hex: '#ec4899' },
+    { name: 'Cian', hex: '#06b6d4' },
+    { name: 'Lima', hex: '#84cc16' },
+    { name: 'Índigo', hex: '#6366f1' },
+    { name: 'Naranja', hex: '#f97316' },
+    { name: 'Teal', hex: '#14b8a6' },
+    { name: 'Zinc', hex: '#71717a' },
+  ]
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>{editingBranch ? "Editar Sucursal" : "Nueva Sucursal"}</DialogTitle></DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto px-1">
           <div className="space-y-2">
             <Label>Nombre *</Label>
             <Input value={branchForm.name} onChange={e => onBranchFormChange({ ...branchForm, name: e.target.value })} placeholder="Nombre de la sucursal" required />
@@ -46,7 +72,65 @@ export const BranchDialog = ({
             <Label>Dirección</Label>
             <Input value={branchForm.address} onChange={e => onBranchFormChange({ ...branchForm, address: e.target.value })} placeholder="Dirección" />
           </div>
-          <div className="space-y-2">
+          
+          <div className="space-y-4 pt-2 border-t">
+            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Identidad Visual</Label>
+            
+            <div className="space-y-2">
+              <Label>Logo de la Sede</Label>
+              <div className="flex gap-2">
+                <Input 
+                  value={branchForm.logoUrl || ""} 
+                  onChange={e => onBranchFormChange({ ...branchForm, logoUrl: e.target.value })} 
+                  placeholder="URL del logo o sube uno -->" 
+                  className="flex-1"
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept="image/*"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="shrink-0"
+                >
+                  <Upload className="w-4 h-4" />
+                </Button>
+              </div>
+              {branchForm.logoUrl && (
+                <div className="mt-2 w-20 h-20 rounded-lg border overflow-hidden bg-muted/50 flex items-center justify-center">
+                  <img src={branchForm.logoUrl} alt="Preview" className="w-full h-full object-contain" />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <Label>Color de Marca de la Sede</Label>
+              <div className="grid grid-cols-6 gap-2">
+                {colors.map((color) => (
+                  <button
+                    key={color.hex}
+                    type="button"
+                    onClick={() => onBranchFormChange({ ...branchForm, themeColor: color.hex })}
+                    className={`w-9 h-9 rounded-full border-2 transition-all flex items-center justify-center ${branchForm.themeColor === color.hex ? 'border-primary ring-2 ring-primary/20 scale-110 shadow-lg' : 'border-transparent hover:scale-105 bg-muted/20'}`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  >
+                    {branchForm.themeColor === color.hex && (
+                      <div className="w-2 h-2 rounded-full bg-white shadow-sm" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 border-t pt-4">
             <Label>Meta Mensual de Ventas ($)</Label>
             <Input 
               type="number" 
@@ -55,52 +139,13 @@ export const BranchDialog = ({
               onChange={e => onBranchFormChange({ ...branchForm, monthlyGoal: e.target.value })} 
               placeholder="Ej: 10000000" 
             />
-            <p className="text-[10px] text-muted-foreground italic">
-              Este valor define el 100% de cumplimiento en el gráfico del Dashboard.
-            </p>
-          </div>
-          <div className="space-y-4 pt-2 border-t">
-            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Identidad Visual</Label>
-            
-            <div className="space-y-2">
-              <Label>URL del Logo de la Sede</Label>
-              <Input 
-                value={branchForm.logoUrl || ""} 
-                onChange={e => onBranchFormChange({ ...branchForm, logoUrl: e.target.value })} 
-                placeholder="https://ejemplo.com/logo-sede.png" 
-              />
-              <p className="text-[9px] text-muted-foreground">Si se deja vacío, se usará el logo principal del negocio.</p>
-            </div>
-
-            <div className="space-y-3">
-              <Label>Color de Marca de la Sede</Label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { name: 'Esmeralda', hex: '#10b981' },
-                  { name: 'Rojo', hex: '#ef4444' },
-                  { name: 'Azul', hex: '#3b82f6' },
-                  { name: 'Violeta', hex: '#8b5cf6' },
-                  { name: 'Ámbar', hex: '#f59e0b' },
-                  { name: 'Rosa', hex: '#ec4899' },
-                ].map((color) => (
-                  <button
-                    key={color.hex}
-                    type="button"
-                    onClick={() => onBranchFormChange({ ...branchForm, themeColor: color.hex })}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${branchForm.themeColor === color.hex ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-transparent hover:scale-105'}`}
-                    style={{ backgroundColor: color.hex }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Switch checked={branchForm.isMain} onCheckedChange={v => onBranchFormChange({ ...branchForm, isMain: v })} />
             <Label>Sucursal Principal</Label>
           </div>
-          <Button type="submit" className="w-full bg-primary hover:opacity-90 cursor-pointer transition-all duration-200 shadow-lg shadow-primary/20">
+          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:opacity-90 cursor-pointer transition-all duration-200 shadow-lg shadow-primary/20 h-10 font-bold">
             {editingBranch ? "Actualizar Sucursal" : "Crear Sucursal"}
           </Button>
         </form>

@@ -140,7 +140,7 @@ export async function PUT(request: NextRequest) {
         phone,
         city,
         isMain,
-        monthlyGoal: parseFloat(monthlyGoal) || 0,
+        monthlyGoal: isNaN(parseFloat(String(monthlyGoal))) ? 0 : parseFloat(String(monthlyGoal)),
         logoUrl: logoUrl !== undefined ? logoUrl : undefined,
         themeColor: themeColor !== undefined ? themeColor : undefined
       }

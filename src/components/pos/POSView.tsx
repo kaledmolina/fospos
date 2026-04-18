@@ -413,6 +413,7 @@ export const POSView = ({
         onBranchFormChange={pos.setBranchForm}
         onSubmit={pos.handleAddBranch}
         editingBranch={pos.editingBranch}
+        onUploadLogo={pos.handleUploadBranchLogo}
       />
       <UserDialog
         open={pos.userDialog}
