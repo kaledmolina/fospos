@@ -6,9 +6,10 @@ import { db } from "@/lib/db";
 // PATCH - Actualizar estado de orden de compra (Recibir mercancía)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !session.user.tenantId) return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
 
@@ -16,7 +17,7 @@ export async function PATCH(
     const { status } = body; // RECEIVED o CANCELLED
 
     const po = await db.purchaseOrder.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { items: true }
     });
 
@@ -77,7 +78,7 @@ export async function PATCH(
 
         // 5. Marcar orden como recibida
         return await tx.purchaseOrder.update({
-          where: { id: params.id },
+          where: { id },
           data: { status: "RECEIVED" }
         });
       });
@@ -87,7 +88,7 @@ export async function PATCH(
 
     if (status === "CANCELLED") {
       const updatedPo = await db.purchaseOrder.update({
-        where: { id: params.id },
+        where: { id },
         data: { status: "CANCELLED" }
       });
       return NextResponse.json({ success: true, data: updatedPo });
