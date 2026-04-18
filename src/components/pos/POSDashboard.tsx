@@ -32,6 +32,7 @@ interface POSDashboardProps {
   branches: any[]
   selectedBranch: string | null
   onBranchChange: (branchId: string | null) => void
+  onProfileOpen: () => void
   children: React.ReactNode
 }
 
@@ -52,7 +53,8 @@ export const POSDashboard = ({
   onTabChangeWithEffects,
   branches,
   selectedBranch,
-  onBranchChange
+  onBranchChange,
+  onProfileOpen
 }: POSDashboardProps) => {
   const currentBranch = branches.find(b => b.id === selectedBranch)
   const displayName = currentBranch ? currentBranch.name : session?.user?.tenantName
@@ -136,13 +138,21 @@ export const POSDashboard = ({
         </ScrollArea>
         
         <div className="p-4 border-t bg-card/80 backdrop-blur-md shrink-0">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center border">
-              <Users className="w-4 h-4 text-muted-foreground" />
+          <div 
+            className="flex items-center gap-3 mb-3 p-2 rounded-xl hover:bg-accent/50 cursor-pointer transition-all group"
+            onClick={onProfileOpen}
+          >
+            <div className="w-8 h-8 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+              <Users className="w-4 h-4 text-emerald-600 group-hover:text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold truncate leading-none mb-1 text-foreground">{session?.user?.name}</p>
-              <p className="text-[10px] text-muted-foreground truncate uppercase tracking-widest">{session?.user?.email}</p>
+              <p className="text-[10px] text-muted-foreground truncate uppercase tracking-widest flex items-center gap-1">
+                {session?.user?.role === "TENANT_ADMIN" ? "Administrador" : 
+                 session?.user?.role === "CASHIER" ? "Cajero" : "Bodeguero"}
+                <span className="w-1 h-1 bg-emerald-500 rounded-full" />
+                Perfil
+              </p>
             </div>
           </div>
           <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-all duration-200 font-bold" onClick={onSignOut}>

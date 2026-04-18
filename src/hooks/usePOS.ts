@@ -183,6 +183,66 @@ export const usePOS = (session: any) => {
     setHistoryDescription(description)
     setHistoryDialog(true)
   }
+
+  // Profile management
+  const [profileDialog, setProfileDialog] = useState(false)
+  const [profileForm, setProfileForm] = useState({
+    name: session?.user?.name || "",
+    email: session?.user?.email || "",
+    phone: "", 
+    password: ""
+  })
+
+  // Sync profile form with session
+  useEffect(() => {
+    if (session?.user) {
+      setProfileForm(prev => ({
+        ...prev,
+        name: session.user.name,
+        email: session.user.email,
+        phone: prev.phone // Phone is not in base session, needs fetching or manual update
+      }))
+    }
+  }, [session])
+
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch("/api/profile")
+      const data = await res.json()
+      if (data.success) {
+        setProfileForm({
+          name: data.data.name,
+          email: data.data.email,
+          phone: data.data.phone || "",
+          password: ""
+        })
+      }
+    } catch { console.error("Error fetching profile") }
+  }
+
+  useEffect(() => {
+    if (profileDialog) fetchProfile()
+  }, [profileDialog])
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileForm)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("Perfil actualizado con éxito")
+        setProfileDialog(false)
+        // Recargar página para actualizar sesión de NextAuth (o usar update() de useSession)
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        toast.error(data.error || "Error al actualizar perfil")
+      }
+    } catch { toast.error("Error de conexión al actualizar perfil") }
+  }
   
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -1573,6 +1633,7 @@ export const usePOS = (session: any) => {
     handleOpenHistory,
     suppliers, setSuppliers, supplierDialog, setSupplierDialog,
     supplierForm, setSupplierForm, editingSupplier, setEditingSupplier,
-    handleAddSupplier, handleUpdateSupplier, handleDeleteSupplier
+    handleAddSupplier, handleUpdateSupplier, handleDeleteSupplier,
+    profileDialog, setProfileDialog, profileForm, setProfileForm, handleUpdateProfile
   }
 }

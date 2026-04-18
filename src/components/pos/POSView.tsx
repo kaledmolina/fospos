@@ -42,6 +42,7 @@ import {
   SubscriptionPaymentDialog,
   SubscriptionFreezeDialog
 } from "./dialogs/SubscriptionDialogs"
+import { ProfileDialog } from "./dialogs/ProfileDialog"
 import { AnimatePresence } from "framer-motion"
 
 interface POSViewProps {
@@ -102,6 +103,7 @@ export const POSView = ({
         branches={pos.branches}
         selectedBranch={pos.selectedBranch}
         onBranchChange={pos.setSelectedBranch}
+        onProfileOpen={() => pos.setProfileDialog(true)}
       >
         <AnimatePresence mode="wait">
           {pos.posTab === "dashboard" && (
@@ -443,13 +445,22 @@ export const POSView = ({
         services={pos.subscriptionServices}
         onSubmit={pos.handleCreateSubscription}
       />
-      <ConfirmationDialog
+      <ConfirmationDialog 
         open={pos.confirmDialog.open}
-        onOpenChange={(open) => pos.setConfirmDialog({ ...pos.confirmDialog, open })}
+        onOpenChange={(open) => pos.setConfirmDialog(prev => ({ ...prev, open }))}
         title={pos.confirmDialog.title}
         message={pos.confirmDialog.message}
         onConfirm={pos.confirmDialog.onConfirm}
         variant={pos.confirmDialog.variant}
+      />
+
+      <ProfileDialog 
+        open={pos.profileDialog}
+        onOpenChange={pos.setProfileDialog}
+        profileForm={pos.profileForm}
+        onProfileFormChange={pos.setProfileForm}
+        onSubmit={pos.handleUpdateProfile}
+        userRole={session?.user?.role}
       />
       <SubscriptionPaymentDialog
         open={pos.showSubscriptionPaymentDialog}
