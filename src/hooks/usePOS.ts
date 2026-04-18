@@ -248,6 +248,7 @@ export const usePOS = (session: any) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const barcodeBuffer = useRef<string>("")
   const lastKeyTime = useRef<number>(0)
+  const prevBranchRef = useRef<string | null>(selectedBranch)
 
   // API CALLS
   const fetchPOSData = useCallback(async () => {
@@ -479,22 +480,29 @@ export const usePOS = (session: any) => {
 
   // Limpiar carrito al cambiar de sucursal para evitar errores de inventario cruzado
   useEffect(() => {
-    if (cart.length > 0) {
-      setCart([])
-      setCartCustomer(null)
-      setCartDiscount(0)
-      setRedeemPoints(0)
-      setCouponCode("")
-      setAppliedCoupon(null)
-      setCashReceived(0)
-      setChange(0)
-      toast.info("Carrito limpiado por cambio de sucursal", {
-        description: "Los productos de una sucursal no pueden venderse en otra."
-      })
+    // Solo limpiar si la sucursal realmente cambió y no es la carga inicial
+    if (prevBranchRef.current !== null && prevBranchRef.current !== selectedBranch) {
+      if (cart.length > 0) {
+        setCart([])
+        setCartCustomer(null)
+        setCartDiscount(0)
+        setRedeemPoints(0)
+        setCouponCode("")
+        setAppliedCoupon(null)
+        setCashReceived(0)
+        setChange(0)
+        toast.info("Carrito limpiado por cambio de sucursal", {
+          description: "Los productos de una sucursal no pueden venderse en otra."
+        })
+      }
     }
+    
     // Forzar actualización de notificaciones al cambiar de sede
     fetchNotifications()
-  }, [selectedBranch, fetchNotifications])
+    
+    // Actualizar el ref para la próxima comparación
+    prevBranchRef.current = selectedBranch
+  }, [selectedBranch, fetchNotifications, cart.length])
 
   // Handlers
   const handleAddProduct = async (e: React.FormEvent) => {
