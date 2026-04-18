@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle,
   LayoutGrid, ArrowRightLeft, Minus, Search, Package, RefreshCw, ShoppingBag, 
-  AlertTriangle, Wallet, CreditCard, FileText, DollarSign
+  AlertTriangle, Wallet, CreditCard, FileText, DollarSign, Wand2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -64,6 +64,7 @@ interface SaleTabProps {
   appliedGiftCard: any
   onPrintGiftCard: (card: any) => void
   userRole?: string
+  businessSettings?: any
 }
 
 export const SaleTab = ({
@@ -111,7 +112,8 @@ export const SaleTab = ({
   onAddPayment,
   onRemovePayment,
   onUpdatePayment,
-  userRole
+  userRole,
+  businessSettings
 }: SaleTabProps) => {
   const isAdmin = userRole === "TENANT_ADMIN"
   const giftCardInputRef = useRef<HTMLInputElement>(null)
@@ -691,7 +693,11 @@ export const SaleTab = ({
                     { id: "CREDIT", label: "Crédito", icon: FileText },
                     { id: "GIFT_CARD", label: "Regalo", icon: Ticket },
                     { id: "MIXED", label: "Mixto", icon: LayoutGrid }
-                  ].map(method => (
+                  ].filter(m => {
+                    if (!businessSettings?.enabledPaymentMethods) return true;
+                    const enabled = businessSettings.enabledPaymentMethods.split(",").filter(Boolean);
+                    return enabled.includes(m.id);
+                  }).map(method => (
                     <motion.div key={method.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                       <Button
                         variant={cartPaymentMethod === method.id ? "default" : "outline"}
@@ -785,9 +791,22 @@ export const SaleTab = ({
                                   type="number" 
                                   value={payment.amount || ""}
                                   onChange={(e) => onUpdatePayment(index, { amount: parseFloat(e.target.value) || 0 })}
-                                  className="h-8 pl-6 text-xs font-black tabular-nums bg-background"
+                                  className="h-8 pl-6 pr-8 text-xs font-black tabular-nums bg-background"
                                   placeholder="0"
                                 />
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="absolute right-0 top-0 h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                                  title="Completar saldo"
+                                  onClick={() => {
+                                    const otherPaymentsTotal = cartPayments.reduce((sum, p, i) => i === index ? sum : sum + p.amount, 0)
+                                    const remainder = Math.max(0, total - otherPaymentsTotal)
+                                    onUpdatePayment(index, { amount: remainder })
+                                  }}
+                                >
+                                  <Wand2 className="w-3.5 h-3.5" />
+                                </Button>
                               </div>
                             </div>
                             

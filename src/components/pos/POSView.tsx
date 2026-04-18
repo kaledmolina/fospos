@@ -162,6 +162,7 @@ export const POSView = ({
               onRemovePayment={pos.handleRemovePayment}
               onUpdatePayment={pos.handleUpdatePayment}
               userRole={pos.session?.user?.role}
+              businessSettings={pos.businessSettings}
             />
           )}
           {pos.posTab === "loyalty" && (
@@ -188,7 +189,11 @@ export const POSView = ({
             />
           )}
           {pos.posTab === "settings" && (
-            <SettingsTab userRole={pos.session?.user?.role} />
+            <SettingsTab 
+              userRole={pos.session?.user?.role} 
+              settings={pos.businessSettings}
+              onUpdateSettings={pos.handleUpdateBusinessSettings}
+            />
           )}
           {pos.posTab === "categories" && (
             <CategoriesTab

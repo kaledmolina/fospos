@@ -184,6 +184,40 @@ export const usePOS = (session: any) => {
     setHistoryDialog(true)
   }
 
+  // Business settings
+  const [businessSettings, setBusinessSettings] = useState<any>(null)
+  const fetchBusinessSettings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/settings/business")
+      const data = await res.json()
+      if (data.success) {
+        setBusinessSettings(data.data)
+      }
+    } catch { console.error("Error fetching business settings") }
+  }, [])
+
+  const handleUpdateBusinessSettings = async (payload: any) => {
+    try {
+      const res = await fetch("/api/settings/business", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("Configuración actualizada")
+        setBusinessSettings(data.data)
+        return true
+      } else {
+        toast.error(data.error || "Error al actualizar")
+        return false
+      }
+    } catch { 
+      toast.error("Error de conexión")
+      return false
+    }
+  }
+
   // Profile management
   const [profileDialog, setProfileDialog] = useState(false)
   const [profileForm, setProfileForm] = useState({
@@ -284,10 +318,12 @@ export const usePOS = (session: any) => {
 
       const suppliersRes = await fetch("/api/suppliers")
       if (suppliersRes.ok) setSuppliers((await suppliersRes.json()).data)
+
+      await fetchBusinessSettings()
     } catch (error) {
       console.error("Error fetching POS data:", error)
     }
-  }, [session, selectedBranch])
+  }, [session, selectedBranch, fetchBusinessSettings])
 
   const fetchNotifications = useCallback(async () => {
     if (!session?.user?.tenantId) return
@@ -503,6 +539,14 @@ export const usePOS = (session: any) => {
     // Actualizar el ref para la próxima comparación
     prevBranchRef.current = selectedBranch
   }, [selectedBranch, fetchNotifications, cart.length])
+
+  // Sincronizar pago cuando el total del carrito cambia (si no es mixto)
+  useEffect(() => {
+    if (cartPaymentMethod !== "MIXED") {
+      const { total } = getCartTotal()
+      setCartPayments([{ method: cartPaymentMethod, amount: total }])
+    }
+  }, [cart.length, cartDiscount, redeemPoints, appliedCoupon, cartPaymentMethod])
 
   // Handlers
   const handleAddProduct = async (e: React.FormEvent) => {
@@ -810,7 +854,8 @@ export const usePOS = (session: any) => {
 
   const getCartTotal = () => {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-    const tax = Math.round(subtotal * 0.19)
+    const taxValue = businessSettings?.taxRate || 19
+    const tax = Math.round(subtotal * (taxValue / 100))
     
     // Loyalty & Coupon discounts
     let loyaltyDiscount = 0
@@ -1642,6 +1687,8 @@ export const usePOS = (session: any) => {
     suppliers, setSuppliers, supplierDialog, setSupplierDialog,
     supplierForm, setSupplierForm, editingSupplier, setEditingSupplier,
     handleAddSupplier, handleUpdateSupplier, handleDeleteSupplier,
-    profileDialog, setProfileDialog, profileForm, setProfileForm, handleUpdateProfile
+    profileDialog, setProfileDialog, profileForm, setProfileForm, handleUpdateProfile,
+    cartPayments, setCartPayments, handleAddPayment, handleUpdatePayment, handleRemovePayment,
+    businessSettings, handleUpdateBusinessSettings
   }
 }

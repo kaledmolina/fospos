@@ -435,7 +435,7 @@ export async function POST(request: NextRequest) {
         pointsEarned = Math.floor(subtotal / step) * loyaltyConfig.pointsPerAmount;
       }
 
-      const tax = Math.round(subtotal * 0.19);
+      const tax = Math.round(subtotal * (tenant.taxRate / 100));
       const finalTotal = Math.max(0, subtotal + tax - (discount || 0) - pointsValue - couponDiscount);
 
       // 1. Validaciones previas de todos los pagos

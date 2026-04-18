@@ -30,6 +30,7 @@ model Tenant {
   invoicePrefix   String   @default("FAC") // Prefijo de facturas
   invoiceNumber   Int      @default(1)     // Consecutivo de facturas
   logoUrl         String?  // Logo del negocio
+  enabledPaymentMethods String   @default("CASH,CARD,TRANSFER,CREDIT,MIXED,GIFT_CARD") // Métodos habilitados
   
   // Timestamps
   createdAt       DateTime @default(now())
