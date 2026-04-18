@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Store, X, LogOut, Menu, Bell, Package, AlertCircle, 
   Clock, BarChart3, ShoppingBag, Users, CreditCard, 
-  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe, Ticket, Truck, ShieldCheck
+  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe, Ticket, Truck, ShieldCheck, Maximize2, Minimize2
 } from "lucide-react"
+import { useState, useEffect } from "react"
 import { BranchSelector } from "./shared/BranchSelector"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -13,6 +14,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Confetti } from "@/components/shared/Confetti"
 import { FAB } from "@/components/ui/fab"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
+import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface POSDashboardProps {
   session: any
@@ -56,155 +64,273 @@ export const POSDashboard = ({
   onBranchChange,
   onProfileOpen
 }: POSDashboardProps) => {
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
+  }, []);
+
   const currentBranch = branches.find(b => b.id === selectedBranch)
   const displayName = currentBranch ? currentBranch.name : session?.user?.tenantName
 
   return (
-    <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden">
-      {/* Confetti for celebrations */}
+    <div className="h-screen bg-slate-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 overflow-hidden relative flex">
       <Confetti show={showConfetti} />
       
-      {/* Sidebar */}
+      {/* Overlay for mobile */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => onSidebarOpenChange(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-md z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Modern Floating Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:shadow-none lg:bg-card/50 flex flex-col h-screen`}
+        className={`fixed lg:relative z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col h-[calc(100vh-1.5rem)] m-3
+          ${sidebarOpen ? "w-64 translate-x-0" : "w-20 -translate-x-[calc(100%+2rem)] lg:translate-x-0"}
+          bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-3xl overflow-hidden`}
       >
-        <div className="flex items-center justify-between p-4 border-b shrink-0">
-          <div className="flex items-center gap-2">
+        <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-4 border-b border-white/10 shrink-0 h-20`}>
+          <div className="flex items-center gap-3 overflow-hidden">
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
-              className="w-10 h-10 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md border-2 border-primary/20"
+              className="w-10 h-10 shrink-0 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 border-2 border-white/20"
             >
               {currentBranch?.logoUrl ? (
-                <img src={currentBranch.logoUrl} alt="Logo Sede" className="w-full h-full object-cover" />
+                <img src={currentBranch.logoUrl} alt="Logo" className="w-full h-full object-cover" />
               ) : session?.user?.logoUrl ? (
-                <img src={session.user.logoUrl} alt="Logo Negocio" className="w-full h-full object-cover" />
+                <img src={session.user.logoUrl} alt="Logo" className="w-full h-full object-cover" />
               ) : (
-                <Store className="w-5 h-5 text-white" />
+                <Store className="w-6 h-6 text-white" />
               )}
             </motion.div>
-            <div className="min-w-0">
-              <BranchSelector 
-                branches={branches}
-                selectedBranch={selectedBranch}
-                onBranchChange={onBranchChange}
-                isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
-                customName={displayName}
-              />
-            </div>
+            {sidebarOpen && (
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
+              >
+                <BranchSelector 
+                  branches={branches}
+                  selectedBranch={selectedBranch}
+                  onBranchChange={onBranchChange}
+                  isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
+                  customName={displayName}
+                />
+              </motion.div>
+            )}
           </div>
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => onSidebarOpenChange(false)}>
+          
+          {sidebarOpen && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full hover:bg-primary/10 text-primary hidden lg:flex"
+              onClick={() => onSidebarOpenChange(false)}
+            >
+              <Minimize2 className="w-4 h-4" />
+            </Button>
+          )}
+
+          {/* Mobile close button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="lg:hidden rounded-full h-10 w-10" 
+            onClick={() => onSidebarOpenChange(false)}
+          >
             <X className="w-5 h-5" />
           </Button>
         </div>
         
-        <ScrollArea className="flex-1 px-4 py-4 min-h-0">
-          <nav className="space-y-1">
-            {[
-              { id: "dashboard", icon: BarChart3, label: "Dashboard" },
-              { id: "sale", icon: ShoppingBag, label: "Nueva Venta" },
-              { id: "transactions", icon: Receipt, label: "Transacciones" },
-              { id: "categories", icon: FolderOpen, label: "Categorías" },
-              { id: "products", icon: Package, label: "Productos" },
-              { id: "advanced-inventory", icon: Truck, label: "Inventario Pro" },
-              { id: "customers", icon: Users, label: "Clientes" },
-              { id: "suppliers", icon: Users, label: "Proveedores" },
-              { id: "credits", icon: CreditCard, label: "Fiados" },
-              { id: "expenses", icon: Receipt, label: "Gastos" },
-              { id: "cash", icon: Wallet, label: "Caja" },
-              { id: "subscriptions", icon: RefreshCw, label: "Suscripciones" },
-              { id: "giftcards", icon: Ticket, label: "Gift Cards" },
-              ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "loyalty", icon: Star, label: "Fidelización" }] : []),
-              ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "branches", icon: Building2, label: "Sucursales" }] : []),
-              ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "users", icon: Users, label: "Usuarios" }] : []),
-              ...(session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN" ? [{ id: "logs", icon: ShieldCheck, label: "Auditoría" }] : [])
-            ].map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Button
-                  variant={posTab === item.id ? "default" : "ghost"}
-                  className={`w-full justify-start cursor-pointer transition-all duration-200 relative group ${posTab === item.id ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-accent text-muted-foreground hover:text-foreground"}`}
-                  onClick={() => onTabChangeWithEffects(item.id)}
+        <ScrollArea className="flex-1 px-4 py-6 min-h-0">
+          <TooltipProvider delayDuration={0}>
+            <nav className="space-y-2">
+              {[
+                { id: "dashboard", icon: BarChart3, label: "Dashboard" },
+                { id: "sale", icon: ShoppingBag, label: "Nueva Venta" },
+                { id: "transactions", icon: Receipt, label: "Historial" },
+                { id: "categories", icon: FolderOpen, label: "Categorías" },
+                { id: "products", icon: Package, label: "Productos" },
+                { id: "advanced-inventory", icon: Truck, label: "Inventario Pro" },
+                { id: "customers", icon: Users, label: "Clientes" },
+                { id: "suppliers", icon: Users, label: "Proveedores" },
+                { id: "credits", icon: CreditCard, label: "Fiados" },
+                { id: "expenses", icon: Receipt, label: "Gastos" },
+                { id: "cash", icon: Wallet, label: "Caja" },
+                { id: "subscriptions", icon: RefreshCw, label: "Suscripciones" },
+                { id: "giftcards", icon: Ticket, label: "Gift Cards" },
+                ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "loyalty", icon: Star, label: "Fidelización" }] : []),
+                ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "branches", icon: Building2, label: "Sucursales" }] : []),
+                ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "users", icon: Users, label: "Usuarios" }] : []),
+                ...(session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN" ? [{ id: "logs", icon: ShieldCheck, label: "Auditoría" }] : [])
+              ].map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.02 }}
                 >
-                  <item.icon className="w-4 h-4 mr-2" />
-                  {item.label}
-                  {posTab === item.id && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r"
-                    />
-                  )}
-                </Button>
-              </motion.div>
-            ))}
-          </nav>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant={posTab === item.id ? "default" : "ghost"}
+                        className={`w-full ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} cursor-pointer h-10 transition-all duration-300 relative group rounded-xl
+                          ${posTab === item.id 
+                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
+                            : "hover:bg-primary/10 text-muted-foreground hover:text-primary"}`}
+                        onClick={() => onTabChangeWithEffects(item.id)}
+                      >
+                        <item.icon className={`${sidebarOpen ? "w-4.5 h-4.5 mr-2.5" : "w-5.5 h-5.5"} shrink-0 transition-transform group-hover:scale-110`} />
+                        {sidebarOpen && (
+                          <motion.span
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="truncate font-black uppercase text-[10px] tracking-widest"
+                          >
+                            {item.label}
+                          </motion.span>
+                        )}
+                        {posTab === item.id && (
+                          <motion.div
+                            layoutId="activePill"
+                            className="absolute left-0 top-3 bottom-3 w-1 bg-primary-foreground rounded-r-full"
+                          />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    {!sidebarOpen && (
+                      <TooltipContent side="right" sideOffset={20} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[10px] tracking-widest">
+                        {item.label}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </motion.div>
+              ))}
+            </nav>
+          </TooltipProvider>
         </ScrollArea>
         
-        <div className="p-4 border-t bg-card/80 backdrop-blur-md shrink-0">
+        <div className="p-4 bg-primary/5 backdrop-blur-md shrink-0">
           <div 
-            className="flex items-center gap-3 mb-3 p-2 rounded-xl hover:bg-accent/50 cursor-pointer transition-all group"
+            className={`flex items-center ${sidebarOpen ? "gap-3" : "justify-center"} p-3 rounded-[1.5rem] bg-white dark:bg-zinc-900 border border-white/10 hover:shadow-xl cursor-pointer transition-all duration-300 group overflow-hidden`}
             onClick={onProfileOpen}
+            title={!sidebarOpen ? "Perfil" : ""}
           >
-            <div className="w-8 h-8 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-              <Users className="w-4 h-4 text-emerald-600 group-hover:text-white" />
+            <div className="w-10 h-10 shrink-0 bg-gradient-to-tr from-primary to-primary/60 rounded-xl flex items-center justify-center text-white shadow-md group-hover:rotate-6 transition-transform">
+              <Users className="w-5 h-5" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold truncate leading-none mb-1 text-foreground">{session?.user?.name}</p>
-              <p className="text-[10px] text-muted-foreground truncate uppercase tracking-widest flex items-center gap-1">
-                {session?.user?.role === "TENANT_ADMIN" ? "Administrador" : 
-                 session?.user?.role === "CASHIER" ? "Cajero" : "Bodeguero"}
-                <span className="w-1 h-1 bg-emerald-500 rounded-full" />
-                Perfil
-              </p>
-            </div>
+            {sidebarOpen && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex-1 min-w-0"
+              >
+                <p className="text-xs font-black truncate text-foreground">{session?.user?.name}</p>
+                <Badge variant="outline" className="h-4 text-[8px] font-black uppercase border-primary/20 bg-primary/5 text-primary">
+                  {session?.user?.role === "TENANT_ADMIN" ? "Admin" : "Usuario"}
+                </Badge>
+              </motion.div>
+            )}
           </div>
-          <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-all duration-200 font-bold" onClick={onSignOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Cerrar Sesión
+          <Button 
+            variant="ghost" 
+            className={`w-full mt-2 ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 font-black h-10 uppercase text-[9px] tracking-widest`} 
+            onClick={onSignOut}
+            title={!sidebarOpen ? "Cerrar Sesión" : ""}
+          >
+            <LogOut className={`${sidebarOpen ? "w-4 h-4 mr-3" : "w-5 h-5"}`} />
+            {sidebarOpen && <span>Salir</span>}
           </Button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 h-screen lg:ml-0 flex flex-col overflow-hidden">
-        {/* Unified Header */}
-        <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border print:hidden">
-          <div className="flex items-center justify-between h-16 px-4 md:px-6">
+      {/* Main Content Area */}
+      <main className="flex-1 h-screen flex flex-col overflow-hidden relative z-10">
+        {/* Modern Floating Header */}
+        <header className="h-20 flex items-center shrink-0 px-4 mt-3 md:px-8 print:hidden relative z-40">
+          <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl h-14 px-5 shadow-xl shadow-black/5">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => onSidebarOpenChange(true)}>
-                <Menu className="w-5 h-5" />
-              </Button>
-              <div className="hidden lg:flex items-center gap-2 text-muted-foreground">
-                <Globe className="w-4 h-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Portal POS</span>
+              {!sidebarOpen && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95 lg:hidden"
+                  onClick={() => onSidebarOpenChange(true)}
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              )}
+              {!sidebarOpen && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95 hidden lg:flex"
+                  onClick={() => onSidebarOpenChange(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              )}
+              <div className="hidden lg:flex items-center gap-2 text-muted-foreground/60">
+                <Globe className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Fost POS • Hub</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4">
-              <div className="flex items-center pr-2 md:pr-4 border-r border-border mr-1 md:mr-2">
-                <ThemeToggle />
-              </div>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="rounded-xl hover:bg-accent hidden sm:flex h-10 w-10 transition-all active:scale-95"
+                onClick={toggleFullscreen}
+                title={isFullscreen ? "Salir de Pantalla Completa" : "Pantalla Completa"}
+              >
+                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              </Button>
+
+              <div className="w-px h-6 bg-border mx-1" />
+              <ThemeToggle />
               
               <Popover onOpenChange={onNotificationsOpenChange}>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative hover:bg-accent transition-all duration-200">
+                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-10 h-10 transition-all active:scale-95">
                     <Bell className="w-5 h-5" />
                     {unreadNotifications > 0 && (
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0 shadow-2xl border-border bg-card/95 backdrop-blur-sm" align="end">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h3 className="font-bold text-sm uppercase tracking-tighter">Notificaciones</h3>
+                <PopoverContent className="w-80 p-0 shadow-2xl border-border bg-card/95 backdrop-blur-md rounded-3xl overflow-hidden mt-2" align="end">
+                  <div className="p-4 bg-primary/5 border-b flex items-center justify-between">
+                    <div>
+                      <h3 className="font-black text-[10px] uppercase tracking-widest text-primary">Notificaciones</h3>
+                      <Badge variant="secondary" className="font-black text-[9px] h-5 mt-1">{unreadNotifications} Nuevas</Badge>
+                    </div>
                     {(notifications?.length || 0) > 0 && (
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-[10px] h-6 px-2 uppercase font-black hover:text-emerald-500"
+                        className="text-[10px] h-6 px-2 uppercase font-black hover:text-primary transition-colors hover:bg-primary/10"
                         onClick={() => {
                            onClearNotifications()
                            onNotificationsOpenChange(false)
@@ -217,26 +343,26 @@ export const POSDashboard = ({
                   <ScrollArea className="h-80">
                     {(notifications?.length || 0) === 0 ? (
                       <div className="p-12 text-center flex flex-col items-center gap-2">
-                        <Bell className="w-8 h-8 text-muted-foreground/20" />
-                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Todo al día</p>
+                        <Bell className="w-8 h-8 text-muted-foreground/10" />
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Todo en orden</p>
                       </div>
                     ) : (
                       <div className="divide-y divide-border/50">
                         {notifications.map(n => (
-                          <div key={n.id} className={`p-4 transition-colors hover:bg-accent/30 ${!n.isRead ? "bg-emerald-500/5" : ""}`}>
+                          <div key={n.id} className={`p-4 transition-colors hover:bg-accent/30 ${!n.isRead ? "bg-primary/5" : ""}`}>
                             <div className="flex items-start gap-3">
-                              <div className={`mt-1 p-1.5 rounded-lg ${
-                                n.type === "LOW_STOCK" ? "bg-yellow-500/10 text-yellow-600" :
-                                (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? "bg-red-500/10 text-red-600" :
-                                "bg-orange-500/10 text-orange-600"
+                              <div className={`mt-1 p-2 rounded-xl ${
+                                n.type === "LOW_STOCK" ? "bg-amber-100 text-amber-600 dark:bg-amber-500/10" :
+                                (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? "bg-red-100 text-red-600 dark:bg-red-500/10" :
+                                "bg-primary/10 text-primary"
                               }`}>
-                                {n.type === "LOW_STOCK" ? <Package className="w-3.5 h-3.5" /> :
-                                 (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? <AlertCircle className="w-3.5 h-3.5" /> :
-                                 <Clock className="w-3.5 h-3.5" />}
+                                {n.type === "LOW_STOCK" ? <Package className="w-4 h-4" /> :
+                                 (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? <AlertCircle className="w-4 h-4" /> :
+                                 <Clock className="w-4 h-4" />}
                               </div>
-                              <div>
-                                <p className="text-sm font-bold leading-tight mb-1">{n.title}</p>
-                                <p className="text-xs text-muted-foreground leading-relaxed">{n.message}</p>
+                              <div className="min-w-0">
+                                <p className="text-xs font-black leading-tight mb-1 uppercase tracking-tight">{n.title}</p>
+                                <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{n.message}</p>
                               </div>
                             </div>
                           </div>
@@ -252,15 +378,24 @@ export const POSDashboard = ({
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 lg:pb-6 custom-scrollbar">
+        {/* Content Scroll Area */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
           <AnimatePresence mode="wait">
-            {children}
+            <motion.div
+              key={posTab}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1.02, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="h-full"
+            >
+              {children}
+            </motion.div>
           </AnimatePresence>
         </div>
       </main>
 
-      {/* Floating Action Button (FAB) - Visible everywhere except on Sale and some config tabs */}
+      {/* Floating Action Button (FAB) */}
       {posTab !== "sale" && posTab !== "settings" && (
         <FAB
           icon={Plus}
@@ -269,15 +404,15 @@ export const POSDashboard = ({
         />
       )}
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-lg border-t border-border/50 shadow-[-5px_0_30px_rgba(0,0,0,0.1)] z-40">
-        <div className="grid grid-cols-5 h-16">
+      {/* Mobile Bottom Navigation (Glassmorphism) */}
+      <nav className="lg:hidden fixed bottom-4 left-4 right-4 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-[2rem] shadow-2xl z-40 h-16 overflow-hidden">
+        <div className="grid grid-cols-5 h-full">
           {[
             { id: "dashboard", icon: Home, label: "Inicio" },
             { id: "sale", icon: ShoppingBag, label: "Venta" },
-            { id: "products", icon: Package, label: "Productos" },
+            { id: "products", icon: Package, label: "Stock" },
             { id: "cash", icon: Wallet, label: "Caja" },
-            { id: "more", icon: Menu, label: "Más" }
+            { id: "more", icon: Menu, label: "Menú" }
           ].map((item) => (
             <motion.button
               key={item.id}
@@ -289,19 +424,19 @@ export const POSDashboard = ({
                   onTabChangeWithEffects(item.id)
                 }
               }}
-              className={`flex flex-col items-center justify-center transition-colors relative ${
-                posTab === item.id ? "text-primary" : "text-muted-foreground hover:bg-accent/50"
+              className={`flex flex-col items-center justify-center transition-all relative ${
+                posTab === item.id ? "text-primary scale-110" : "text-muted-foreground"
               }`}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.9 }}
             >
               {posTab === item.id && (
                 <motion.div
-                  layoutId="bottomNavIndicator"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-b-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"
+                  layoutId="mobileActive"
+                  className="absolute bottom-1 w-6 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"
                 />
               )}
               <item.icon className="w-5 h-5" />
-              <span className="text-xs mt-1">{item.label}</span>
+              <span className="text-[9px] font-black uppercase mt-1 tracking-tighter">{item.label}</span>
             </motion.button>
           ))}
         </div>
