@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PurchaseOrderDialog } from "../dialogs/PurchaseOrderDialog"
+import { PurchaseOrderDetailDialog } from "../dialogs/PurchaseOrderDetailDialog"
 import { formatCurrency } from "@/lib/utils"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -32,6 +33,8 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
   const [showPODialog, setShowPODialog] = useState(false)
+  const [selectedPO, setSelectedPO] = useState<any>(null)
+  const [showDetailDialog, setShowDetailDialog] = useState(false)
 
   const fetchMovements = async () => {
     setLoading(true)
@@ -113,6 +116,11 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
     } catch (error) {
       toast.error("Error al procesar recepción")
     }
+  }
+
+  const handleViewPO = (po: any) => {
+    setSelectedPO(po)
+    setShowDetailDialog(true)
   }
 
   return (
@@ -305,7 +313,12 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                                 <CheckCircle2 className="w-4 h-4 mr-2" /> Recibir
                               </Button>
                             )}
-                            <Button variant="outline" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors">
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                              onClick={() => handleViewPO(po)}
+                            >
                               <Eye className="w-4 h-4" />
                             </Button>
                           </div>
@@ -342,6 +355,12 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
         suppliers={suppliers}
         products={products}
         onCreate={handleCreatePO}
+      />
+
+      <PurchaseOrderDetailDialog 
+        open={showDetailDialog}
+        onOpenChange={setShowDetailDialog}
+        po={selectedPO}
       />
     </div>
   )

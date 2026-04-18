@@ -77,8 +77,8 @@ export const PurchaseOrderDialog = ({
       <DialogContent className="w-[95vw] sm:max-w-[650px] max-h-[90vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950 rounded-[2rem]">
         <div className="p-6 bg-slate-50/50 dark:bg-zinc-900/30 border-b backdrop-blur-md shrink-0">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-2xl font-black text-emerald-600">
-              <div className="p-2 bg-emerald-500 rounded-lg shadow-lg shadow-emerald-500/20">
+            <DialogTitle className="flex items-center gap-3 text-2xl font-black text-primary">
+              <div className="p-2 bg-primary rounded-lg shadow-lg shadow-primary/20">
                 <Truck className="w-5 h-5 text-white" />
               </div>
               Nueva Orden de Compra
@@ -102,11 +102,11 @@ export const PurchaseOrderDialog = ({
                     {suppliers.length === 0 ? (
                       <div className="p-4 text-center">
                         <p className="text-xs text-muted-foreground mb-2">No tienes proveedores creados</p>
-                        <p className="text-[10px] font-bold text-emerald-600">Ve a la pestaña de Proveedores para crear uno</p>
+                        <p className="text-[10px] font-bold text-primary">Ve a la pestaña de Proveedores para crear uno</p>
                       </div>
                     ) : (
                       suppliers.map(s => (
-                        <SelectItem key={s.id} value={s.id} className="rounded-lg focus:bg-emerald-50 dark:focus:bg-emerald-500/10">
+                        <SelectItem key={s.id} value={s.id} className="rounded-lg focus:bg-primary/10">
                           {s.name} <span className="text-[10px] text-muted-foreground ml-2 opacity-60">({s.taxId || "Sin NIT"})</span>
                         </SelectItem>
                       ))
@@ -123,7 +123,7 @@ export const PurchaseOrderDialog = ({
                     variant="outline" 
                     size="sm" 
                     onClick={addItem}
-                    className="h-8 text-[10px] font-black uppercase text-emerald-600 border-emerald-500/20 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg px-4 transition-all hover:translate-x-1"
+                    className="h-8 text-[10px] font-black uppercase text-primary border-primary/20 hover:bg-primary/10 rounded-lg px-4 transition-all hover:translate-x-1"
                   >
                     <Plus className="w-3 h-3 mr-1" /> Añadir Item
                   </Button>
@@ -171,18 +171,18 @@ export const PurchaseOrderDialog = ({
                           <div className="flex-1 space-y-1.5">
                             <Label className="text-[9px] uppercase font-black text-muted-foreground ml-1 tracking-wider opacity-60">Costo Unit.</Label>
                             <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
                               <Input 
                                 type="number" 
                                 value={item.unitCost} 
                                 onChange={(e) => updateItem(index, "unitCost", parseFloat(e.target.value) || 0)}
-                                className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-emerald-500/20"
+                                className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20"
                               />
                             </div>
                           </div>
                           <div className="text-right flex flex-col justify-end min-w-[80px] pb-1">
                             <Label className="text-[9px] uppercase font-black text-muted-foreground">Subtotal</Label>
-                            <p className="font-black text-xs text-emerald-600">{formatCurrency(item.unitCost * item.quantity)}</p>
+                            <p className="font-black text-xs text-primary">{formatCurrency(item.unitCost * item.quantity)}</p>
                           </div>
                         </div>
                       </div>
@@ -233,12 +233,12 @@ export const PurchaseOrderDialog = ({
               <div className="space-y-1">
                 <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest opacity-60">Inversión Total Estimada</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-emerald-500">$</span>
+                  <span className="text-2xl font-bold text-primary">$</span>
                   <p className="text-4xl font-black text-foreground tabular-nums tracking-tighter">{total.toLocaleString()}</p>
                 </div>
               </div>
               <div className="text-right flex flex-col items-end gap-2">
-                <Badge className="bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg shadow-emerald-500/20 border-none">
+                <Badge className="bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-lg shadow-primary/20 border-none">
                   {items.length} {items.length === 1 ? 'Producto' : 'Productos'}
                 </Badge>
               </div>
@@ -255,7 +255,7 @@ export const PurchaseOrderDialog = ({
               </Button>
               <Button 
                 type="submit" 
-                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 h-12 px-10 rounded-xl font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+                className="bg-primary hover:opacity-90 text-primary-foreground shadow-xl shadow-primary/20 h-12 px-10 rounded-xl font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                 disabled={loading || !supplierId || items.length === 0}
               >
                 {loading ? "Procesando..." : "Emitir Orden de Compra"}
