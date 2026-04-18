@@ -15,15 +15,25 @@ interface BranchSelectorProps {
   selectedBranch: string | null
   onBranchChange: (branchId: string | null) => void
   isAdmin: boolean
+  customName?: string
 }
 
 export const BranchSelector = ({
   branches,
   selectedBranch,
   onBranchChange,
-  isAdmin
+  isAdmin,
+  customName
 }: BranchSelectorProps) => {
-  if (!isAdmin || branches.length <= 1) return null
+  if (!isAdmin || branches.length <= 1) {
+    return (
+      <div className="flex items-center gap-2 px-1">
+        <span className="font-bold text-sm text-foreground truncate block">
+          {customName || "Cargando..."}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center gap-2">
@@ -31,10 +41,11 @@ export const BranchSelector = ({
         value={selectedBranch || ""}
         onValueChange={onBranchChange}
       >
-        <SelectTrigger className="w-[200px] bg-card border-border shadow-sm h-9">
-          <div className="flex items-center gap-2 truncate">
-            <Building2 className="w-4 h-4 text-emerald-500" />
-            <SelectValue placeholder="Seleccionar Sede" />
+        <SelectTrigger className="h-auto p-0 border-0 bg-transparent shadow-none hover:bg-transparent focus:ring-0 group">
+          <div className="flex items-center gap-1.5 truncate max-w-[140px]">
+            <span className="font-bold text-sm text-foreground truncate block transition-colors group-hover:text-emerald-500">
+              {customName || "Seleccionar Sede"}
+            </span>
           </div>
         </SelectTrigger>
         <SelectContent>

@@ -54,6 +54,9 @@ export const POSDashboard = ({
   selectedBranch,
   onBranchChange
 }: POSDashboardProps) => {
+  const currentBranch = branches.find(b => b.id === selectedBranch)
+  const displayName = currentBranch ? currentBranch.name : session?.user?.tenantName
+
   return (
     <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden">
       {/* Confetti for celebrations */}
@@ -71,8 +74,14 @@ export const POSDashboard = ({
             >
               <Store className="w-4 h-4 text-white" />
             </motion.div>
-            <div>
-              <span className="font-bold text-sm text-foreground truncate block">{session?.user?.tenantName}</span>
+            <div className="min-w-0">
+              <BranchSelector 
+                branches={branches}
+                selectedBranch={selectedBranch}
+                onBranchChange={onBranchChange}
+                isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
+                customName={displayName}
+              />
             </div>
           </div>
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => onSidebarOpenChange(false)}>
@@ -222,14 +231,7 @@ export const POSDashboard = ({
                 </PopoverContent>
               </Popover>
 
-              <div className="pl-2 md:pl-4 border-l border-border ml-1 md:mr-0 mr-[-10px]">
-                <BranchSelector 
-                  branches={branches}
-                  selectedBranch={selectedBranch}
-                  onBranchChange={onBranchChange}
-                  isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
-                />
-              </div>
+              {/* Branch selector moved to sidebar */}
             </div>
           </div>
         </header>
