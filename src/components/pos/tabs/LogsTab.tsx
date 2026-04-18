@@ -22,7 +22,7 @@ export const LogsTab = ({ logs, fetchLogs }: LogsTabProps) => {
 
   const getActionIcon = (action: string) => {
     switch (action) {
-      case "PRICE_CHANGE": return <DollarSign className="w-4 h-4 text-emerald-500" />
+      case "PRICE_CHANGE": return <DollarSign className="w-4 h-4 text-primary" />
       case "STOCK_ADJUSTMENT": return <Package className="w-4 h-4 text-blue-500" />
       case "PRODUCT_DELETE": return <ShieldCheck className="w-4 h-4 text-red-500" />
       case "PRODUCT_UPDATE": return <Tag className="w-4 h-4 text-amber-500" />
@@ -32,7 +32,7 @@ export const LogsTab = ({ logs, fetchLogs }: LogsTabProps) => {
 
   const getActionColor = (action: string) => {
     switch (action) {
-      case "PRICE_CHANGE": return "bg-emerald-500/10 text-emerald-600 border-emerald-200"
+      case "PRICE_CHANGE": return "bg-primary/10 text-primary border-emerald-200"
       case "STOCK_ADJUSTMENT": return "bg-blue-500/10 text-blue-600 border-blue-200"
       case "PRODUCT_DELETE": return "bg-red-500/10 text-red-600 border-red-200"
       case "PRODUCT_UPDATE": return "bg-amber-500/10 text-amber-600 border-amber-200"
@@ -57,7 +57,7 @@ export const LogsTab = ({ logs, fetchLogs }: LogsTabProps) => {
           </div>
           <p className="text-muted-foreground text-sm font-medium">Historial detallado de acciones administrativas y de seguridad.</p>
         </div>
-        <Badge variant="outline" className="h-8 px-4 bg-emerald-50 text-emerald-700 border-emerald-100 font-bold">
+        <Badge variant="outline" className="h-8 px-4 bg-emerald-50 text-primary border-emerald-100 font-bold">
           {logs.length} Eventos registrados
         </Badge>
       </div>
@@ -109,8 +109,8 @@ export const LogsTab = ({ logs, fetchLogs }: LogsTabProps) => {
                              )}
                              {log.newValue && (
                                <div className="p-3 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100/50 dark:border-emerald-900/20">
-                                 <p className="text-[10px] font-black uppercase text-emerald-500 mb-1 tracking-widest">Valor Nuevo</p>
-                                 <code className="text-[11px] text-emerald-700 dark:text-emerald-400 break-all">{log.newValue}</code>
+                                 <p className="text-[10px] font-black uppercase text-primary mb-1 tracking-widest">Valor Nuevo</p>
+                                 <code className="text-[11px] text-primary dark:text-primary break-all">{log.newValue}</code>
                                </div>
                              )}
                           </div>

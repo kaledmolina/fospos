@@ -159,7 +159,7 @@ export const CreditsTab = ({
                   {credit.status !== "PAID" && (
                     <Button
                       size="sm"
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="flex-1 bg-primary hover:bg-primary cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
                       onClick={() => {
                         onSetSelectedCredit(credit)
                         onSetPaymentAmount(credit.balance)

@@ -38,7 +38,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-500 rounded-xl shadow-lg shadow-emerald-500/20">
+            <div className="p-2 bg-primary rounded-xl shadow-lg shadow-primary/20">
               <Truck className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-4xl font-black tracking-tight text-foreground">Proveedores</h1>
@@ -48,7 +48,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
 
         <Button 
           onClick={onAdd}
-          className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group"
+          className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white shadow-xl shadow-primary/20 rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group"
         >
           <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" /> Nuevo Proveedor
         </Button>
@@ -68,7 +68,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                   placeholder="Buscar por nombre, NIT o correo..." 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 h-11 bg-white/50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-emerald-500/20 font-medium"
+                  className="pl-10 h-11 bg-white/50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-primary/20 font-medium"
                 />
               </div>
               <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-slate-200 dark:border-zinc-800 shrink-0 cursor-pointer">
@@ -90,8 +90,8 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                   className="group p-6 hover:bg-slate-50/50 dark:hover:bg-zinc-900/30 transition-all duration-300 relative"
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 group-hover:border-emerald-500/30 group-hover:shadow-lg group-hover:shadow-emerald-500/5 transition-all">
-                      <Truck className="w-6 h-6 text-emerald-500" />
+                    <div className="p-3 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 group-hover:border-primary/30 group-hover:shadow-lg group-hover:shadow-primary/5 transition-all">
+                      <Truck className="w-6 h-6 text-primary" />
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -114,7 +114,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                   </div>
 
                   <div className="space-y-1 mb-6">
-                    <h3 className="font-black text-lg tracking-tight group-hover:text-emerald-600 transition-colors uppercase line-clamp-1">
+                    <h3 className="font-black text-lg tracking-tight group-hover:text-primary transition-colors uppercase line-clamp-1">
                       {supplier.name}
                     </h3>
                     <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                     <div className="text-[10px] uppercase font-black text-muted-foreground tracking-widest opacity-40">
                       ID: {supplier.id.slice(-8)}
                     </div>
-                    <Button variant="ghost" size="sm" className="h-8 rounded-lg font-bold text-[10px] uppercase text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 cursor-pointer">
+                    <Button variant="ghost" size="sm" className="h-8 rounded-lg font-bold text-[10px] uppercase text-primary hover:bg-emerald-50 dark:hover:bg-primary/10 cursor-pointer">
                       Ver Historial <ExternalLink className="w-3 h-3 ml-2" />
                     </Button>
                   </div>
@@ -168,7 +168,7 @@ export const SuppliersTab = ({ suppliers, onAdd, onEdit, onDelete }: SuppliersTa
                 </div>
                 <Button 
                   onClick={onAdd}
-                  className="mt-4 bg-emerald-600 dark:bg-emerald-500 rounded-2xl h-11 px-8 font-black uppercase tracking-widest text-[10px] cursor-pointer"
+                  className="mt-4 bg-primary dark:bg-primary rounded-2xl h-11 px-8 font-black uppercase tracking-widest text-[10px] cursor-pointer"
                 >
                   <Plus className="w-3 h-3 mr-2" /> Registrar ahora
                 </Button>

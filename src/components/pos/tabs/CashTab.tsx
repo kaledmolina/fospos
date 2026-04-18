@@ -43,7 +43,7 @@ export const CashTab = ({
                   Caja Abierta
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="cursor-pointer border-emerald-500 text-emerald-600 hover:bg-emerald-50" onClick={onPrintSummary}>
+                  <Button variant="outline" className="cursor-pointer border-primary text-primary hover:bg-emerald-50" onClick={onPrintSummary}>
                     <Printer className="w-4 h-4 mr-2" />
                     Imprimir Resumen
                   </Button>
@@ -65,7 +65,7 @@ export const CashTab = ({
                   {isAdmin && (
                     <div>
                       <p className="text-sm text-muted-foreground">Ventas Totales</p>
-                      <p className="text-2xl font-bold text-emerald-500">{formatCurrency(cashRegister.totalSales)}</p>
+                      <p className="text-2xl font-bold text-primary">{formatCurrency(cashRegister.totalSales)}</p>
                     </div>
                   )}
                 </div>
@@ -78,15 +78,15 @@ export const CashTab = ({
                       <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Transferencia</span><span className="font-bold">{formatCurrency(cashRegister.totalTransfer)}</span></div>
                       <div className="flex justify-between p-3 bg-muted/30 rounded-lg"><span>Créditos</span><span className="font-bold">{formatCurrency(cashRegister.totalCredit)}</span></div>
                       <Separator />
-                      <div className="flex justify-between p-3 bg-emerald-500/10 rounded-lg">
+                      <div className="flex justify-between p-3 bg-primary/10 rounded-lg">
                         <span className="font-medium">Efectivo Esperado</span>
-                        <span className="font-bold text-emerald-500">{formatCurrency(cashRegister.initialCash + cashRegister.totalCash - todayExpenses)}</span>
+                        <span className="font-bold text-primary">{formatCurrency(cashRegister.initialCash + cashRegister.totalCash - todayExpenses)}</span>
                       </div>
                     </>
                   ) : (
-                    <div className="p-6 bg-emerald-500/5 rounded-2xl border border-dashed border-emerald-500/20 text-center flex flex-col items-center justify-center h-full">
-                       <Receipt className="w-10 h-10 text-emerald-500/40 mb-3" />
-                       <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Arqueo Ciego Activo</p>
+                    <div className="p-6 bg-primary/5 rounded-2xl border border-dashed border-primary/20 text-center flex flex-col items-center justify-center h-full">
+                       <Receipt className="w-10 h-10 text-primary/40 mb-3" />
+                       <p className="text-xs font-bold text-primary uppercase tracking-widest">Arqueo Ciego Activo</p>
                        <p className="text-[10px] text-muted-foreground italic max-w-[180px] mx-auto">Los reportes detallados están restringidos al Administrador por seguridad.</p>
                     </div>
                   )}
@@ -109,7 +109,7 @@ export const CashTab = ({
             <Wallet className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
             <p className="text-xl font-medium mb-2">Caja Cerrada</p>
             <p className="text-muted-foreground mb-6">Abre caja para comenzar a registrar ventas</p>
-            <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer" onClick={() => onSetCashDialog(true)}>Abrir Caja</Button>
+            <Button size="lg" className="bg-primary hover:bg-primary cursor-pointer" onClick={() => onSetCashDialog(true)}>Abrir Caja</Button>
           </CardContent>
         </Card>
       )}
@@ -143,12 +143,12 @@ export const CashTab = ({
                         )}
                       </td>
                       <td className="px-6 py-4 font-medium">{formatCurrency(item.initialCash)}</td>
-                      <td className="px-6 py-4 text-emerald-600 font-bold">{formatCurrency(item.totalSales)}</td>
+                      <td className="px-6 py-4 text-primary font-bold">{formatCurrency(item.totalSales)}</td>
                       <td className="px-6 py-4 font-bold">{item.finalCash ? formatCurrency(item.finalCash) : "-"}</td>
                       {isAdmin && (
                         <td className="px-6 py-4">
                           {item.status === "CLOSED" ? (
-                            <span className={`${item.difference === 0 ? "text-emerald-500" : item.difference > 0 ? "text-blue-500" : "text-red-500"} font-bold`}>
+                            <span className={`${item.difference === 0 ? "text-primary" : item.difference > 0 ? "text-blue-500" : "text-red-500"} font-bold`}>
                               {formatCurrency(item.difference || 0)}
                             </span>
                           ) : "-"}

@@ -244,11 +244,11 @@ export const SaleTab = ({
           <Card className="h-full flex flex-col">
             <CardHeader className="pb-2">
               <div className="relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
                 <Input 
                   ref={searchInputRef}
                   placeholder="Buscar producto o escanear [F2]..." 
-                  className="pl-9 h-12 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-emerald-500" 
+                  className="pl-9 h-12 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-primary" 
                   value={searchTerm}
                   onChange={(e) => handleProductSearch(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
@@ -292,7 +292,7 @@ export const SaleTab = ({
                           <Button
                             variant="outline"
                             disabled={product.stock <= 0}
-                            className={`h-auto p-0 w-full flex flex-col items-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-emerald-400 overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border-slate-100 dark:border-zinc-800 ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
+                            className={`h-auto p-0 w-full flex flex-col items-start cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-primary overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border-slate-100 dark:border-zinc-800 ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
                             onClick={() => onAddToCart(product)}
                           >
                             <div className="relative w-full aspect-[4/3] bg-slate-100 dark:bg-zinc-800 overflow-hidden">
@@ -313,7 +313,7 @@ export const SaleTab = ({
                                 </div>
                               )}
                               <div className="absolute top-2 right-2">
-                                <Badge className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-[10px] font-black text-emerald-600 border-none shadow-sm">
+                                <Badge className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-[10px] font-black text-primary border-none shadow-sm">
                                   {formatCurrency(product.salePrice)}
                                 </Badge>
                               </div>
@@ -323,7 +323,7 @@ export const SaleTab = ({
                               <p className="font-bold text-xs text-left truncate w-full text-slate-800 dark:text-zinc-200">{product.name}</p>
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">{product.category?.name || "Sin cat."}</span>
-                                <span className={`text-[10px] font-black ${product.stock < 10 ? 'text-red-500' : 'text-emerald-500'}`}>{product.stock} {product.unit}</span>
+                                <span className={`text-[10px] font-black ${product.stock < 10 ? 'text-red-500' : 'text-primary'}`}>{product.stock} {product.unit}</span>
                               </div>
                             </div>
                           </Button>
@@ -402,7 +402,7 @@ export const SaleTab = ({
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 text-[9px] font-black uppercase tracking-tighter border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all bg-white dark:bg-zinc-900 shadow-sm"
+                                className="h-8 text-[9px] font-black uppercase tracking-tighter border-primary/20 text-primary hover:bg-primary hover:text-white transition-all bg-white dark:bg-zinc-900 shadow-sm"
                                 onClick={() => onAddServiceToCart(service, false)}
                               >
                                 <Zap className="w-3 h-3 mr-1" /> Único
@@ -520,7 +520,7 @@ export const SaleTab = ({
                   <Button 
                     variant="outline" 
                     size="icon" 
-                    className="shrink-0 text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all cursor-pointer"
+                    className="shrink-0 text-primary border-primary/20 bg-primary/5 hover:bg-primary hover:text-white transition-all cursor-pointer"
                     title="Nuevo Cliente"
                     onClick={() => onSetCustomerDialog(true)}
                   >
@@ -532,16 +532,16 @@ export const SaleTab = ({
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }} 
                     animate={{ opacity: 1, scale: 1 }} 
-                    className="mt-3 overflow-hidden rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent shadow-sm shadow-emerald-500/10"
+                    className="mt-3 overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm shadow-primary/10"
                   >
                     <div className="p-3 space-y-2.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                          <Users className="w-5 h-5 text-emerald-600" />
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20">
+                          <Users className="w-5 h-5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] uppercase font-black tracking-widest text-emerald-600/60 leading-none mb-1">Cliente Seleccionado</p>
-                          <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 truncate">{cartCustomer.name}</p>
+                          <p className="text-[10px] uppercase font-black tracking-widest text-primary/60 leading-none mb-1">Cliente Seleccionado</p>
+                          <p className="text-sm font-black text-primary dark:text-primary truncate">{cartCustomer.name}</p>
                         </div>
                       </div>
                       
@@ -549,7 +549,7 @@ export const SaleTab = ({
                         <motion.div 
                           initial={{ opacity: 0, height: 0 }} 
                           animate={{ opacity: 1, height: "auto" }}
-                          className="pt-2 border-t border-emerald-500/10 flex items-center justify-between"
+                          className="pt-2 border-t border-primary/10 flex items-center justify-between"
                         >
                           <div className="flex items-center gap-2">
                              <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/10">
@@ -588,7 +588,7 @@ export const SaleTab = ({
                             <span className="text-[10px] font-bold uppercase text-muted-foreground">Disponibles: <span className="text-amber-600 dark:text-amber-500">{cartCustomer?.points || 0} pts</span></span>
                           </div>
                           {loyaltyConfig?.isActive && (cartCustomer?.points >= loyaltyConfig.minPointsToRedeem) && (
-                            <Button size="sm" variant="ghost" className="h-5 text-[9px] text-emerald-600 hover:bg-emerald-500/10 px-1 font-black" onClick={() => onSetRedeemPoints(cartCustomer?.points || 0)}>
+                            <Button size="sm" variant="ghost" className="h-5 text-[9px] text-primary hover:bg-primary/10 px-1 font-black" onClick={() => onSetRedeemPoints(cartCustomer?.points || 0)}>
                               USAR TODOS
                             </Button>
                           )}
@@ -617,11 +617,11 @@ export const SaleTab = ({
                             onChange={(e) => onSetCouponCode(e.target.value)}
                           />
                           <Button size="sm" variant="outline" className="h-8 px-2 text-[10px] font-bold border-blue-500/30 text-blue-600 hover:bg-blue-50" onClick={onValidateCoupon}>
-                            {appliedCoupon ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : "APLICAR"}
+                            {appliedCoupon ? <CheckCircle2 className="w-3 h-3 text-primary" /> : "APLICAR"}
                           </Button>
                         </div>
                         {appliedCoupon && (
-                          <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold px-1 flex items-center gap-1">
+                          <p className="text-[9px] text-primary dark:text-primary font-bold px-1 flex items-center gap-1">
                             <CheckCircle2 className="w-2.5 h-2.5" /> {appliedCoupon.description || appliedCoupon.code} (-{formatCurrency(couponDiscount)})
                           </p>
                         )}
@@ -650,7 +650,7 @@ export const SaleTab = ({
                         exit={{ opacity: 0, x: -50, scale: 0.8 }}
                         className="group flex items-center gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-xl border border-transparent hover:border-border transition-all shadow-sm"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border text-muted-foreground group-hover:text-emerald-500 transition-colors">
+                        <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border text-muted-foreground group-hover:text-primary transition-colors">
                           {item.type === "PRODUCT" ? <Package className="w-5 h-5" /> : <RefreshCw className="w-5 h-5" />}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -659,7 +659,7 @@ export const SaleTab = ({
                         </div>
                         <div className="flex items-center bg-background rounded-lg border p-0.5 shadow-sm">
                           <Button size="icon" variant="ghost" className="w-6 h-6 h-auto" onClick={() => onUpdateCartQuantity(item.id, item.quantity - 1)}>-</Button>
-                          <span className="w-8 text-center text-xs font-black text-emerald-600">{item.quantity}</span>
+                          <span className="w-8 text-center text-xs font-black text-primary">{item.quantity}</span>
                           <Button size="icon" variant="ghost" className="w-6 h-6 h-auto" onClick={() => onUpdateCartQuantity(item.id, item.quantity + 1)}>+</Button>
                         </div>
                         <Button 
@@ -701,7 +701,7 @@ export const SaleTab = ({
                     <motion.div key={method.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                       <Button
                         variant={cartPaymentMethod === method.id ? "default" : "outline"}
-                        className={`w-full cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-emerald-500 hover:bg-emerald-600 shadow-md" : "hover:border-emerald-300"}`}
+                        className={`w-full cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-md" : "hover:border-emerald-300"}`}
                         onClick={() => onSetCartPaymentMethod(method.id)}
                       >
                         <method.icon className="w-4 h-4 mr-1" />{method.label}
@@ -731,15 +731,15 @@ export const SaleTab = ({
                 
                 <div className="my-2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 
-                <div className="flex justify-between items-end p-4 bg-gradient-to-br from-emerald-600 to-emerald-700 dark:from-emerald-500/20 dark:to-emerald-500/5 rounded-2xl shadow-lg shadow-emerald-500/20 dark:shadow-none group transition-all duration-300">
+                <div className="flex justify-between items-end p-4 bg-gradient-to-br from-primary to-primary dark:from-primary/20 dark:to-primary/5 rounded-2xl shadow-lg shadow-primary/20 dark:shadow-none group transition-all duration-300">
                   <div className="space-y-1">
-                    <p className="text-[10px] uppercase font-black tracking-[0.2em] text-emerald-100 dark:text-emerald-500/70">Total a Pagar</p>
-                    <p className="text-3xl font-black text-white dark:text-emerald-400 tabular-nums leading-none drop-shadow-sm">
+                    <p className="text-[10px] uppercase font-black tracking-[0.2em] text-emerald-100 dark:text-primary/70">Total a Pagar</p>
+                    <p className="text-3xl font-black text-white dark:text-primary tabular-nums leading-none drop-shadow-sm">
                       {formatCurrency(total)}
                     </p>
                   </div>
                   <div className="text-right pb-1">
-                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 dark:bg-emerald-500/10 backdrop-blur-sm border border-white/10">
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 dark:bg-primary/10 backdrop-blur-sm border border-white/10">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
                       <p className="text-[9px] font-black text-emerald-50 border-none uppercase tracking-tighter">Balance Final</p>
                     </div>
@@ -758,7 +758,7 @@ export const SaleTab = ({
                       <Button 
                         size="sm" 
                         variant="ghost" 
-                        className="h-7 text-[10px] font-black uppercase text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 px-2"
+                        className="h-7 text-[10px] font-black uppercase text-primary hover:text-primary hover:bg-emerald-50 px-2"
                         onClick={onAddPayment}
                       >
                         <Plus className="w-3.5 h-3.5 mr-1" /> Añadir
@@ -786,7 +786,7 @@ export const SaleTab = ({
                                 </SelectContent>
                               </Select>
                               <div className="relative flex-1">
-                                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-emerald-500" />
+                                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-primary" />
                                 <Input 
                                   type="number" 
                                   value={payment.amount || ""}
@@ -797,7 +797,7 @@ export const SaleTab = ({
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  className="absolute right-0 top-0 h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                                  className="absolute right-0 top-0 h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
                                   title="Completar saldo"
                                   onClick={() => {
                                     const otherPaymentsTotal = cartPayments.reduce((sum, p, i) => i === index ? sum : sum + p.amount, 0)
@@ -840,13 +840,13 @@ export const SaleTab = ({
                     <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
                       <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-500">
                         <span>Restante</span>
-                        <span className={total - cartPayments.reduce((sum, p) => sum + p.amount, 0) === 0 ? "text-emerald-500" : "text-amber-600"}>
+                        <span className={total - cartPayments.reduce((sum, p) => sum + p.amount, 0) === 0 ? "text-primary" : "text-amber-600"}>
                           {formatCurrency(Math.max(0, total - cartPayments.reduce((sum, p) => sum + p.amount, 0)))}
                         </span>
                       </div>
                       <div className="mt-1 h-1 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                         <motion.div 
-                          className="h-full bg-emerald-500"
+                          className="h-full bg-primary"
                           initial={{ width: 0 }}
                           animate={{ width: `${Math.min(100, (cartPayments.reduce((sum, p) => sum + p.amount, 0) / total) * 100)}%` }}
                         />
@@ -879,7 +879,7 @@ export const SaleTab = ({
                             </div>
                             <Button 
                               size="sm" 
-                              className={`h-8 px-3 text-[10px] font-black uppercase shadow-md transition-colors ${appliedGiftCard ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-600 hover:bg-blue-700"}`}
+                              className={`h-8 px-3 text-[10px] font-black uppercase shadow-md transition-colors ${appliedGiftCard ? "bg-primary hover:bg-primary" : "bg-blue-600 hover:bg-blue-700"}`}
                               onClick={onValidateGiftCard}
                             >
                               {appliedGiftCard ? <CheckCircle2 className="w-4 h-4" /> : "LISTO"}
@@ -893,12 +893,12 @@ export const SaleTab = ({
                       <motion.div 
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/20 space-y-3 mb-4"
+                        className="p-3 bg-primary/5 rounded-lg border border-primary/20 space-y-3 mb-4"
                       >
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-emerald-600">Dinero entregado</Label>
+                          <Label className="text-[10px] uppercase font-bold text-primary">Dinero entregado</Label>
                           <div className="relative">
-                            <Wallet className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-emerald-500" />
+                            <Wallet className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-primary" />
                             <Input 
                               type="number" 
                               placeholder="0"
@@ -907,7 +907,7 @@ export const SaleTab = ({
                                 onCashReceivedChange(parseFloat(e.target.value) || 0)
                                 onUpdatePayment(0, { amount: total }) // Sync with simple payment
                               }}
-                              className="h-8 pl-7 bg-background dark:bg-slate-900 border-emerald-500/30 font-bold text-emerald-600 dark:text-emerald-400" 
+                              className="h-8 pl-7 bg-background dark:bg-slate-900 border-primary/30 font-bold text-primary dark:text-primary" 
                             />
                           </div>
                         </div>
@@ -933,7 +933,7 @@ export const SaleTab = ({
                   className={`w-full cursor-pointer transition-all duration-300 shadow-lg ${
                     cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total || !cartCustomer)
                       ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed shadow-none"
-                      : "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25"
+                      : "bg-primary hover:bg-primary shadow-primary/25"
                   }`}
                   size="lg" 
                   disabled={

@@ -170,7 +170,7 @@ export const LoyaltyConfigTab = ({
 
               <div className="flex justify-end pt-4 border-t">
                 <Button 
-                  className="bg-emerald-500 hover:bg-emerald-600 gap-2"
+                  className="bg-primary hover:bg-primary gap-2"
                   onClick={() => onSaveConfig(config)}
                 >
                   <Save className="w-4 h-4" /> Guardar Configuración
@@ -275,7 +275,7 @@ export const LoyaltyConfigTab = ({
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-bold text-emerald-600">Usos: {coupon.currentUses || 0}</p>
+                          <p className="text-xs font-bold text-primary">Usos: {coupon.currentUses || 0}</p>
                           <Button 
                             variant="ghost" 
                             size="icon" 

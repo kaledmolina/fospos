@@ -120,7 +120,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-foreground flex items-center gap-3">
-            <div className="p-2 bg-emerald-500 rounded-xl shadow-lg shadow-emerald-500/20">
+            <div className="p-2 bg-primary rounded-xl shadow-lg shadow-primary/20">
               <Package className="w-6 h-6 text-white" />
             </div>
             Inventario Avanzado
@@ -163,7 +163,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                         placeholder="Buscar por producto..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 h-10 bg-white/50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-emerald-500/20"
+                        className="pl-10 h-10 bg-white/50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-primary/20"
                       />
                     </div>
                     <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-900 shrink-0 cursor-pointer">
@@ -200,7 +200,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                           <td className="px-4 py-3">
                             <Badge className={`uppercase text-[9px] font-black ${
                               m.type === "SALE" || m.type === "OUT" ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                              m.type === "PURCHASE" || m.type === "IN" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                              m.type === "PURCHASE" || m.type === "IN" ? "bg-primary/10 text-primary border-primary/20" :
                               "bg-blue-500/10 text-blue-500 border-blue-500/20"
                             }`} variant="outline">
                               {m.type === "SALE" && <TrendingDown className="w-2.5 h-2.5 mr-1" />}
@@ -210,7 +210,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                             </Badge>
                           </td>
                           <td className={`px-4 py-3 text-right font-black ${
-                             m.type === "SALE" || m.type === "OUT" ? "text-red-500" : "text-emerald-500"
+                             m.type === "SALE" || m.type === "OUT" ? "text-red-500" : "text-primary"
                           }`}>
                             {m.type === "SALE" || m.type === "OUT" ? "-" : "+"}{m.quantity}
                           </td>
@@ -253,7 +253,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                     <CardDescription className="text-sm font-medium">Abastece tu inventario con tus proveedores estratégicos</CardDescription>
                   </div>
                   <Button 
-                    className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-xl shadow-emerald-500/20 rounded-xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:cursor-not-allowed group"
+                    className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary shadow-xl shadow-primary/20 rounded-xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:cursor-not-allowed group"
                     onClick={() => setShowPODialog(true)}
                   >
                     <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" /> Nueva Orden
@@ -263,11 +263,11 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
               <CardContent>
                 <div className="grid grid-cols-1 gap-4">
                   {purchaseOrders.map((po) => (
-                    <div key={po.id} className="group p-5 rounded-3xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-emerald-500/50 transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/5">
+                    <div key={po.id} className="group p-5 rounded-3xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-primary/50 transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-primary/5">
                       <div className="flex flex-wrap items-center justify-between gap-6">
                         <div className="flex items-center gap-5">
                           <div className={`p-4 rounded-2xl transition-colors duration-500 ${
-                            po.status === "RECEIVED" ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/5 dark:text-emerald-400" :
+                            po.status === "RECEIVED" ? "bg-primary/10 text-primary dark:bg-primary/5 dark:text-primary" :
                             po.status === "PENDING" ? "bg-amber-500/10 text-amber-600 dark:bg-amber-500/5 dark:text-amber-400" :
                             "bg-slate-500/10 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400"
                           }`}>
@@ -277,7 +277,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                             <div className="flex items-center gap-2">
                               <span className="font-black text-sm uppercase tracking-tighter">OC-{po.id.slice(-6)}</span>
                               <Badge className={`uppercase text-[8px] font-black ${
-                                po.status === "RECEIVED" ? "bg-emerald-500 text-white" : "bg-amber-500 text-white"
+                                po.status === "RECEIVED" ? "bg-primary text-white" : "bg-amber-500 text-white"
                               }`}>
                                 {po.status}
                               </Badge>
@@ -299,7 +299,7 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                           <div className="flex items-center gap-2">
                             {po.status === "PENDING" && (
                               <Button 
-                                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 font-bold rounded-xl transition-all hover:scale-105 cursor-pointer"
+                                className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary font-bold rounded-xl transition-all hover:scale-105 cursor-pointer"
                                 onClick={() => handleReceivePO(po.id)}
                               >
                                 <CheckCircle2 className="w-4 h-4 mr-2" /> Recibir
@@ -316,14 +316,14 @@ export const AdvancedInventoryTab = ({ products, branches }: AdvancedInventoryTa
                   {purchaseOrders.length === 0 && (
                     <div className="text-center py-20 border-2 border-dashed border-slate-100 dark:border-zinc-800 rounded-[32px] bg-slate-50/50 dark:bg-zinc-900/20 animate-in fade-in zoom-in-95 duration-500">
                       <div className="w-20 h-20 bg-white dark:bg-zinc-900 rounded-3xl shadow-xl mx-auto mb-6 flex items-center justify-center border border-slate-50 dark:border-zinc-800">
-                        <Truck className="w-10 h-10 text-emerald-500 opacity-20" />
+                        <Truck className="w-10 h-10 text-primary opacity-20" />
                       </div>
                       <p className="font-black text-slate-900 dark:text-white text-xl tracking-tight">Sin órdenes registradas</p>
                       <p className="text-sm text-muted-foreground mt-2 max-w-[250px] mx-auto font-medium">Empieza a abastecer tu inventario creando tu primera orden de compra.</p>
                       <Button 
                         variant="outline" 
                         onClick={() => setShowPODialog(true)}
-                        className="mt-8 rounded-xl border-emerald-500/20 text-emerald-600 font-bold hover:bg-emerald-50 cursor-pointer"
+                        className="mt-8 rounded-xl border-primary/20 text-primary font-bold hover:bg-emerald-50 cursor-pointer"
                       >
                         Crear Orden Ahora
                       </Button>

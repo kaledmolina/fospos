@@ -124,7 +124,7 @@ export const SettingsTab = ({ userRole, settings, onUpdateSettings }: SettingsTa
                   />
                 </div>
               </div>
-              <Button onClick={handleSubmit} className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer">Guardar Cambios</Button>
+              <Button onClick={handleSubmit} className="bg-primary hover:bg-primary cursor-pointer">Guardar Cambios</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -165,7 +165,7 @@ export const SettingsTab = ({ userRole, settings, onUpdateSettings }: SettingsTa
                 {paymentMethods.map(method => (
                   <div 
                     key={method.id} 
-                    className={`flex items-center space-x-3 p-3 rounded-xl border transition-all cursor-pointer ${form.enabledPaymentMethods.includes(method.id) ? "bg-emerald-500/5 border-emerald-500/30" : "bg-muted/10 opacity-60"}`}
+                    className={`flex items-center space-x-3 p-3 rounded-xl border transition-all cursor-pointer ${form.enabledPaymentMethods.includes(method.id) ? "bg-primary/5 border-primary/30" : "bg-muted/10 opacity-60"}`}
                     onClick={() => handleToggleMethod(method.id)}
                   >
                     <Checkbox 
@@ -174,7 +174,7 @@ export const SettingsTab = ({ userRole, settings, onUpdateSettings }: SettingsTa
                       onCheckedChange={() => handleToggleMethod(method.id)}
                     />
                     <div className="flex items-center gap-2">
-                      <method.icon className={`w-4 h-4 ${form.enabledPaymentMethods.includes(method.id) ? "text-emerald-500" : "text-muted-foreground"}`} />
+                      <method.icon className={`w-4 h-4 ${form.enabledPaymentMethods.includes(method.id) ? "text-primary" : "text-muted-foreground"}`} />
                       <Label htmlFor={method.id} className="cursor-pointer font-bold text-xs">{method.label}</Label>
                     </div>
                   </div>
@@ -184,7 +184,7 @@ export const SettingsTab = ({ userRole, settings, onUpdateSettings }: SettingsTa
           </Card>
 
           <div className="flex justify-end">
-            <Button onClick={handleSubmit} size="lg" className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer shadow-lg shadow-emerald-500/20">
+            <Button onClick={handleSubmit} size="lg" className="bg-primary hover:bg-primary cursor-pointer shadow-lg shadow-primary/20">
               Guardar Configuración de Facturación
             </Button>
           </div>

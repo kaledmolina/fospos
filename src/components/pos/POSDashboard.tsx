@@ -72,7 +72,7 @@ export const POSDashboard = ({
           <div className="flex items-center gap-2">
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
-              className="w-10 h-10 overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center shadow-md border-2 border-primary/20"
+              className="w-10 h-10 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md border-2 border-primary/20"
             >
               {currentBranch?.logoUrl ? (
                 <img src={currentBranch.logoUrl} alt="Logo Sede" className="w-full h-full object-cover" />

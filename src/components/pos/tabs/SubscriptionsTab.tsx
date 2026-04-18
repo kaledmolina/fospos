@@ -62,7 +62,7 @@ export const SubscriptionsTab = ({
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Servicios de Suscripción</h1>
         <Button 
-          className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95" 
+          className="bg-primary hover:bg-primary cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95" 
           onClick={() => {
             onSetEditingSubscriptionService(null)
             onSetSubscriptionServiceForm({
@@ -81,8 +81,8 @@ export const SubscriptionsTab = ({
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">
-                <Crown className="w-5 h-5 text-emerald-500" />
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Crown className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total</p>
@@ -121,8 +121,8 @@ export const SubscriptionsTab = ({
                   {subscriptionServices.map(service => (
                     <div key={service.id} className={`flex items-center justify-between p-4 rounded-lg ${!service.isActive ? "bg-muted/50 opacity-60" : "bg-muted/30"}`}>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">
-                          <Crown className="w-5 h-5 text-emerald-500" />
+                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <Crown className="w-5 h-5 text-primary" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -175,7 +175,7 @@ export const SubscriptionsTab = ({
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-muted-foreground">{subscriptions.length} suscripciones activas</p>
             <Button 
-              className="bg-emerald-500 hover:bg-emerald-600"
+              className="bg-primary hover:bg-primary"
               onClick={() => {
                 onSetNewSubscription({
                   customerId: "", serviceId: "", startDate: new Date().toISOString().split('T')[0],
@@ -217,7 +217,7 @@ export const SubscriptionsTab = ({
                               <span>{sub.service.name}</span>
                               <span className="mx-1">•</span>
                               <CreditCard className="w-3 h-3" />
-                              <span className="font-semibold text-emerald-600">{formatCurrency(sub.agreedPrice)}</span>
+                              <span className="font-semibold text-primary">{formatCurrency(sub.agreedPrice)}</span>
                             </div>
                           </div>
                         </div>
@@ -238,7 +238,7 @@ export const SubscriptionsTab = ({
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 h-9 px-3 gap-1.5"
+                            className="bg-emerald-50 text-primary border-emerald-200 hover:bg-emerald-100 h-9 px-3 gap-1.5"
                             onClick={() => { 
                               onSetSelectedSubscription(sub); 
                               onSetSubscriptionPaymentAmount(sub.agreedPrice.toString()); 

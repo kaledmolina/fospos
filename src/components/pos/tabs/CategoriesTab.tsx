@@ -41,7 +41,7 @@ export const CategoriesTab = ({
           <p className="text-sm text-muted-foreground">Administra las categorías de productos de tu negocio</p>
         </div>
         <Button 
-          className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer shadow-md shadow-emerald-500/25 relative z-10"
+          className="bg-primary hover:bg-primary cursor-pointer shadow-md shadow-primary/25 relative z-10"
           onClick={() => {
             onSetEditingCategory(null)
             onSetCategoryForm({ name: "", description: "", color: "#10B981", icon: "🏷️" })
@@ -147,7 +147,7 @@ export const CategoriesTab = ({
           <p className="text-lg font-medium text-slate-600 dark:text-slate-300">No tienes categorías registradas</p>
           <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">Comienza creando una para organizar tus productos</p>
           <Button 
-            className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer"
+            className="bg-primary hover:bg-primary cursor-pointer"
             onClick={() => onSetCategoryDialog(true)}
           >
             Crear mi primera categoría
@@ -156,7 +156,7 @@ export const CategoriesTab = ({
       )}
       
       <div className="mt-8 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/20 flex gap-3 items-start">
-        <Info className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        <Info className="w-5 h-5 text-primary dark:text-primary shrink-0 mt-0.5" />
         <div className="text-sm text-emerald-800 dark:text-emerald-200">
           <p className="font-bold mb-1">Tip de Organización</p>
           <p>Usa colores distintos para cada categoría para que tus cajeros puedan identificar los productos más rápido en la pantalla de ventas.</p>

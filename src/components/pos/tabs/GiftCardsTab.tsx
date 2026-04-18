@@ -33,7 +33,7 @@ export const GiftCardsTab = ({ giftCards, onPrintCard }: GiftCardsTabProps) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ACTIVE":
-        return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-1"><CheckCircle2 className="w-3 h-3" /> ACTIVA</Badge>
+        return <Badge className="bg-primary/10 text-primary border-primary/20 gap-1"><CheckCircle2 className="w-3 h-3" /> ACTIVA</Badge>
       case "USED_UP":
         return <Badge variant="secondary" className="gap-1"><Clock className="w-3 h-3" /> AGOTADA</Badge>
       case "EXPIRED":
@@ -68,14 +68,14 @@ export const GiftCardsTab = ({ giftCards, onPrintCard }: GiftCardsTabProps) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card className="border-emerald-500/20 bg-emerald-500/5 shadow-sm overflow-hidden group">
+          <Card className="border-primary/20 bg-primary/5 shadow-sm overflow-hidden group">
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                 <Ticket className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600/70">Emitidas Hoy</p>
-                <p className="text-2xl font-black text-emerald-700">{giftCards.length}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary/70">Emitidas Hoy</p>
+                <p className="text-2xl font-black text-primary">{giftCards.length}</p>
               </div>
             </CardContent>
           </Card>
@@ -195,7 +195,7 @@ export const GiftCardsTab = ({ giftCards, onPrintCard }: GiftCardsTabProps) => {
                              <div key={red.id} className="p-2 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 space-y-1">
                                <div className="flex justify-between items-center text-[10px] font-black uppercase">
                                  <span className="text-slate-500">{new Date(red.createdAt).toLocaleDateString()}</span>
-                                 <span className="text-emerald-600">-{formatCurrency(red.amountUsed)}</span>
+                                 <span className="text-primary">-{formatCurrency(red.amountUsed)}</span>
                                </div>
                                <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
                                  <User className="w-3 h-3" />

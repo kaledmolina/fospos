@@ -30,7 +30,7 @@ export const CustomersTab = ({
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 shadow-md shadow-emerald-500/25" onClick={() => onSetCustomerDialog(true)}>
+          <Button className="bg-primary hover:bg-primary cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => onSetCustomerDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />Nuevo Cliente
           </Button>
         </motion.div>
@@ -52,8 +52,8 @@ export const CustomersTab = ({
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-500/10 rounded-full flex items-center justify-center">
-                      <Users className="w-5 h-5 text-emerald-500" />
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <p className="font-medium">{customer.name}</p>
@@ -71,13 +71,13 @@ export const CustomersTab = ({
                   </div>
                   <div className="flex flex-col items-end gap-1 text-right">
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Historial de Compras</p>
-                    <p className="font-bold text-sm text-emerald-600">{formatCurrency(customer.totalPurchases || 0)}</p>
+                    <p className="font-bold text-sm text-primary">{formatCurrency(customer.totalPurchases || 0)}</p>
                     
                     <div className="flex flex-col items-end gap-1 mt-2">
                        {customer.creditLimit > 0 && (
                          <div className="text-[10px] space-y-0.5 mb-1">
                            <p className="text-muted-foreground">Límite: {formatCurrency(customer.creditLimit)}</p>
-                           <p className="font-bold text-emerald-500">Disponible: {formatCurrency(Math.max(0, customer.creditLimit - (customer.pendingBalance || 0)))}</p>
+                           <p className="font-bold text-primary">Disponible: {formatCurrency(Math.max(0, customer.creditLimit - (customer.pendingBalance || 0)))}</p>
                          </div>
                        )}
                        {customer.pendingBalance > 0 && (
@@ -88,7 +88,7 @@ export const CustomersTab = ({
                            <Button
                              size="sm"
                              variant="outline"
-                             className="h-7 text-[11px] border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white cursor-pointer"
+                             className="h-7 text-[11px] border-primary text-primary hover:bg-primary hover:text-white cursor-pointer"
                              onClick={(e) => {
                                e.stopPropagation()
                                const customerCredit = credits.find(c => c.customerId === customer.id && c.status !== "PAID")
@@ -115,7 +115,7 @@ export const CustomersTab = ({
             <Users className="w-20 h-20 mx-auto mb-4 text-muted-foreground/30" />
             <p className="text-lg font-medium text-foreground mb-2">No hay clientes registrados</p>
             <p className="text-sm text-muted-foreground mb-6">Agrega clientes para llevar un registro de sus compras</p>
-            <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer" onClick={() => onSetCustomerDialog(true)}>Agregar primer cliente</Button>
+            <Button className="bg-primary hover:bg-primary cursor-pointer" onClick={() => onSetCustomerDialog(true)}>Agregar primer cliente</Button>
           </motion.div>
         )}
       </motion.div>

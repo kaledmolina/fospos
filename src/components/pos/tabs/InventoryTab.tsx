@@ -51,7 +51,7 @@ export const InventoryTab = ({
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 shadow-md shadow-emerald-500/25" onClick={() => onSetProductDialog(true)}>
+            <Button className="bg-primary hover:bg-primary cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => onSetProductDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />Producto
             </Button>
           </motion.div>
@@ -60,7 +60,7 @@ export const InventoryTab = ({
       
       {categories.length > 0 && (
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          <Button variant="outline" size="sm" className="bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20">Todos</Button>
+          <Button variant="outline" size="sm" className="bg-primary/10 dark:bg-primary/20 border-primary/20 text-primary hover:bg-primary/20">Todos</Button>
           {categories.map(cat => (<Button key={cat.id} variant="outline" size="sm">{cat.icon && <span className="mr-1">{cat.icon}</span>}{cat.name}</Button>))}
         </div>
       )}
@@ -78,7 +78,7 @@ export const InventoryTab = ({
             whileHover={{ scale: 1.02, y: -4 }}
             transition={{ duration: 0.2 }}
           >
-            <Card className={`group cursor-pointer transition-all duration-300 hover:shadow-2xl hover:border-emerald-500/30 overflow-hidden rounded-[2rem] border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/50 backdrop-blur-sm ${!product.isActive ? "opacity-50" : ""}`}>
+            <Card className={`group cursor-pointer transition-all duration-300 hover:shadow-2xl hover:border-primary/30 overflow-hidden rounded-[2rem] border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-950/50 backdrop-blur-sm ${!product.isActive ? "opacity-50" : ""}`}>
               <div className="relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-zinc-900">
                 {product.imageUrl ? (
                   <img 
@@ -106,7 +106,7 @@ export const InventoryTab = ({
                       <Button 
                         variant="secondary" 
                         size="icon" 
-                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
+                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-primary hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation()
                           onSetSelectedProductForStock(product)
@@ -177,7 +177,7 @@ export const InventoryTab = ({
                   <div className="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-zinc-900">
                     <div>
                       <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest">Precio</p>
-                      <p className="text-lg font-black text-emerald-500">{formatCurrency(product.salePrice)}</p>
+                      <p className="text-lg font-black text-primary">{formatCurrency(product.salePrice)}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-[9px] uppercase font-black text-muted-foreground tracking-widest">Stock</p>
@@ -197,7 +197,7 @@ export const InventoryTab = ({
               <FolderOpen className="w-20 h-20 mx-auto mb-4 text-muted-foreground/30 dark:text-muted-foreground/20" />
               <p className="text-lg font-medium text-foreground mb-2">No hay productos registrados</p>
               <p className="text-sm text-muted-foreground mb-6">Comienza agregando tu primer producto al inventario</p>
-              <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer" onClick={() => onSetProductDialog(true)}>
+              <Button className="bg-primary hover:bg-primary cursor-pointer" onClick={() => onSetProductDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />Agregar primer producto
               </Button>
             </div>

@@ -58,14 +58,14 @@ export const DashboardTab = ({
           }
         ].map((stat, i) => (
           <motion.div key={stat.label} variants={fadeInUp} whileHover={{ scale: 1.02, y: -4 }}>
-            <Card className="cursor-pointer border-none shadow-lg shadow-black/5 dark:shadow-emerald-500/5 transition-all duration-300 hover:shadow-xl overflow-hidden relative group h-full">
+            <Card className="cursor-pointer border-none shadow-lg shadow-black/5 dark:shadow-primary/5 transition-all duration-300 hover:shadow-xl overflow-hidden relative group h-full">
               <div className={`absolute inset-0 bg-gradient-to-br from-${stat.color}-500/10 via-${stat.color}-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
               <CardContent className="p-5 relative">
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-12 h-12 bg-${stat.color}-500/10 dark:bg-${stat.color}-500/20 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300`}>
                     <stat.icon className={`w-6 h-6 text-${stat.color}-600 dark:text-${stat.color}-400`} />
                   </div>
-                  <Badge variant="outline" className={`h-6 border-none ${stat.isUp ? 'bg-emerald-500/10 text-emerald-600' : 'bg-orange-500/10 text-orange-600'} text-[10px] font-black`}>
+                  <Badge variant="outline" className={`h-6 border-none ${stat.isUp ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-600'} text-[10px] font-black`}>
                     {stat.trend}
                   </Badge>
                 </div>
@@ -90,7 +90,7 @@ export const DashboardTab = ({
 
       {/* Goal Widget */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-6">
-        <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+        <Card className="bg-gradient-to-r from-primary to-teal-500 text-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -119,7 +119,7 @@ export const DashboardTab = ({
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-lg font-bold">Tendencia de Ventas (7 días)</CardTitle>
-              <BarChart3 className="w-5 h-5 text-emerald-500" />
+              <BarChart3 className="w-5 h-5 text-primary" />
             </CardHeader>
             <CardContent>
               <SalesChart data={dashboardStats?.weeklySales || []} />
@@ -224,7 +224,7 @@ export const DashboardTab = ({
               <h3 className="text-2xl font-bold mb-4">{Math.round(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100)}% de la meta</h3>
               <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-4">
                 <motion.div 
-                  className="h-full bg-emerald-400"
+                  className="h-full bg-primary"
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100, 100)}%` }}
                 />
@@ -243,13 +243,13 @@ export const DashboardTab = ({
               {dashboardStats?.topProducts.map((product, i) => (
                 <div key={product.id || i} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">{i + 1}</span>
+                    <span className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">{i + 1}</span>
                     <div>
                       <p className="font-medium text-foreground">{product.name}</p>
                       <p className="text-sm text-muted-foreground">{product.totalSold} vendidos</p>
                     </div>
                   </div>
-                  <p className="font-bold text-emerald-500">{formatCurrency(product.totalRevenue)}</p>
+                  <p className="font-bold text-primary">{formatCurrency(product.totalRevenue)}</p>
                 </div>
               ))}
               {(!dashboardStats?.topProducts || dashboardStats.topProducts.length === 0) && (

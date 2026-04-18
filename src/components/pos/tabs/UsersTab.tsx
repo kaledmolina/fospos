@@ -42,9 +42,9 @@ export const UsersTab = ({
         return {
           label: "Cajero",
           icon: CreditCard,
-          bgColor: "bg-emerald-500/10",
-          textColor: "text-emerald-500",
-          badgeClass: "border-emerald-500/20 text-emerald-500 bg-emerald-500/10"
+          bgColor: "bg-primary/10",
+          textColor: "text-primary",
+          badgeClass: "border-primary/20 text-primary bg-primary/10"
         }
       case "WAREHOUSE":
         return {
@@ -70,7 +70,7 @@ export const UsersTab = ({
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Usuarios</h1>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer transition-all duration-200 shadow-md shadow-emerald-500/25" onClick={() => { onSetEditingUser(null); onSetUserForm({ name: "", email: "", password: "", role: "CASHIER", branchIds: [], phone: "" }); onSetUserDialog(true) }}>
+          <Button className="bg-primary hover:bg-primary cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => { onSetEditingUser(null); onSetUserForm({ name: "", email: "", password: "", role: "CASHIER", branchIds: [], phone: "" }); onSetUserDialog(true) }}>
             <Plus className="w-4 h-4 mr-2" />Nuevo Usuario
           </Button>
         </motion.div>
@@ -97,11 +97,11 @@ export const UsersTab = ({
         </Card>
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-emerald-600">
+            <div className="flex items-center gap-2 text-primary">
               <CreditCard className="w-4 h-4" />
               <p className="text-sm text-muted-foreground">Cajeros</p>
             </div>
-            <p className="text-2xl font-bold mt-2 text-emerald-600">{tenantUsers.filter(u => u.role === "CASHIER").length}</p>
+            <p className="text-2xl font-bold mt-2 text-primary">{tenantUsers.filter(u => u.role === "CASHIER").length}</p>
           </CardContent>
         </Card>
       </div>

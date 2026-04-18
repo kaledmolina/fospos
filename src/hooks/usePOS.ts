@@ -553,15 +553,20 @@ export const usePOS = (session: any) => {
   useEffect(() => {
     if (!selectedBranch || branches.length === 0) return
     const branch = branches.find((b: any) => b.id === selectedBranch)
-    if (branch?.themeColor) {
-      document.documentElement.style.setProperty('--primary', hexToOklch(branch.themeColor))
-      // Opcional: --sidebar-primary también
-      document.documentElement.style.setProperty('--sidebar-primary', hexToOklch(branch.themeColor))
-    } else {
-      // Valor por defecto (Emerald-500 premium approx en oklch)
-      document.documentElement.style.setProperty('--primary', 'oklch(0.65 0.18 160)')
-      document.documentElement.style.setProperty('--sidebar-primary', 'oklch(0.65 0.18 160)')
-    }
+    const baseColor = branch?.themeColor || '#10b981'
+    const oklch = hexToOklch(baseColor)
+
+    // Propagar variables CSS al documento
+    const root = document.documentElement
+    root.style.setProperty('--primary', oklch)
+    root.style.setProperty('--sidebar-primary', oklch)
+    root.style.setProperty('--ring', `${oklch} / 50%`)
+    root.style.setProperty('--accent-foreground', oklch)
+    root.style.setProperty('--sidebar-accent-foreground', oklch)
+    
+    // Variación para efectos hover suaves (10% de opacidad)
+    root.style.setProperty('--sidebar-accent', `${oklch} / 10%`)
+    root.style.setProperty('--accent', `${oklch} / 10%`)
   }, [selectedBranch, branches])
 
   // Helper para convertir HEX a OKLCH (proporcionando tonos premium balanceados)
