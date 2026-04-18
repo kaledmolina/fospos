@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { ImageIcon, Upload } from "lucide-react"
+import { ImageIcon, Upload, Check } from "lucide-react"
 
 interface BranchDialogProps {
   open: boolean
@@ -109,20 +109,38 @@ export const BranchDialog = ({
               )}
             </div>
 
-            <div className="space-y-3">
-              <Label>Color de Marca de la Sede</Label>
-              <div className="grid grid-cols-6 gap-2">
-                {colors.map((color) => (
+            <div className="space-y-4">
+              <Label className="text-sm font-bold flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-primary" />
+                Estilo Visual del Punto de Venta
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { name: 'Energía Neón', hex: '#db2777', desc: 'Moderno y vibrante' },
+                  { name: 'Bosque Esmeralda', hex: '#10b981', desc: 'Clásico y profesional' },
+                  { name: 'Océano Ártico', hex: '#0ea5e9', desc: 'Limpio y tecnológico' },
+                  { name: 'Atardecer Dorado', hex: '#f59e0b', desc: 'Cálido y acogedor' },
+                  { name: 'Amatista Real', hex: '#8b5cf6', desc: 'Elegante y creativo' },
+                  { name: 'Fuego Azul', hex: '#3b82f6', desc: 'Digital e innovador' },
+                ].map((theme) => (
                   <button
-                    key={color.hex}
+                    key={theme.hex}
                     type="button"
-                    onClick={() => onBranchFormChange({ ...branchForm, themeColor: color.hex })}
-                    className={`w-9 h-9 rounded-full border-2 transition-all flex items-center justify-center ${branchForm.themeColor === color.hex ? 'border-primary ring-2 ring-primary/20 scale-110 shadow-lg' : 'border-transparent hover:scale-105 bg-muted/20'}`}
-                    style={{ backgroundColor: color.hex }}
-                    title={color.name}
+                    onClick={() => onBranchFormChange({ ...branchForm, themeColor: theme.hex })}
+                    className={`flex flex-col gap-2 p-3 rounded-xl border-2 text-left transition-all relative overflow-hidden group ${branchForm.themeColor === theme.hex ? 'border-primary bg-primary/5 shadow-md' : 'border-border hover:border-primary/50 bg-card/50'}`}
                   >
-                    {branchForm.themeColor === color.hex && (
-                      <div className="w-2 h-2 rounded-full bg-white shadow-sm" />
+                    <div className="flex items-center justify-between">
+                      <div className="w-6 h-6 rounded-full shadow-inner" style={{ backgroundColor: theme.hex }} />
+                      {branchForm.themeColor === theme.hex && (
+                        <Check className="w-4 h-4 text-primary" />
+                      )}
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className={`text-[11px] font-black uppercase tracking-tight ${branchForm.themeColor === theme.hex ? 'text-primary' : 'text-foreground'}`}>{theme.name}</p>
+                      <p className="text-[9px] text-muted-foreground font-medium">{theme.desc}</p>
+                    </div>
+                    {branchForm.themeColor === theme.hex && (
+                      <motion.div layoutId="activeTheme" className="absolute bottom-0 left-0 h-0.5 w-full bg-primary" />
                     )}
                   </button>
                 ))}

@@ -37,12 +37,12 @@ export const ProfileDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-500" />
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/60 shadow-[0_2px_10px_rgba(var(--primary),0.3)]" />
         
         <DialogHeader className="pt-2">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <User className="w-6 h-6 text-emerald-500" />
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <User className="w-6 h-6 text-primary" />
             </div>
             <div>
               <DialogTitle className="text-xl font-black tracking-tight uppercase">Mi Perfil</DialogTitle>
@@ -58,13 +58,13 @@ export const ProfileDialog = ({
             {/* Información Básica */}
             <div className="space-y-3">
               <div className="relative">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-1 mb-1 block">Nombre Completo</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1 mb-1 block">Nombre Completo</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
                     value={profileForm.name}
                     onChange={e => onProfileFormChange({ ...profileForm, name: e.target.value })}
-                    className="pl-10 h-11 bg-muted/50 border-border focus:ring-emerald-500/20 rounded-xl font-bold"
+                    className="pl-10 h-11 bg-muted/50 border-border focus:ring-primary/20 rounded-xl font-bold"
                     placeholder="Tu nombre"
                     required
                   />
@@ -73,14 +73,14 @@ export const ProfileDialog = ({
 
               {!isCajero && (
                 <div className="relative">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-1 mb-1 block">Correo Electrónico</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1 mb-1 block">Correo Electrónico</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input 
                       type="email"
                       value={profileForm.email}
                       onChange={e => onProfileFormChange({ ...profileForm, email: e.target.value })}
-                      className="pl-10 h-11 bg-muted/50 border-border focus:ring-emerald-500/20 rounded-xl font-bold"
+                      className="pl-10 h-11 bg-muted/50 border-border focus:ring-primary/20 rounded-xl font-bold"
                       placeholder="correo@ejemplo.com"
                       required
                     />
@@ -89,13 +89,13 @@ export const ProfileDialog = ({
               )}
 
               <div className="relative">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-1 mb-1 block">Teléfono / WhatsApp</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1 mb-1 block">Teléfono / WhatsApp</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
                     value={profileForm.phone}
                     onChange={e => onProfileFormChange({ ...profileForm, phone: e.target.value })}
-                    className="pl-10 h-11 bg-muted/50 border-border focus:ring-emerald-500/20 rounded-xl font-bold"
+                    className="pl-10 h-11 bg-muted/50 border-border focus:ring-primary/20 rounded-xl font-bold"
                     placeholder="300 123 4567"
                   />
                 </div>
@@ -124,7 +124,7 @@ export const ProfileDialog = ({
                 </div>
                 {isCajero && (
                   <p className="text-[9px] text-muted-foreground mt-1 ml-1 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                    <ShieldCheck className="w-3 h-3 text-primary" />
                     El PIN debe ser de exactamente 4 dígitos.
                   </p>
                 )}
@@ -136,7 +136,7 @@ export const ProfileDialog = ({
             <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-500/20"
+                className="w-full h-12 bg-primary hover:opacity-90 text-primary-foreground font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20"
               >
                 <Check className="w-5 h-5 mr-2" />
                 Guardar Cambios

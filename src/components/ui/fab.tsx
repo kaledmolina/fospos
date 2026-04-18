@@ -7,25 +7,38 @@ interface FABProps {
   icon: LucideIcon
   onClick: () => void
   label: string
-  color?: "emerald" | "blue" | "purple"
 }
 
-export const FAB = ({ icon: Icon, onClick, label, color = "emerald" }: FABProps) => {
-  const colors: Record<string, string> = {
-    emerald: "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30",
-    blue: "bg-blue-500 hover:bg-blue-600 shadow-blue-500/30",
-    purple: "bg-purple-500 hover:bg-purple-600 shadow-purple-500/30"
-  }
-  
+export const FAB = ({ icon: Icon, onClick, label }: FABProps) => {
   return (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={onClick}
-      className={`w-14 h-14 rounded-full ${colors[color]} text-white shadow-lg flex items-center justify-center transition-colors`}
-      title={label}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5, y: 50 }}
+      animate={{ 
+        opacity: 1, 
+        scale: 1, 
+        y: [0, -8, 0], // Efecto de levitación (bobbing)
+      }}
+      transition={{
+        y: {
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut"
+        },
+        opacity: { duration: 0.5 },
+        scale: { duration: 0.5 }
+      }}
+      className="fixed bottom-6 right-6 z-[9999]"
     >
-      <Icon className="w-6 h-6" />
-    </motion.button>
+      <motion.button
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={onClick}
+        className="w-16 h-16 rounded-2xl bg-primary hover:opacity-90 text-primary-foreground shadow-[0_10px_25px_-5px_rgba(var(--primary-rgb),0.5)] shadow-primary/40 flex items-center justify-center transition-all duration-300 group"
+        title={label}
+      >
+        <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Icon className="w-8 h-8 relative z-10" />
+      </motion.button>
+    </motion.div>
   )
 }
