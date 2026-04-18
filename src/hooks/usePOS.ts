@@ -563,10 +563,16 @@ export const usePOS = (session: any) => {
     root.style.setProperty('--ring', `${oklch} / 50%`)
     root.style.setProperty('--accent-foreground', oklch)
     root.style.setProperty('--sidebar-accent-foreground', oklch)
-    
-    // Variación para efectos hover suaves (10% de opacidad)
     root.style.setProperty('--sidebar-accent', `${oklch} / 10%`)
     root.style.setProperty('--accent', `${oklch} / 10%`)
+
+    // Inyectar Tipografía basada en el tema
+    const roundedThemes = ['#db2777', '#f59e0b', '#8b5cf6']
+    if (roundedThemes.includes(baseColor.toLowerCase())) {
+      root.style.setProperty('--pos-font', '"Outfit", "Geist Variable", ui-rounded, sans-serif')
+    } else {
+      root.style.setProperty('--pos-font', '"Geist Variable", "Inter", ui-sans-serif, sans-serif')
+    }
   }, [selectedBranch, branches])
 
   // Helper para convertir HEX a OKLCH (proporcionando tonos premium balanceados)
@@ -575,18 +581,16 @@ export const usePOS = (session: any) => {
     
     // Mapeo detallado de colores premium (balanceados para legibilidad y estética)
     const premiumPalette: Record<string, string> = {
-      '#10b981': 'oklch(0.65 0.18 160)', // Esmeralda (Principal)
-      '#ef4444': 'oklch(0.6 0.25 25)',   // Rojo
-      '#3b82f6': 'oklch(0.6 0.18 250)',  // Azul
-      '#8b5cf6': 'oklch(0.6 0.18 290)',  // Violeta
-      '#f59e0b': 'oklch(0.7 0.15 60)',   // Ámbar
-      '#ec4899': 'oklch(0.65 0.2 330)',  // Rosa
-      '#06b6d4': 'oklch(0.65 0.15 200)', // Cian
-      '#84cc16': 'oklch(0.75 0.2 130)',  // Lima
-      '#6366f1': 'oklch(0.6 0.2 265)',   // Índigo
-      '#f97316': 'oklch(0.65 0.2 40)',   // Naranja
-      '#14b8a6': 'oklch(0.65 0.15 175)', // Teal
-      '#71717a': 'oklch(0.5 0.02 250)',  // Zinc (Dark Gray)
+      '#10b981': 'oklch(0.65 0.18 160)', // Bosque Esmeralda
+      '#db2777': 'oklch(0.65 0.22 330)', // Energía Neón
+      '#0ea5e9': 'oklch(0.65 0.15 240)', // Océano Ártico
+      '#f59e0b': 'oklch(0.75 0.15 70)',  // Atardecer Dorado
+      '#8b5cf6': 'oklch(0.65 0.18 290)', // Amatista Real
+      '#3b82f6': 'oklch(0.6 0.2 250)',   // Fuego Azul
+      // Legado / Otros
+      '#ef4444': 'oklch(0.6 0.25 25)',   
+      '#ec4899': 'oklch(0.65 0.2 330)',
+      '#06b6d4': 'oklch(0.65 0.15 200)',
     }
     
     return premiumPalette[hex.toLowerCase()] || 'oklch(0.65 0.18 160)'

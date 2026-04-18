@@ -260,16 +260,13 @@ export const POSDashboard = ({
         </div>
       </main>
 
-      {/* Floating Action Button (FAB) */}
-      {posTab === "dashboard" && (
-        <div className="fixed bottom-20 lg:bottom-6 right-6 z-40">
-          <FAB
-            icon={Plus}
-            onClick={() => onPosTabChange("sale")}
-            label="Nueva Venta"
-            color="emerald"
-          />
-        </div>
+      {/* Floating Action Button (FAB) - Visible everywhere except on Sale and some config tabs */}
+      {posTab !== "sale" && posTab !== "settings" && (
+        <FAB
+          icon={Plus}
+          onClick={() => onPosTabChange("sale")}
+          label="Nueva Venta"
+        />
       )}
 
       {/* Mobile Bottom Navigation */}
@@ -300,7 +297,7 @@ export const POSDashboard = ({
               {posTab === item.id && (
                 <motion.div
                   layoutId="bottomNavIndicator"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-emerald-500 rounded-b-full"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-b-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"
                 />
               )}
               <item.icon className="w-5 h-5" />

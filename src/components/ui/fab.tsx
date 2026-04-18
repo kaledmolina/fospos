@@ -16,7 +16,7 @@ export const FAB = ({ icon: Icon, onClick, label }: FABProps) => {
       animate={{ 
         opacity: 1, 
         scale: 1, 
-        y: [0, -8, 0], // Efecto de levitación (bobbing)
+        y: [0, -8, 0],
       }}
       transition={{
         y: {
@@ -27,18 +27,19 @@ export const FAB = ({ icon: Icon, onClick, label }: FABProps) => {
         opacity: { duration: 0.5 },
         scale: { duration: 0.5 }
       }}
-      className="fixed bottom-6 right-6 z-[9999]"
+      whileHover={{ scale: 1.1, rotate: 2 }}
+      whileTap={{ scale: 0.9 }}
+      className="fixed bottom-24 lg:bottom-6 right-6 z-[9999] cursor-pointer"
     >
-      <motion.button
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.9 }}
+      <button
         onClick={onClick}
-        className="w-16 h-16 rounded-2xl bg-primary hover:opacity-90 text-primary-foreground shadow-[0_10px_25px_-5px_rgba(var(--primary-rgb),0.5)] shadow-primary/40 flex items-center justify-center transition-all duration-300 group"
+        className="w-16 h-16 rounded-2xl bg-primary text-primary-foreground shadow-2xl shadow-primary/40 flex items-center justify-center transition-all duration-300 group relative overflow-hidden active:scale-95"
         title={label}
       >
-        <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-        <Icon className="w-8 h-8 relative z-10" />
-      </motion.button>
+        {/* Glow effect */}
+        <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Icon className="w-8 h-8 relative z-10 transition-transform group-hover:scale-110" />
+      </button>
     </motion.div>
   )
 }
