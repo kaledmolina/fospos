@@ -99,7 +99,7 @@ export const usePOS = (session: any) => {
   const [editingCategory, setEditingCategory] = useState<any | null>(null)
   const [editingProduct, setEditingProduct] = useState<any | null>(null)
   const [userForm, setUserForm] = useState({
-    name: "", email: "", password: "", role: "CASHIER", branchId: "", phone: ""
+    name: "", email: "", password: "", role: "CASHIER", branchId: "", phone: "", isQuickAccess: false
   })
   
   // Subscription state
@@ -1202,7 +1202,7 @@ export const usePOS = (session: any) => {
         toast.success(editingUser ? "Usuario actualizado" : "Usuario creado")
         setUserDialog(false)
         setEditingUser(null)
-        setUserForm({ name: "", email: "", password: "", role: "CASHIER", branchId: "", phone: "" })
+        setUserForm({ name: "", email: "", password: "", role: "CASHIER", branchId: "", phone: "", isQuickAccess: false })
         fetchUsers()
       }
     } catch { toast.error("Error al procesar usuario") }

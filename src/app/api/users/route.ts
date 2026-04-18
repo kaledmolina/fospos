@@ -58,11 +58,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, email, password, role, branchId, phone } = body
+    const { name, email, password, role, branchId, phone, isQuickAccess } = body
 
-    if (!name || !email || !password || !role) {
+    if (!name || (!email && !isQuickAccess) || !password || !role) {
       return NextResponse.json(
-        { success: false, error: "Nombre, email, contraseña y rol son requeridos" },
+        { success: false, error: "Nombre, email/PIN, contraseña y rol son requeridos" },
         { status: 400 }
       )
     }
@@ -83,14 +83,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Generar email automático si es acceso rápido
+    let finalEmail = email
+    if (isQuickAccess) {
+      const tenant = await db.tenant.findUnique({
+        where: { id: session.user.tenantId },
+        select: { nit: true }
+      })
+      const cleanName = name.toLowerCase().replace(/\s+/g, '.')
+      const cleanNit = tenant?.nit.replace(/[^0-9]/g, '') || '0000'
+      finalEmail = `${cleanName}.${cleanNit}@staff.fostpos`
+    }
+
     // Verificar que el email no exista
     const existingUser = await db.user.findUnique({
-      where: { email }
+      where: { email: finalEmail }
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { success: false, error: "El email ya está registrado" },
+        { success: false, error: "Este usuario ya existe (nombre duplicado en esta empresa)" },
         { status: 400 }
       )
     }
@@ -115,7 +127,7 @@ export async function POST(request: NextRequest) {
     const user = await db.user.create({
       data: {
         name,
-        email,
+        email: finalEmail,
         password: hashedPassword,
         role,
         tenantId: session.user.tenantId,

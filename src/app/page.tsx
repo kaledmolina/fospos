@@ -16,7 +16,7 @@ import { POSView } from "@/components/pos/POSView"
 export default function Home() {
   const { data: session, status } = useSession()
   const [showLanding, setShowLanding] = useState(true)
-  const [authTab, setAuthTab] = useState<"login" | "register">("login")
+  const [authTab, setAuthTab] = useState<"login" | "register" | "staff">("login")
   const [view, setView] = useState<"auth" | "pos" | "superadmin" | "setup">("auth")
   const [needsSetup, setNeedsSetup] = useState(false)
   const [loadingSetup, setLoadingSetup] = useState(true)

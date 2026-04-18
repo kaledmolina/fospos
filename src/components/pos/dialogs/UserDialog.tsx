@@ -34,7 +34,25 @@ export const UserDialog = ({
             {editingUser ? "Actualiza la información del usuario" : "Crea un nuevo cajero o bodeguero"}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="flex items-center justify-between p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl mb-4 group cursor-pointer" onClick={() => onUserFormChange({ ...userForm, isQuickAccess: !userForm.isQuickAccess })}>
+            <div className="flex items-center gap-3">
+               <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <div className="font-black text-xs">PIN</div>
+               </div>
+               <div>
+                  <p className="text-xs font-black uppercase tracking-widest text-emerald-600">Acceso Rápido (PIN)</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">Ideal para cajeros y bodegueros</p>
+               </div>
+            </div>
+            <input 
+              type="checkbox" 
+              checked={userForm.isQuickAccess} 
+              onChange={() => {}} // Handled by div click
+              className="w-4 h-4 accent-emerald-500 pointer-events-none" 
+            />
+          </div>
+
+          <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Nombre completo *</Label>
             <Input 
@@ -44,25 +62,34 @@ export const UserDialog = ({
               required 
             />
           </div>
+          {!userForm.isQuickAccess && (
+            <div className="space-y-2">
+              <Label>Email *</Label>
+              <Input 
+                type="email" 
+                value={userForm.email} 
+                onChange={e => onUserFormChange({ ...userForm, email: e.target.value })} 
+                placeholder="correo@ejemplo.com" 
+                required 
+              />
+            </div>
+          )}
           <div className="space-y-2">
-            <Label>Email *</Label>
+            <Label>{userForm.isQuickAccess ? "PIN de 4 dígitos *" : `Contraseña ${editingUser ? "(dejar vacío para mantener)" : "*"}`}</Label>
             <Input 
-              type="email" 
-              value={userForm.email} 
-              onChange={e => onUserFormChange({ ...userForm, email: e.target.value })} 
-              placeholder="correo@ejemplo.com" 
-              required 
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Contraseña {editingUser ? "(dejar vacío para mantener)" : "*"}</Label>
-            <Input 
-              type="password" 
+              type={userForm.isQuickAccess ? "text" : "password"} 
+              maxLength={userForm.isQuickAccess ? 4 : undefined}
               value={userForm.password} 
-              onChange={e => onUserFormChange({ ...userForm, password: e.target.value })} 
-              placeholder="••••••••" 
+              onChange={e => {
+                const val = e.target.value;
+                if (userForm.isQuickAccess && val.length > 4) return;
+                onUserFormChange({ ...userForm, password: val });
+              }} 
+              placeholder={userForm.isQuickAccess ? "Ej: 1234" : "••••••••"} 
               required={!editingUser} 
+              className={userForm.isQuickAccess ? "text-center text-2xl font-black tracking-[1em]" : ""}
             />
+            {userForm.isQuickAccess && <p className="text-[10px] text-muted-foreground italic">El cajero usará este PIN para entrar rápido al sistema.</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

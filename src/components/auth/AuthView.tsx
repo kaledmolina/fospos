@@ -12,10 +12,11 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { fadeInUp, staggerContainer, floatAnimation } from "@/lib/animations"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
+import { StaffAccessView } from "./StaffAccessView"
 
 interface AuthViewProps {
-  authTab: "login" | "register"
-  onAuthTabChange: (tab: "login" | "register") => void
+  authTab: "login" | "register" | "staff"
+  onAuthTabChange: (tab: "login" | "register" | "staff") => void
   loginForm: any
   onLoginFormChange: (form: any) => void
   onLogin: (e: React.FormEvent<HTMLFormElement>) => void
@@ -176,12 +177,18 @@ export const AuthView = ({
           </motion.div>
 
           <Tabs value={authTab} onValueChange={(v) => onAuthTabChange(v as "login" | "register")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-12 bg-muted border border-border p-1 mb-8 rounded-xl">
+            <TabsList className="grid w-full grid-cols-3 h-12 bg-muted border border-border p-1 mb-8 rounded-xl">
                <TabsTrigger 
                  value="login" 
                  className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold uppercase text-[10px] tracking-widest transition-all"
                >
-                 Ingresar
+                 Admin
+               </TabsTrigger>
+               <TabsTrigger 
+                 value="staff" 
+                 className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold uppercase text-[10px] tracking-widest transition-all"
+               >
+                 Personal
                </TabsTrigger>
                <TabsTrigger 
                 value="register" 
@@ -268,6 +275,20 @@ export const AuthView = ({
                     {loginLoading ? "Verificando..." : "Iniciar Sesión"}
                   </Button>
                 </motion.form>
+              </TabsContent>
+
+              <TabsContent value="staff" key="staff-tab" className="mt-0">
+                <StaffAccessView 
+                  loading={loginLoading}
+                  onLogin={async (email, pin) => {
+                    onLoginFormChange({ email, password: pin });
+                    // Trigger login programmatically
+                    setTimeout(() => {
+                      const form = document.querySelector('form') as HTMLFormElement;
+                      if (form) onLogin({ preventDefault: () => {}, currentTarget: form } as any);
+                    }, 100);
+                  }}
+                />
               </TabsContent>
 
               <TabsContent value="register" key="register-tab" className="mt-0">
