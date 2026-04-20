@@ -53,6 +53,9 @@ export async function POST(request: NextRequest) {
             productId: item.productId,
             quantity: item.quantity,
             unitCost: item.unitCost,
+            salePrice: item.salePrice || null,
+            batchNumber: item.batchNumber || null,
+            expiryDate: item.expiryDate ? new Date(item.expiryDate) : null,
             subtotal: item.unitCost * item.quantity
           }))
         }

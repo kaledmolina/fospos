@@ -56,7 +56,21 @@ export async function PATCH(
             }
           });
 
-          // 4. Registrar en Kardex
+          // 4. CREACIÓN DE LOTE (Nuevo: Sistema de Gestión de Lotes)
+          const batch = await tx.productBatch.create({
+            data: {
+              productId: item.productId,
+              branchId: po.branchId || "",
+              supplierId: po.supplierId,
+              batchNumber: item.batchNumber || `LOT-${new Date().getTime().toString().slice(-6)}`,
+              quantity: item.quantity,
+              costPrice: item.unitCost,
+              salePrice: item.salePrice || product.salePrice, // Si no se define en la PO, usar el actual del producto
+              expiryDate: item.expiryDate || null,
+            }
+          });
+
+          // 5. Registrar en Kardex
           await tx.inventoryMovement.create({
             data: {
               tenantId: session.user.tenantId,
@@ -70,7 +84,8 @@ export async function PATCH(
               totalCost: item.subtotal,
               referenceType: "PURCHASE_ORDER",
               referenceId: po.id,
-              notes: `Recepción de Orden de Compra #${po.id}`,
+              batchId: batch.id, // Vinculamos al lote recién creado
+              notes: `Recepción de OC#${po.id.slice(-6)}${item.batchNumber ? ` - Lote: ${item.batchNumber}` : ''}`,
               createdBy: session.user.id
             }
           });

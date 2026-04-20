@@ -100,7 +100,9 @@ export const PurchaseOrderDetailDialog = ({
                     <tr className="bg-slate-50/50 dark:bg-zinc-900/50 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b border-slate-100 dark:border-zinc-800">
                       <th className="px-6 py-4 text-left">Producto</th>
                       <th className="px-6 py-4 text-center">Cantidad</th>
+                      <th className="px-6 py-4 text-center">Lote / Vence</th>
                       <th className="px-6 py-4 text-right">Costo Unit.</th>
+                      <th className="px-6 py-4 text-right">Venta Sug.</th>
                       <th className="px-6 py-4 text-right">Subtotal</th>
                     </tr>
                   </thead>
@@ -116,8 +118,17 @@ export const PurchaseOrderDetailDialog = ({
                             {item.quantity}
                           </Badge>
                         </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="text-[10px] font-black text-primary">{item.batchNumber || "SIN LOTE"}</div>
+                          {item.expiryDate && (
+                            <div className="text-[9px] text-amber-600 font-bold">Vence: {format(new Date(item.expiryDate), "dd/MM/yy")}</div>
+                          )}
+                        </td>
                         <td className="px-6 py-4 text-right font-medium text-muted-foreground tabular-nums">
                           {formatCurrency(item.unitCost)}
+                        </td>
+                        <td className="px-6 py-4 text-right font-bold text-emerald-600 tabular-nums">
+                          {formatCurrency(item.salePrice || 0)}
                         </td>
                         <td className="px-6 py-4 text-right font-black text-foreground tabular-nums">
                           {formatCurrency(item.subtotal)}
@@ -127,7 +138,7 @@ export const PurchaseOrderDetailDialog = ({
                   </tbody>
                   <tfoot>
                     <tr className="bg-primary/5">
-                      <td colSpan={3} className="px-6 py-6 text-right">
+                      <td colSpan={4} className="px-6 py-6 text-right">
                         <span className="text-xs font-black uppercase tracking-widest text-muted-foreground mr-4">Total de Inversión:</span>
                       </td>
                       <td className="px-6 py-6 text-right">

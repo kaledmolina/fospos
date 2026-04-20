@@ -35,7 +35,7 @@ export const PurchaseOrderDialog = ({
   const [loading, setLoading] = useState(false)
 
   const addItem = () => {
-    setItems([...items, { productId: "", quantity: 1, unitCost: 0 }])
+    setItems([...items, { productId: "", quantity: 1, unitCost: 0, salePrice: 0, batchNumber: "", expiryDate: "" }])
   }
 
   const removeItem = (index: number) => {
@@ -179,6 +179,40 @@ export const PurchaseOrderDialog = ({
                                 className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20"
                               />
                             </div>
+                          </div>
+                          <div className="flex-1 space-y-1.5">
+                            <Label className="text-[9px] uppercase font-black text-muted-foreground ml-1 tracking-wider opacity-60">Precio Venta (Lote)</Label>
+                            <div className="relative">
+                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                              <Input 
+                                type="number" 
+                                value={item.salePrice} 
+                                onChange={(e) => updateItem(index, "salePrice", parseFloat(e.target.value) || 0)}
+                                className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-emerald-500/20"
+                                placeholder="Precio venta lote"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-4">
+                          <div className="flex-1 space-y-1.5">
+                            <Label className="text-[9px] uppercase font-black text-muted-foreground ml-1 tracking-wider opacity-60">Número de Lote</Label>
+                            <Input 
+                              value={item.batchNumber} 
+                              onChange={(e) => updateItem(index, "batchNumber", e.target.value)}
+                              className="h-10 bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20"
+                              placeholder="Ej: AB-123"
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1.5">
+                            <Label className="text-[9px] uppercase font-black text-muted-foreground ml-1 tracking-wider opacity-60">Vencimiento</Label>
+                            <Input 
+                              type="date"
+                              value={item.expiryDate} 
+                              onChange={(e) => updateItem(index, "expiryDate", e.target.value)}
+                              className="h-10 bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20"
+                            />
                           </div>
                           <div className="text-right flex flex-col justify-end min-w-[80px] pb-1">
                             <Label className="text-[9px] uppercase font-black text-muted-foreground">Subtotal</Label>
