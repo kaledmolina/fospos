@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { fadeInUp, staggerContainer } from "@/lib/animations"
 import { formatCurrency } from "@/lib/utils"
 
+interface InventoryTabProps {
+  products: any[]
+  categories: any[]
   onSetProductDialog: (open: boolean, product?: any) => void
   onSetCategoryDialog: (open: boolean) => void
   onSetBulkUploadDialog: (open: boolean) => void
