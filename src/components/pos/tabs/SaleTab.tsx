@@ -65,6 +65,7 @@ interface SaleTabProps {
   onPrintGiftCard: (card: any) => void
   userRole?: string
   businessSettings?: any
+  currentBranch?: any
 }
 
 export const SaleTab = ({
@@ -113,7 +114,8 @@ export const SaleTab = ({
   onRemovePayment,
   onUpdatePayment,
   userRole,
-  businessSettings
+  businessSettings,
+  currentBranch
 }: SaleTabProps) => {
   const isAdmin = userRole === "TENANT_ADMIN"
   const giftCardInputRef = useRef<HTMLInputElement>(null)
@@ -248,7 +250,7 @@ export const SaleTab = ({
                 <Input 
                   ref={searchInputRef}
                   placeholder="Buscar producto o escanear [F2]..." 
-                  className="pl-9 h-8 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-primary text-[11px]" 
+                  className="pl-9 h-8 rounded-xl border-slate-200 dark:border-zinc-800 focus:ring-primary text-xs" 
                   value={searchTerm}
                   onChange={(e) => handleProductSearch(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
@@ -320,7 +322,7 @@ export const SaleTab = ({
                             </div>
                             
                             <div className="p-1 w-full space-y-0.5 bg-white dark:bg-zinc-900 border-t border-slate-50 dark:border-zinc-800/50">
-                              <p className="font-black text-[9px] text-left truncate w-full text-foreground uppercase tracking-tight">{product.name}</p>
+                              <p className="font-black text-[11px] text-left truncate w-full text-foreground uppercase tracking-tight">{product.name}</p>
                               <div className="flex items-center justify-between">
                                 <span className="text-[8px] font-bold text-muted-foreground uppercase opacity-60 truncate mr-2">{product.category?.name || "Sin cat."}</span>
                                 <span className={`text-[8px] font-black shrink-0 ${product.stock < 10 ? 'text-red-500' : 'text-primary'}`}>{product.stock} {product.unit}</span>
@@ -597,7 +599,7 @@ export const SaleTab = ({
                             max={cartCustomer?.points || 0}
                             onChange={(e) => onSetRedeemPoints(Math.min(parseInt(e.target.value) || 0, cartCustomer?.points || 0))}
                           />
-                          <div className="shrink-0 px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[9px] font-black border border-amber-500/20">
+                          <div className="shrink-0 px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[10px] font-black border border-amber-500/20">
                             -{formatCurrency(loyaltyDiscount)}
                           </div>
                         </div>
@@ -689,6 +691,12 @@ export const SaleTab = ({
                     { id: "GIFT_CARD", label: "Regalo", icon: Ticket },
                     { id: "MIXED", label: "Mixto", icon: LayoutGrid }
                   ].filter(m => {
+                    // Filter priority: 1. Branch specific settings 2. Business global settings
+                    const branchMethods = currentBranch?.enabledPaymentMethods?.split(",").filter(Boolean);
+                    if (branchMethods && branchMethods.length > 0) {
+                      return branchMethods.includes(m.id);
+                    }
+                    
                     if (!businessSettings?.enabledPaymentMethods) return true;
                     const enabled = businessSettings.enabledPaymentMethods.split(",").filter(Boolean);
                     return enabled.includes(m.id);
@@ -696,10 +704,10 @@ export const SaleTab = ({
                     <motion.div key={method.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                         <Button
                           variant={cartPaymentMethod === method.id ? "default" : "outline"}
-                          className={`w-full h-8 px-1 text-[10px] font-black uppercase cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-sm" : "hover:border-emerald-300"}`}
+                          className={`w-full h-8 px-1 text-[11px] font-black uppercase cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-sm" : "hover:border-emerald-300"}`}
                           onClick={() => onSetCartPaymentMethod(method.id)}
                         >
-                          <method.icon className="w-3.5 h-3.5 mr-1" />{method.label}
+                          <method.icon className="w-4 h-4 mr-1" />{method.label}
                         </Button>
                     </motion.div>
                   ))}

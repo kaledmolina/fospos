@@ -163,6 +163,7 @@ export const POSView = ({
               onUpdatePayment={pos.handleUpdatePayment}
               userRole={pos.session?.user?.role}
               businessSettings={pos.businessSettings}
+              currentBranch={pos.branches.find((b: any) => b.id === pos.selectedBranch)}
             />
           )}
           {pos.posTab === "loyalty" && (

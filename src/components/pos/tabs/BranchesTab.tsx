@@ -27,7 +27,7 @@ export const BranchesTab = ({
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Sucursales</h1>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button className="bg-primary hover:bg-primary cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => { onSetEditingBranch(null); onSetBranchForm({ name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0 }); onSetBranchDialog(true) }}>
+          <Button className="bg-primary hover:bg-primary cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => { onSetEditingBranch(null); onSetBranchForm({ name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0, enabledPaymentMethods: "CASH,CARD,TRANSFER,CREDIT,MIXED,GIFT_CARD" }); onSetBranchDialog(true) }}>
             <Plus className="w-4 h-4 mr-2" />Nueva Sucursal
           </Button>
         </motion.div>
@@ -78,7 +78,7 @@ export const BranchesTab = ({
                       <p className="text-xs text-muted-foreground">Ventas</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="cursor-pointer transition-all duration-200" onClick={() => { onSetEditingBranch(branch); onSetBranchForm({ name: branch.name, address: branch.address || "", phone: branch.phone || "", city: branch.city, isMain: branch.isMain, monthlyGoal: branch.monthlyGoal || 0 }); onSetBranchDialog(true) }}>
+                      <Button variant="outline" size="sm" className="cursor-pointer transition-all duration-200" onClick={() => { onSetEditingBranch(branch); onSetBranchForm({ name: branch.name, address: branch.address || "", phone: branch.phone || "", city: branch.city, isMain: branch.isMain, monthlyGoal: branch.monthlyGoal || 0, enabledPaymentMethods: branch.enabledPaymentMethods || "CASH,CARD,TRANSFER,CREDIT,MIXED,GIFT_CARD" }); onSetBranchDialog(true) }}>
                         <Edit className="w-4 h-4" />
                       </Button>
                       {!branch.isMain && (

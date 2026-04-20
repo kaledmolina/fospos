@@ -126,7 +126,7 @@ export const POSDashboard = ({
           <div className="flex items-center gap-3 overflow-hidden">
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
-              className="w-9 h-9 shrink-0 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 border-2 border-white/20"
+              className="w-10 h-10 shrink-0 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 border-2 border-white/20"
             >
               {currentBranch?.logoUrl ? (
                 <img src={currentBranch.logoUrl} alt="Logo" className="w-full h-full object-cover" />
@@ -136,21 +136,7 @@ export const POSDashboard = ({
                 <Store className="w-5 h-5 text-white" />
               )}
             </motion.div>
-            {sidebarOpen && (
-              <motion.div 
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="min-w-0 flex-1"
-              >
-                <BranchSelector 
-                  branches={branches}
-                  selectedBranch={selectedBranch}
-                  onBranchChange={onBranchChange}
-                  isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
-                  customName={displayName}
-                />
-              </motion.div>
-            )}
+            {/* Branch selector removed from here to avoid redundancy with the header */}
           </div>
           
           {sidebarOpen && (
@@ -218,7 +204,7 @@ export const POSDashboard = ({
                           <motion.span
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="truncate font-black uppercase text-[10px] tracking-widest"
+                            className="truncate font-black uppercase text-[11px] tracking-widest"
                           >
                             {item.label}
                           </motion.span>
@@ -231,11 +217,9 @@ export const POSDashboard = ({
                         )}
                       </Button>
                     </TooltipTrigger>
-                    {!sidebarOpen && canShowTooltip && (
-                      <TooltipContent side="right" sideOffset={15} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[10px] tracking-widest shadow-2xl">
+                      <TooltipContent side="right" sideOffset={15} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[11px] tracking-widest shadow-2xl">
                         {item.label}
                       </TooltipContent>
-                    )}
                   </Tooltip>
                 </motion.div>
               ))}
@@ -267,7 +251,7 @@ export const POSDashboard = ({
           </div>
           <Button 
             variant="ghost" 
-            className={`w-full mt-2 ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 font-black h-10 uppercase text-[9px] tracking-widest`} 
+            className={`w-full mt-2 ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 font-black h-10 uppercase text-[10px] tracking-widest`} 
             onClick={onSignOut}
             title={!sidebarOpen ? "Cerrar Sesión" : ""}
           >
@@ -280,8 +264,8 @@ export const POSDashboard = ({
       {/* Main Content Area */}
       <main className="flex-1 h-screen flex flex-col overflow-hidden relative z-10">
         {/* Modern Floating Header */}
-        <header className="h-14 flex items-center shrink-0 px-3 mt-2 md:px-6 print:hidden relative z-40">
-          <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl h-11 px-3 shadow-xl shadow-black/5">
+        <header className="h-16 flex items-center shrink-0 px-3 mt-1 md:px-6 print:hidden relative z-40">
+          <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl h-12 px-4 shadow-xl shadow-black/5">
             <div className="flex items-center gap-4">
               {!sidebarOpen && (
                 <Button 
@@ -303,9 +287,15 @@ export const POSDashboard = ({
                   <Plus className="w-4 h-4" />
                 </Button>
               )}
-              <div className="hidden lg:flex items-center gap-2 text-muted-foreground/60">
-                <Globe className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Fost POS • Hub</span>
+              <div className="hidden lg:flex items-center gap-3">
+                <div className="w-px h-6 bg-border/50 mx-1" />
+                <BranchSelector 
+                  branches={branches}
+                  selectedBranch={selectedBranch}
+                  onBranchChange={onBranchChange}
+                  isAdmin={session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN"}
+                  customName={displayName}
+                />
               </div>
             </div>
 
@@ -313,11 +303,11 @@ export const POSDashboard = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="rounded-xl hover:bg-accent hidden sm:flex h-9 w-9 transition-all active:scale-95"
+                className="rounded-xl hover:bg-accent hidden sm:flex h-10 w-10 transition-all active:scale-95"
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Salir de Pantalla Completa" : "Pantalla Completa"}
               >
-                {isFullscreen ? <Minimize2 className="w-4.5 h-4.5" /> : <Maximize2 className="w-4.5 h-4.5" />}
+                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
               </Button>
 
               <div className="w-px h-6 bg-border mx-1" />
@@ -325,18 +315,18 @@ export const POSDashboard = ({
               
               <Popover onOpenChange={onNotificationsOpenChange}>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-9 h-9 transition-all active:scale-95">
-                    <Bell className="w-4.5 h-4.5" />
+                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-10 h-10 transition-all active:scale-95">
+                    <Bell className="w-5 h-5" />
                     {unreadNotifications > 0 && (
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
+                      <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
                     )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0 shadow-2xl border-border bg-card/95 backdrop-blur-md rounded-3xl overflow-hidden mt-2" align="end">
                   <div className="p-4 bg-primary/5 border-b flex items-center justify-between">
                     <div>
-                      <h3 className="font-black text-[10px] uppercase tracking-widest text-primary">Notificaciones</h3>
-                      <Badge variant="secondary" className="font-black text-[9px] h-5 mt-1">{unreadNotifications} Nuevas</Badge>
+                      <h3 className="font-black text-xs uppercase tracking-widest text-primary">Notificaciones</h3>
+                      <Badge variant="secondary" className="font-black text-[10px] h-5 mt-1">{unreadNotifications} Nuevas</Badge>
                     </div>
                     {(notifications?.length || 0) > 0 && (
                       <Button 
@@ -447,8 +437,8 @@ export const POSDashboard = ({
                   className="absolute bottom-1 w-6 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"
                 />
               )}
-              <item.icon className="w-5 h-5" />
-              <span className="text-[9px] font-black uppercase mt-1 tracking-tighter">{item.label}</span>
+              <item.icon className="w-5.5 h-5.5" />
+              <span className="text-[10px] font-black uppercase mt-1 tracking-tighter">{item.label}</span>
             </motion.button>
           ))}
         </div>

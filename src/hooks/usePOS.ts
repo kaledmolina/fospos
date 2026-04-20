@@ -92,7 +92,7 @@ export const usePOS = (session: any) => {
   })
   const [branchForm, setBranchForm] = useState({
     name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0,
-    logoUrl: "", themeColor: "#10b981"
+    logoUrl: "", themeColor: "#10b981", enabledPaymentMethods: "CASH,CARD,TRANSFER,CREDIT,MIXED,GIFT_CARD"
   })
   const [bulkUploadData, setBulkUploadData] = useState("")
   const [editingBranch, setEditingBranch] = useState<BranchData | null>(null)

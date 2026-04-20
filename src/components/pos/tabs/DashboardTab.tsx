@@ -65,12 +65,12 @@ export const DashboardTab = ({
                   <div className={`w-9 h-9 bg-${stat.color}-500/10 dark:bg-${stat.color}-500/20 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300`}>
                     <stat.icon className={`w-4.5 h-4.5 text-${stat.color}-600 dark:text-${stat.color}-400`} />
                   </div>
-                  <Badge variant="outline" className={`h-5 border-none ${stat.isUp ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-600'} text-[9px] font-black`}>
+                  <Badge variant="outline" className={`h-5 border-none ${stat.isUp ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-600'} text-[10px] font-black`}>
                     {stat.trend}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-[9px] uppercase font-black tracking-widest text-muted-foreground/60 mb-0.5">{stat.label}</p>
+                  <p className="text-xs uppercase font-black tracking-widest text-muted-foreground/60 mb-0.5">{stat.label}</p>
                   <div className="text-lg font-black text-foreground tabular-nums">
                     <AnimatedCounter value={stat.value as number} prefix={stat.prefix === "$" ? "$" : ""} />
                   </div>
@@ -96,7 +96,7 @@ export const DashboardTab = ({
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Target className="w-4 h-4 text-white/60" />
-                  <p className="text-white/80 text-[10px] uppercase font-black tracking-widest">Meta Mensual</p>
+                  <p className="text-white/80 text-xs uppercase font-black tracking-widest">Meta Mensual</p>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-xl font-black">{formatCurrency(dashboardStats?.monthSales || 0)}</p>
@@ -114,11 +114,11 @@ export const DashboardTab = ({
                 </div>
               </div>
               <div className="hidden md:flex flex-col items-end">
-                <p className="text-[8px] uppercase font-black text-white/40 mb-1">Tu progreso hoy</p>
+                <p className="text-[10px] uppercase font-black text-white/40 mb-1">Tu progreso hoy</p>
                 <div className="flex items-center gap-2">
                    <div className="text-right">
                       <p className="text-sm font-black leading-none">{Math.round(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100)}%</p>
-                      <p className="text-[8px] text-white/60">Objetivo Diario</p>
+                      <p className="text-[10px] text-white/60">Objetivo Diario</p>
                    </div>
                 </div>
               </div>
@@ -149,13 +149,13 @@ export const DashboardTab = ({
                   <CardContent className="p-3 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 text-red-500" />
-                      <p className="text-red-500 text-[10px] font-black uppercase tracking-tight">Productos Vencidos</p>
+                      <p className="text-red-500 text-xs font-black uppercase tracking-tight">Productos Vencidos</p>
                     </div>
-                    <p className="text-[11px] text-red-500/80 leading-tight">Tienes {dashboardStats?.expiredCount} productos que ya caducaron.</p>
+                    <p className="text-xs text-red-500/80 leading-tight">Tienes {dashboardStats?.expiredCount} productos que ya caducaron.</p>
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="w-full h-7 bg-white dark:bg-zinc-900 border-red-500/20 hover:bg-red-500/10 cursor-pointer text-red-600 dark:text-red-400 text-[9px] font-black uppercase" 
+                      className="w-full h-8 bg-white dark:bg-zinc-900 border-red-500/20 hover:bg-red-500/10 cursor-pointer text-red-600 dark:text-red-400 text-xs font-black uppercase" 
                       onClick={() => onPosTabChange("products")}
                     >
                       Sacar de Inventario
@@ -170,13 +170,13 @@ export const DashboardTab = ({
                   <CardContent className="p-3 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-orange-500" />
-                      <p className="text-orange-500 text-[10px] font-black uppercase tracking-tight">Por Vencer Pronto</p>
+                      <p className="text-orange-500 text-xs font-black uppercase tracking-tight">Por Vencer Pronto</p>
                     </div>
-                    <p className="text-[11px] text-orange-500/80 leading-tight">Tienes {dashboardStats?.nearExpiryCount} productos por vencer pronto.</p>
+                    <p className="text-xs text-orange-500/80 leading-tight">Tienes {dashboardStats?.nearExpiryCount} productos por vencer pronto.</p>
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="w-full h-7 bg-white dark:bg-zinc-900 border-orange-500/20 hover:bg-orange-500/10 cursor-pointer text-orange-600 dark:text-orange-400 text-[9px] font-black uppercase" 
+                      className="w-full h-8 bg-white dark:bg-zinc-900 border-orange-500/20 hover:bg-orange-500/10 cursor-pointer text-orange-600 dark:text-orange-400 text-xs font-black uppercase" 
                       onClick={() => onPosTabChange("products")}
                     >
                       Crear Promoción
@@ -191,19 +191,19 @@ export const DashboardTab = ({
                   <CardContent className="p-3 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       <Package className="w-4 h-4 text-yellow-500" />
-                      <p className={`text-[10px] font-black uppercase tracking-tight ${dashboardStats?.isGlobalView ? "text-orange-500" : "text-yellow-600"}`}>
+                      <p className={`text-xs font-black uppercase tracking-tight ${dashboardStats?.isGlobalView ? "text-orange-500" : "text-yellow-600"}`}>
                         {dashboardStats?.isGlobalView ? "Stock Bajo (Global)" : "Stock Bajo"}
                       </p>
                     </div>
                     <div className="flex flex-col gap-1">
                       {dashboardStats?.stockItems?.slice(0, 2).map((item: any) => (
-                        <div key={item.id} className="text-[9px] font-black bg-yellow-500/5 px-2 py-1 rounded border border-yellow-500/10 flex justify-between items-center text-yellow-700 dark:text-yellow-300">
+                        <div key={item.id} className="text-xs font-black bg-yellow-500/5 px-2 py-1 rounded border border-yellow-500/10 flex justify-between items-center text-yellow-700 dark:text-yellow-300">
                           <span className="truncate mr-2 uppercase">{item.name}</span>
                           <span className="shrink-0">{item.stock}</span>
                         </div>
                       ))}
                     </div>
-                    <Button size="sm" variant="outline" className="w-full h-7 bg-white dark:bg-zinc-900 border-yellow-500/20 hover:bg-yellow-500/10 cursor-pointer text-yellow-600 dark:text-yellow-400 font-black text-[9px] uppercase" onClick={() => onPosTabChange("products")}>Surtir Stock</Button>
+                    <Button size="sm" variant="outline" className="w-full h-8 bg-white dark:bg-zinc-900 border-yellow-500/20 hover:bg-yellow-500/10 cursor-pointer text-yellow-600 dark:text-yellow-400 font-black text-xs uppercase" onClick={() => onPosTabChange("products")}>Surtir Stock</Button>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -229,8 +229,8 @@ export const DashboardTab = ({
               <Target className="w-16 h-16" />
             </div>
             <CardContent className="p-4">
-              <p className="text-primary-foreground/60 text-[9px] font-black uppercase tracking-widest mb-1">Tu progreso hoy</p>
-              <h3 className="text-lg font-black mb-3">{Math.round(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100)}% <span className="text-[10px] font-normal text-primary-foreground/50">de la meta</span></h3>
+              <p className="text-primary-foreground/60 text-[10px] font-black uppercase tracking-widest mb-1">Tu progreso hoy</p>
+              <h3 className="text-lg font-black mb-3">{Math.round(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100)}% <span className="text-xs font-normal text-primary-foreground/50">de la meta</span></h3>
               <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden mb-3">
                 <motion.div 
                   className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
@@ -238,7 +238,7 @@ export const DashboardTab = ({
                   animate={{ width: `${Math.min(((dashboardStats?.todaySales || 0) / (dashboardStats?.dailyGoal || 1000000)) * 100, 100)}%` }}
                 />
               </div>
-              <p className="text-[9px] opacity-60 italic">¡Sigue así! Estás cerca de superar tu promedio.</p>
+              <p className="text-[10px] opacity-60 italic">¡Sigue así! Estás cerca de superar tu promedio.</p>
             </CardContent>
           </Card>
         </div>
@@ -252,10 +252,10 @@ export const DashboardTab = ({
               {dashboardStats?.topProducts.map((product, i) => (
                 <div key={product.id || i} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <span className="w-5 h-5 bg-primary/20 text-primary border border-primary/20 rounded flex items-center justify-center text-[10px] font-black">{i + 1}</span>
+                    <span className="w-5 h-5 bg-primary/20 text-primary border border-primary/20 rounded flex items-center justify-center text-xs font-black">{i + 1}</span>
                     <div>
                       <p className="text-xs font-black text-foreground uppercase tracking-tight">{product.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{product.totalSold} vendidos</p>
+                      <p className="text-xs text-muted-foreground">{product.totalSold} vendidos</p>
                     </div>
                   </div>
                   <p className="text-xs font-black text-primary">{formatCurrency(product.totalRevenue)}</p>
@@ -283,8 +283,8 @@ export const DashboardTab = ({
                       <p className="text-[10px] text-muted-foreground truncate max-w-[120px]">{sale.customer?.name || "Cliente general"}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[9px] text-muted-foreground uppercase font-medium">{formatDate(sale.createdAt)}</p>
-                      <Badge variant="outline" className="h-4 text-[8px] font-black uppercase mt-0.5 px-1.5">{sale.paymentMethod}</Badge>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium">{formatDate(sale.createdAt)}</p>
+                      <Badge variant="outline" className="h-4 text-[10px] font-black uppercase mt-0.5 px-1.5">{sale.paymentMethod}</Badge>
                     </div>
                   </div>
                 ))}

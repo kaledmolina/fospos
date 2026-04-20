@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, address, phone, city, isMain, monthlyGoal, logoUrl, themeColor } = body
+    const { name, address, phone, city, isMain, monthlyGoal, logoUrl, themeColor, enabledPaymentMethods } = body
 
     if (!name) {
       return NextResponse.json({ success: false, error: "El nombre es requerido" }, { status: 400 })
@@ -77,7 +77,8 @@ export async function POST(request: NextRequest) {
         isMain: shouldBeMain,
         monthlyGoal: parseFloat(monthlyGoal) || 0,
         logoUrl: logoUrl || null,
-        themeColor: themeColor || "#10b981"
+        themeColor: themeColor || "#10b981",
+        enabledPaymentMethods: enabledPaymentMethods || "CASH,CARD,TRANSFER,CREDIT,MIXED,GIFT_CARD"
       }
     })
 
@@ -118,7 +119,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { id, name, address, phone, city, isMain, monthlyGoal, logoUrl, themeColor } = body
+    const { id, name, address, phone, city, isMain, monthlyGoal, logoUrl, themeColor, enabledPaymentMethods } = body
 
     if (!id || !name) {
       return NextResponse.json({ success: false, error: "ID y nombre son requeridos" }, { status: 400 })
@@ -142,7 +143,8 @@ export async function PUT(request: NextRequest) {
         isMain,
         monthlyGoal: isNaN(parseFloat(String(monthlyGoal))) ? 0 : parseFloat(String(monthlyGoal)),
         logoUrl: logoUrl !== undefined ? logoUrl : undefined,
-        themeColor: themeColor !== undefined ? themeColor : undefined
+        themeColor: themeColor !== undefined ? themeColor : undefined,
+        enabledPaymentMethods: enabledPaymentMethods !== undefined ? enabledPaymentMethods : undefined
       }
     })
 

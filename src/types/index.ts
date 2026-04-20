@@ -159,6 +159,9 @@ export interface BranchData {
   city: string
   isMain: boolean
   isActive: boolean
+  logoUrl?: string | null
+  themeColor?: string | null
+  enabledPaymentMethods?: string | null
   _count?: { products: number; sales: number }
   createdAt: string
 }

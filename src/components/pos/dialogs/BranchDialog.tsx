@@ -149,6 +149,51 @@ export const BranchDialog = ({
             </div>
           </div>
 
+          <div className="space-y-4 pt-2 border-t">
+            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Medios de Pago Habilitados</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { id: "CASH", label: "Efectivo" },
+                { id: "CARD", label: "Tarjeta" },
+                { id: "TRANSFER", label: "Transferencia" },
+                { id: "CREDIT", label: "Crédito / Fiado" },
+                { id: "GIFT_CARD", label: "Tarjeta Regalo" },
+                { id: "MIXED", label: "Pago Mixto" }
+              ].map(method => {
+                const methods = (branchForm.enabledPaymentMethods || "").split(",").filter(Boolean);
+                const isEnabled = methods.includes(method.id);
+                
+                return (
+                  <div key={method.id} className="flex items-center gap-2 p-2 rounded-lg border bg-muted/30">
+                    <Switch 
+                      checked={isEnabled} 
+                      onCheckedChange={(checked) => {
+                        let newMethods;
+                        if (checked) {
+                          newMethods = [...methods, method.id].join(",");
+                        } else {
+                          newMethods = methods.filter(m => m !== method.id).join(",");
+                        }
+                        onBranchFormChange({ ...branchForm, enabledPaymentMethods: newMethods });
+                      }} 
+                    />
+                    <Label className="text-xs font-medium cursor-pointer" onClick={() => {
+                        let newMethods;
+                        if (!isEnabled) {
+                          newMethods = [...methods, method.id].join(",");
+                        } else {
+                          newMethods = methods.filter(m => m !== method.id).join(",");
+                        }
+                        onBranchFormChange({ ...branchForm, enabledPaymentMethods: newMethods });
+                    }}>
+                      {method.label}
+                    </Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-2 border-t pt-4">
             <Label>Meta Mensual de Ventas ($)</Label>
             <Input 
