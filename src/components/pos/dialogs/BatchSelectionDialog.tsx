@@ -58,7 +58,7 @@ export const BatchSelectionDialog = ({
         <div className="p-4 bg-background">
           <ScrollArea className="h-[300px] pr-4">
             <div className="space-y-3">
-              {batches.map((batch) => (
+              {batches?.map((batch) => (
                 <motion.div
                   key={batch.id}
                   whileHover={{ scale: 1.01 }}

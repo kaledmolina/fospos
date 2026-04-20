@@ -6,7 +6,7 @@ import {
   ProductData, CategoryData, CustomerData, CreditWithDetails, 
   DashboardStats, CashRegisterData, NotificationData, ExpenseData, 
   BranchData, TenantUserData, SubscriptionServiceData, CustomerSubscriptionData, 
-  SubscriptionStats 
+  SubscriptionStats, ProductBatchData
 } from "@/types"
 import { formatCurrency, getDaysOverdue } from "@/lib/utils"
 
@@ -1795,6 +1795,7 @@ export const usePOS = (session: any) => {
     handleAddSupplier, handleUpdateSupplier, handleDeleteSupplier,
     profileDialog, setProfileDialog, profileForm, setProfileForm, handleUpdateProfile,
     cartPayments, setCartPayments, handleAddPayment, handleUpdatePayment, handleRemovePayment,
-    businessSettings, handleUpdateBusinessSettings
+    businessSettings, handleUpdateBusinessSettings,
+    batchDialogOpen, setBatchDialogOpen, availableBatches, activeProductForBatch
   }
 }
