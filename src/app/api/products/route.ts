@@ -101,6 +101,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    const { 
+      code, sku, name, description, imageUrl,
       costPrice, salePrice, wholesalePrice, stock, minStock,
       unit, categoryId, isActive, expiryDate,
       supplierId, batchNumber
@@ -218,10 +220,6 @@ export async function POST(request: NextRequest) {
             minStock: minStock || 5
           }
         })
-      } else {
-        // Fallback: si no hay sucursal (ej. superadmin creando global), inicializar en todas? 
-        // O mejor no crear stock hasta que se asigne.
-        // El usuario pidió aislamiento, así que asumimos que siempre hay una sucursal.
       }
 
       return mainProduct
