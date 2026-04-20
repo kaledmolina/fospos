@@ -77,7 +77,8 @@ export const usePOS = (session: any) => {
   const [productForm, setProductForm] = useState({
     code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
     stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
-    expiryDate: "", imageUrl: ""
+    expiryDate: "", imageUrl: "",
+    supplierId: "", batchNumber: ""
   })
   const [categoryForm, setCategoryForm] = useState({ name: "", description: "", color: "#10B981", icon: "🏷️", imageUrl: "" })
   const [customerForm, setCustomerForm] = useState({ name: "", document: "", phone: "", email: "", address: "", creditLimit: 0 })
@@ -1703,7 +1704,42 @@ export const usePOS = (session: any) => {
     activityLogs, fetchActivityLogs,
     tenantUsers, cart, setCart, cartCustomer, setCartCustomer,
     cartPaymentMethod, setCartPaymentMethod: handleSetCartPaymentMethod, cartDiscount, setCartDiscount,
-    productDialog, setProductDialog, categoryDialog, setCategoryDialog,
+    productDialog, setProductDialog, 
+    handleOpenProductDialog: (isOpen: boolean, product: any = null) => {
+      if (isOpen && !product) {
+        // Reset form for NEW product
+        setProductForm({
+          code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
+          stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
+          expiryDate: "", imageUrl: "", supplierId: "",
+          batchNumber: `LOT-${Math.floor(100000 + Math.random() * 900000)}` // Auto-generate lot
+        })
+        setEditingProduct(null)
+      } else if (isOpen && product) {
+        // Edit existing product
+        setEditingProduct(product)
+        setProductForm({
+          code: product.code || "",
+          sku: product.sku || "",
+          name: product.name,
+          description: product.description || "",
+          costPrice: product.costPrice || 0,
+          salePrice: product.salePrice,
+          wholesalePrice: product.wholesalePrice || 0,
+          stock: product.stock || 0,
+          minStock: product.minStock || 5,
+          unit: product.unit || "unidad",
+          categoryId: product.categoryId || "",
+          isActive: product.isActive,
+          expiryDate: product.expiryDate ? product.expiryDate.split('T')[0] : "",
+          imageUrl: product.imageUrl || "",
+          supplierId: "", // Logic to fetch last supplier if needed
+          batchNumber: "" // For existing products, batches are managed in advanced tab
+        })
+      }
+      setProductDialog(isOpen)
+    },
+    categoryDialog, setCategoryDialog,
     customerDialog, setCustomerDialog, paymentDialog, setPaymentDialog,
     cashDialog, setCashDialog, expenseDialog, setExpenseDialog,
     branchDialog, setBranchDialog, bulkUploadDialog, setBulkUploadDialog,

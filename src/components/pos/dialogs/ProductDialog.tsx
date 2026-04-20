@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   ImagePlus, X, Loader2, Package, AlignLeft, Tag, 
   DollarSign, Barcode, Calendar, Info, Layers, 
-  Percent, TrendingUp, Sparkles, LayoutGrid
+  Percent, TrendingUp, Sparkles, LayoutGrid, Briefcase
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -22,10 +22,11 @@ interface ProductDialogProps {
   onOpenChange: (open: boolean) => void
   productForm: any
   onProductFormChange: (form: any) => void
-  categories: any []
+  categories: any[]
   onSubmit: (e: React.FormEvent) => void
   editingProduct?: any
   userRole?: string
+  suppliers: any[]
 }
 
 export const ProductDialog = ({
@@ -36,7 +37,8 @@ export const ProductDialog = ({
   categories,
   onSubmit,
   editingProduct,
-  userRole
+  userRole,
+  suppliers
 }: ProductDialogProps) => {
   const [uploading, setUploading] = useState(false)
   const [activeTab, setActiveTab] = useState("general")
@@ -94,8 +96,8 @@ export const ProductDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl p-0 overflow-hidden border-none shadow-2xl">
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white relative">
-          <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
+        <div className="bg-primary p-6 text-primary-foreground relative">
+          <div className="absolute top-0 right-0 p-8 opacity-20 rotate-12">
             <Sparkles className="w-24 h-24" />
           </div>
           <DialogHeader className="relative z-10">
@@ -110,7 +112,7 @@ export const ProductDialog = ({
             <DialogTitle className="text-3xl font-black tracking-tight text-white mb-1">
               {editingProduct ? "Editar Producto" : "Nuevo Producto"}
             </DialogTitle>
-            <DialogDescription className="text-emerald-50/80 font-medium">
+            <DialogDescription className="text-primary-foreground/80 font-medium">
               {editingProduct 
                 ? `Actualizando información de: ${editingProduct.name}`
                 : "Completa los detalles para añadir un nuevo ítem al catálogo."}
@@ -121,17 +123,17 @@ export const ProductDialog = ({
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="px-6 pt-4 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-zinc-800">
             <TabsList className="bg-transparent h-12 gap-6 w-full justify-start overflow-x-auto no-scrollbar">
-              <TabsTrigger value="general" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-emerald-600 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none px-0 pb-3 font-bold transition-all gap-2 h-full">
-                <Info className="w-4 h-4" /> Básico
+              <TabsTrigger value="general" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black uppercase text-[10px] tracking-widest px-6 h-9 transition-all rounded-full">
+                General
               </TabsTrigger>
-              <TabsTrigger value="id" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-emerald-600 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none px-0 pb-3 font-bold transition-all gap-2 h-full">
-                <Barcode className="w-4 h-4" /> Identificación
+              <TabsTrigger value="id" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black uppercase text-[10px] tracking-widest px-6 h-9 transition-all rounded-full">
+                Identificación
               </TabsTrigger>
-              <TabsTrigger value="prices" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-emerald-600 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none px-0 pb-3 font-bold transition-all gap-2 h-full">
-                <DollarSign className="w-4 h-4" /> Precios
+              <TabsTrigger value="prices" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black uppercase text-[10px] tracking-widest px-6 h-9 transition-all rounded-full">
+                Precios
               </TabsTrigger>
-              <TabsTrigger value="inventory" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-emerald-600 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none px-0 pb-3 font-bold transition-all gap-2 h-full">
-                <Layers className="w-4 h-4" /> Inventario
+              <TabsTrigger value="inventory" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black uppercase text-[10px] tracking-widest px-6 h-9 transition-all rounded-full">
+                Inventario
               </TabsTrigger>
             </TabsList>
           </div>
@@ -143,14 +145,14 @@ export const ProductDialog = ({
                   <div className="md:col-span-1">
                     <Label className="text-[10px] font-black uppercase text-slate-400 dark:text-zinc-500 mb-3 block tracking-widest">Visual del Producto</Label>
                     <div 
-                      className="relative group w-full aspect-square rounded-3xl border-2 border-dashed border-slate-200 dark:border-zinc-800 flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-zinc-950 transition-all hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 cursor-pointer"
+                      className="relative group w-full aspect-square rounded-3xl border-2 border-dashed border-slate-200 dark:border-zinc-800 flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-zinc-950 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 cursor-pointer"
                       onClick={() => !uploading && fileInputRef.current?.click()}
                     >
                       {productForm.imageUrl ? (
                         <>
                           <img src={productForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-emerald-600/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                            <div className="bg-white text-emerald-600 p-3 rounded-full shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                          <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                            <div className="bg-white text-primary p-3 rounded-full shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
                               <ImagePlus className="w-6 h-6" />
                             </div>
                           </div>
@@ -163,9 +165,9 @@ export const ProductDialog = ({
                           </button>
                         </>
                       ) : (
-                        <div className="flex flex-col items-center gap-3 text-slate-400 group-hover:text-emerald-500 transition-colors px-4 text-center">
-                          <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-zinc-900 flex items-center justify-center mb-1 shadow-inner group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/20 group-hover:scale-110 transition-all duration-300">
-                            {uploading ? <Loader2 className="w-8 h-8 animate-spin text-emerald-500" /> : <ImagePlus className="w-8 h-8" />}
+                        <div className="flex flex-col items-center gap-3 text-slate-400 group-hover:text-primary transition-colors px-4 text-center">
+                          <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-zinc-900 flex items-center justify-center mb-1 shadow-inner group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                            {uploading ? <Loader2 className="w-8 h-8 animate-spin text-primary" /> : <ImagePlus className="w-8 h-8" />}
                           </div>
                           <div>
                             <span className="text-xs font-bold uppercase tracking-wider block mb-1">{uploading ? "Subiendo..." : "Subir Imagen"}</span>
@@ -180,20 +182,20 @@ export const ProductDialog = ({
                   <div className="md:col-span-2 space-y-4">
                     <div className="space-y-2">
                       <Label className="text-xs font-bold text-slate-600 dark:text-zinc-400 flex items-center gap-2">
-                        <Tag className="w-3 h-3 text-emerald-500" /> Nombre del Producto
+                        <Tag className="w-3 h-3 text-primary" /> Nombre del Producto
                       </Label>
                       <Input 
                         value={productForm.name} 
                         onChange={e => onProductFormChange({ ...productForm, name: e.target.value })} 
                         placeholder="Ej: Coca Cola Original 2.5L" 
                         required 
-                        className="h-12 text-lg font-bold border-slate-200 dark:border-zinc-800 rounded-2xl focus:ring-emerald-500" 
+                        className="h-12 text-lg font-bold border-slate-200 dark:border-zinc-800 rounded-2xl focus:ring-primary" 
                       />
                     </div>
 
                     <div className="space-y-2">
                        <Label className="text-xs font-bold text-slate-600 dark:text-zinc-400 flex items-center gap-2">
-                        <LayoutGrid className="w-3 h-3 text-emerald-500" /> Categoría
+                        <LayoutGrid className="w-3 h-3 text-primary" /> Categoría
                       </Label>
                       <Select value={productForm.categoryId} onValueChange={v => onProductFormChange({ ...productForm, categoryId: v })}>
                         <SelectTrigger className="h-11 rounded-xl border-slate-200 dark:border-zinc-800">
@@ -214,7 +216,7 @@ export const ProductDialog = ({
 
                     <div className="space-y-2">
                       <Label className="text-xs font-bold text-slate-600 dark:text-zinc-400 flex items-center gap-2">
-                        <AlignLeft className="w-3 h-3 text-emerald-500" /> Descripción
+                        <AlignLeft className="w-3 h-3 text-primary" /> Descripción
                       </Label>
                       <Textarea 
                         value={productForm.description || ""} 
@@ -231,7 +233,7 @@ export const ProductDialog = ({
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 dark:bg-zinc-900/30 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
                     <div className="space-y-3">
                       <div className="bg-white dark:bg-zinc-950 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800">
-                        <Label className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2 block">Código de Barras</Label>
+                        <Label className="text-xs font-black text-primary uppercase tracking-widest mb-2 block">Código de Barras</Label>
                         <div className="relative">
                           <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
                           <Input 
@@ -306,20 +308,20 @@ export const ProductDialog = ({
                       {!isAdmin && <p className="text-[9px] text-red-500 font-bold italic mt-1">Solo administradores pueden editar costos.</p>}
                     </div>
 
-                    <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-5 rounded-3xl border border-emerald-100 dark:border-emerald-800/30 shadow-sm space-y-3 relative overflow-hidden group">
+                    <div className="bg-primary/5 dark:bg-primary/10 p-5 rounded-3xl border border-primary/20 dark:border-primary/30 shadow-sm space-y-3 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-3 opacity-10 rotate-12 group-hover:scale-125 transition-transform duration-500">
-                        <Sparkles className="w-12 h-12 text-emerald-600" />
+                        <Sparkles className="w-12 h-12 text-primary" />
                       </div>
-                      <div className="flex h-10 w-10 bg-emerald-500 rounded-xl items-center justify-center text-white mb-2 shadow-md shadow-emerald-500/20">
+                      <div className="flex h-10 w-10 bg-primary rounded-xl items-center justify-center text-white mb-2 shadow-md shadow-primary/20">
                         <DollarSign className="w-5 h-5" />
                       </div>
-                      <Label className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Precio de Venta *</Label>
+                      <Label className="text-xs font-bold text-primary dark:text-primary-foreground uppercase tracking-wider">Precio de Venta *</Label>
                       <div className="relative">
                         <Input 
                           type="number" 
                           value={productForm.salePrice} 
                           onChange={e => onProductFormChange({ ...productForm, salePrice: parseFloat(e.target.value) || 0 })} 
-                          className="pl-3 h-12 text-2xl font-black rounded-xl border-emerald-200 focus:ring-emerald-500" 
+                          className="pl-3 h-12 text-2xl font-black rounded-xl border-primary/20 focus:ring-primary" 
                           required 
                           disabled={!isAdmin}
                         />
@@ -352,7 +354,7 @@ export const ProductDialog = ({
                     <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
                        <div className="flex items-center gap-4">
                           <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
-                            <Percent className="w-7 h-7 text-emerald-400" />
+                            <Percent className="w-7 h-7 text-primary" />
                           </div>
                           <div>
                             <p className="text-xs font-bold opacity-60 uppercase tracking-widest leading-tight">Margen de Ganancia</p>
@@ -368,7 +370,7 @@ export const ProductDialog = ({
                           </div>
                           <div>
                             <p className="text-xs font-bold opacity-60 uppercase tracking-widest leading-tight">Utilidad por Unidad</p>
-                            <h3 className="text-3xl font-black text-emerald-400">
+                            <h3 className="text-3xl font-black text-primary">
                               +${profitStats.profit.toLocaleString()}
                             </h3>
                           </div>
@@ -385,7 +387,7 @@ export const ProductDialog = ({
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-slate-50 dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 space-y-4">
                        <div className="flex items-center gap-2 mb-2">
-                         <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                         <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                          <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Niveles de Unidades</span>
                        </div>
                        
@@ -419,46 +421,78 @@ export const ProductDialog = ({
                     </div>
 
                     <div className="space-y-4">
-                       <div className="bg-white dark:bg-zinc-950 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm space-y-4">
-                         <div className="space-y-2">
-                            <Label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                              <Calendar className="w-3 h-3" /> Fecha de Vencimiento
-                            </Label>
-                            <Input 
-                              type="date" 
-                              value={productForm.expiryDate || ""} 
-                              onChange={e => onProductFormChange({ ...productForm, expiryDate: e.target.value })} 
-                              className="h-11 rounded-xl cursor-pointer bg-slate-50 border-slate-100"
-                            />
-                         </div>
+                        <div className="bg-white dark:bg-zinc-950 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm space-y-6">
+                          <div className="space-y-2">
+                             <Label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                               <Briefcase className="w-3 h-3 text-primary" /> Proveedor Responsable
+                             </Label>
+                             <Select 
+                               value={productForm.supplierId || ""} 
+                               onValueChange={v => onProductFormChange({ ...productForm, supplierId: v })}
+                             >
+                               <SelectTrigger className="h-11 rounded-xl bg-slate-50/50 border-slate-100">
+                                 <SelectValue placeholder="Seleccionar proveedor..." />
+                               </SelectTrigger>
+                               <SelectContent className="rounded-xl">
+                                 {suppliers.map(s => (
+                                   <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                 ))}
+                               </SelectContent>
+                             </Select>
+                          </div>
 
-                         <div className="space-y-2">
-                            <Label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                              <Info className="w-3 h-3 text-emerald-500" />
-                              Estado del Producto
-                            </Label>
-                            <Select 
-                              value={productForm.isActive ? "true" : "false"} 
-                              onValueChange={v => onProductFormChange({ ...productForm, isActive: v === "true" })}
-                            >
-                              <SelectTrigger className={`h-11 rounded-xl font-bold transition-all ${productForm.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-700 border-red-100"}`}>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-xl">
-                                <SelectItem value="true" className="font-bold text-emerald-600">Activo (Disponible)</SelectItem>
-                                <SelectItem value="false" className="font-bold text-red-600">Inactivo (Oculto)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                         </div>
-                       </div>
+                          <div className="space-y-2">
+                             <Label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                               <Layers className="w-3 h-3 text-primary" /> Número de Lote (Auto)
+                             </Label>
+                             <Input 
+                               value={productForm.batchNumber || ""} 
+                               onChange={e => onProductFormChange({ ...productForm, batchNumber: e.target.value })} 
+                               className="h-11 rounded-xl font-bold bg-slate-50 border-slate-100"
+                               placeholder="Ej: LOTE-001"
+                               disabled={editingProduct}
+                             />
+                          </div>
 
-                       <div className="bg-emerald-500/5 p-4 rounded-3xl border border-emerald-500/10 flex gap-3 items-start">
-                          <Info className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
-                          <p className="text-[10px] leading-relaxed text-emerald-700/70 font-bold italic uppercase tracking-wider">
-                            Configura alertas automáticas para que el sistema te notifique cuando un producto esté por agotarse o vencer.
-                          </p>
-                       </div>
-                    </div>
+                          <div className="space-y-2">
+                             <Label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                               <Calendar className="w-3 h-3" /> Fecha de Vencimiento
+                             </Label>
+                             <Input 
+                               type="date" 
+                               value={productForm.expiryDate || ""} 
+                               onChange={e => onProductFormChange({ ...productForm, expiryDate: e.target.value })} 
+                               className="h-11 rounded-xl cursor-pointer bg-slate-50 border-slate-100"
+                             />
+                          </div>
+
+                          <div className="space-y-2">
+                             <Label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                               <Info className="w-3 h-3 text-primary" />
+                               Estado del Producto
+                             </Label>
+                             <Select 
+                               value={productForm.isActive ? "true" : "false"} 
+                               onValueChange={v => onProductFormChange({ ...productForm, isActive: v === "true" })}
+                             >
+                               <SelectTrigger className={`h-11 rounded-xl font-bold transition-all ${productForm.isActive ? "bg-primary/10 text-primary border-primary/20" : "bg-red-50 text-red-700 border-red-100"}`}>
+                                 <SelectValue />
+                               </SelectTrigger>
+                               <SelectContent className="rounded-xl">
+                                 <SelectItem value="true" className="font-bold text-primary">Activo (Disponible)</SelectItem>
+                                 <SelectItem value="false" className="font-bold text-red-600">Inactivo (Oculto)</SelectItem>
+                               </SelectContent>
+                             </Select>
+                          </div>
+                        </div>
+
+                        <div className="bg-primary/5 p-4 rounded-3xl border border-primary/10 flex gap-3 items-start">
+                           <Info className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                           <p className="text-[10px] leading-relaxed text-primary/70 font-bold italic uppercase tracking-wider">
+                             Al registrar stock inicial, se creará automáticamente un lote vinculado al proveedor seleccionado.
+                           </p>
+                        </div>
+                     </div>
                  </div>
               </TabsContent>
             </div>
@@ -473,7 +507,7 @@ export const ProductDialog = ({
                  <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-2xl h-12 px-6 font-bold hover:bg-slate-200 cursor-pointer">
                    Cancelar
                  </Button>
-                 <Button type="submit" className="flex-1 sm:flex-none min-w-[200px] h-12 bg-emerald-600 hover:bg-emerald-700 rounded-2xl font-black text-lg shadow-xl shadow-emerald-500/25 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer">
+                 <Button type="submit" className="flex-1 sm:flex-none min-w-[200px] h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-black text-lg shadow-xl shadow-primary/25 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer">
                    {editingProduct ? "Actualizar Producto" : "Guardar Producto"}
                  </Button>
                </div>

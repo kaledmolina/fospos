@@ -10,9 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { fadeInUp, staggerContainer } from "@/lib/animations"
 import { formatCurrency } from "@/lib/utils"
 
-interface InventoryTabProps {
-  products: any[]
-  categories: any[]
+  onSetProductDialog: (open: boolean, product?: any) => void
+  onSetCategoryDialog: (open: boolean) => void
   onSetBulkUploadDialog: (open: boolean) => void
   onSetStockAdjustmentDialog: (open: boolean) => void
   onSetSelectedProductForStock: (product: any) => void
@@ -51,7 +50,7 @@ export const InventoryTab = ({
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button className="bg-primary hover:bg-primary cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => onSetProductDialog(true)}>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => onSetProductDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />Producto
             </Button>
           </motion.div>
@@ -121,24 +120,7 @@ export const InventoryTab = ({
                         className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation()
-                          onSetEditingProduct(product)
-                          onSetProductForm({
-                            code: product.code || "",
-                            sku: product.sku || "",
-                            name: product.name,
-                            description: product.description || "",
-                            costPrice: product.costPrice,
-                            salePrice: product.salePrice,
-                            wholesalePrice: product.wholesalePrice || 0,
-                            stock: product.stock,
-                            minStock: product.minStock,
-                            unit: product.unit,
-                            categoryId: product.categoryId || "",
-                            isActive: product.isActive,
-                            expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : "",
-                            imageUrl: product.imageUrl || ""
-                          })
-                          onSetProductDialog(true)
+                          onSetProductDialog(true, product)
                         }}
                       >
                         <Pencil className="w-4 h-4" />
@@ -197,7 +179,7 @@ export const InventoryTab = ({
               <FolderOpen className="w-20 h-20 mx-auto mb-4 text-muted-foreground/30 dark:text-muted-foreground/20" />
               <p className="text-lg font-medium text-foreground mb-2">No hay productos registrados</p>
               <p className="text-sm text-muted-foreground mb-6">Comienza agregando tu primer producto al inventario</p>
-              <Button className="bg-primary hover:bg-primary cursor-pointer" onClick={() => onSetProductDialog(true)}>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer" onClick={() => onSetProductDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />Agregar primer producto
               </Button>
             </div>

@@ -101,10 +101,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { 
-      code, sku, name, description, imageUrl,
       costPrice, salePrice, wholesalePrice, stock, minStock,
-      unit, categoryId, isActive, expiryDate 
+      unit, categoryId, isActive, expiryDate,
+      supplierId, batchNumber
     } = body
 
     if (!name || salePrice === undefined) {
@@ -175,6 +174,39 @@ export async function POST(request: NextRequest) {
           category: true
         }
       })
+
+      // 2. Crear lote inicial si hay stock y proveedor
+      if (stock > 0 && supplierId) {
+        const batchName = batchNumber || `LOT-${Math.floor(100000 + Math.random() * 900000)}`
+        
+        const batch = await tx.productBatch.create({
+          data: {
+            productId: mainProduct.id,
+            branchId: targetBranchId,
+            supplierId: supplierId,
+            batchNumber: batchName,
+            initialStock: stock,
+            currentStock: stock,
+            costPrice: costPrice || 0,
+            salePrice: salePrice,
+            expiryDate: safeDate
+          }
+        })
+
+        // 3. Registrar movimiento inicial
+        await tx.inventoryMovement.create({
+          data: {
+            productId: mainProduct.id,
+            branchId: targetBranchId,
+            batchId: batch.id,
+            type: "IN",
+            quantity: stock,
+            reason: "Inventario Inicial",
+            reference: `Carga inicial de producto: ${batchName}`,
+            userId: session.user.id
+          }
+        })
+      }
 
       if (targetBranchId) {
         // En un POS con aislamiento de sucursal, solo creamos stock para la sucursal actual
