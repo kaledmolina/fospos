@@ -305,20 +305,35 @@ export async function POST(request: NextRequest) {
             where: { productId_branchId: { productId: product.id, branchId: userBranchId || "" } }
           });
           if (!productStock) throw new Error(`El producto ${product.name} no está en esta sucursal`);
-          if (productStock.stock < item.quantity) throw new Error(`Stock insuficiente para ${product.name}`);
+          
+          // Validación y deducción por LOTE
+          let currentBatch = null;
+          if (item.batchId) {
+            currentBatch = await tx.productBatch.findUnique({ where: { id: item.batchId } });
+            if (!currentBatch) throw new Error(`Lote ${item.batchId} no encontrado`);
+            if (currentBatch.quantity < item.quantity) throw new Error(`Stock insuficiente en el lote seleccionado (${currentBatch.batchNumber})`);
+          } else if (productStock.stock < item.quantity) {
+             throw new Error(`Stock insuficiente para ${product.name}`);
+          }
 
-          const itemSubtotal = product.salePrice * item.quantity - (item.discount || 0);
+          // El precio de venta viene del carrito (que ya considera el lote si se eligió)
+          const salePrice = item.unitPrice || product.salePrice;
+          const costPrice = currentBatch?.costPrice || product.costPrice || 0;
+
+          const itemSubtotal = salePrice * item.quantity - (item.discount || 0);
           subtotal += itemSubtotal;
 
           saleItems.push({
             productId: product.id,
             productName: product.name,
             productCode: product.code,
-            unitPrice: product.salePrice,
+            unitPrice: salePrice,
+            costPrice: costPrice,
             quantity: item.quantity,
             unit: product.unit,
             discount: item.discount || 0,
-            subtotal: itemSubtotal
+            subtotal: itemSubtotal,
+            batchId: item.batchId || null
           });
 
           const previousStock = productStock.stock;
@@ -326,6 +341,14 @@ export async function POST(request: NextRequest) {
 
           await tx.productStock.update({ where: { id: productStock.id }, data: { stock: newStock } });
           await tx.product.update({ where: { id: product.id }, data: { stock: { decrement: item.quantity } } });
+
+          // Deducción del lote si aplica
+          if (item.batchId) {
+            await tx.productBatch.update({
+              where: { id: item.batchId },
+              data: { quantity: { decrement: item.quantity } }
+            });
+          }
 
           // Registrar en Kardex
           await tx.inventoryMovement.create({
@@ -339,7 +362,10 @@ export async function POST(request: NextRequest) {
               newStock,
               referenceType: "SALE",
               referenceId: invoiceNumber, // Usamos el número de factura como referencia
-              notes: `Venta POS #${invoiceNumber}`,
+              batchId: item.batchId || null,
+              unitCost: currentBatch?.costPrice || product.costPrice || 0,
+              totalCost: (currentBatch?.costPrice || product.costPrice || 0) * item.quantity,
+              notes: `Venta POS #${invoiceNumber}${item.batchId ? ` (Lote: ${currentBatch?.batchNumber})` : ''}`,
               createdBy: session.user.id
             }
           });

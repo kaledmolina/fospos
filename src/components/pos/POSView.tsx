@@ -43,6 +43,7 @@ import {
   SubscriptionFreezeDialog
 } from "./dialogs/SubscriptionDialogs"
 import { ProfileDialog } from "./dialogs/ProfileDialog"
+import { BatchSelectionDialog } from "./dialogs/BatchSelectionDialog"
 import { AnimatePresence } from "framer-motion"
 
 interface POSViewProps {
@@ -553,6 +554,13 @@ export const POSView = ({
           address: pos.branches.find(b => b.id === session?.user?.branchId)?.address || "Sede Principal",
           phone: pos.branches.find(b => b.id === session?.user?.branchId)?.phone || "Consulte en caja",
         }}
+      />
+      <BatchSelectionDialog 
+        open={pos.batchDialogOpen}
+        onOpenChange={pos.setBatchDialogOpen}
+        product={pos.activeProductForBatch}
+        batches={pos.availableBatches}
+        onSelect={(batch) => pos.addToCart(pos.activeProductForBatch!, batch)}
       />
     </>
   )

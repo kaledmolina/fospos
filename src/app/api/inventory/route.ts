@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
     const { 
       productId, branchId, type, quantity, 
       referenceType, referenceId, supplierId,
-      unitCost, notes, reason 
+      unitCost, notes, reason,
+      batchNumber, expiryDate, salePrice
     } = body
 
     // Seguridad: Solo el administrador puede hacer ajustes manuales
@@ -87,6 +88,28 @@ export async function POST(request: NextRequest) {
         )
     }
 
+    // GESTIÓN DE LOTES (Solo para Entradas/Compras)
+    let batchId = null
+    if (type === "IN" || type === "PURCHASE") {
+      // Intentar encontrar un lote existente por número o proveedor si no se provee número
+      // o simplemente crear uno nuevo para esta entrada específica si así se prefiere.
+      // Por consistencia con la petición del usuario (selección manual), cada entrada importante puede ser un lote.
+      
+      const batch = await db.productBatch.create({
+        data: {
+          productId,
+          branchId,
+          supplierId,
+          batchNumber: batchNumber || `LOT-${new Date().getTime().toString().slice(-6)}`,
+          quantity: quantity,
+          costPrice: unitCost || 0,
+          salePrice: salePrice || 0, // El usuario puede definir el precio de venta específico para este lote
+          expiryDate: expiryDate ? new Date(expiryDate) : null,
+        }
+      })
+      batchId = batch.id
+    }
+
     // Crear el movimiento
     const movement = await db.inventoryMovement.create({
       data: {
@@ -100,6 +123,7 @@ export async function POST(request: NextRequest) {
         referenceType,
         referenceId,
         supplierId,
+        batchId, // Vinculamos el movimiento al lote
         unitCost,
         totalCost: unitCost ? unitCost * quantity : 0,
         notes,

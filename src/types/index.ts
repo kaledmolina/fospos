@@ -37,10 +37,25 @@ export interface ProductData {
   costPrice: number
   salePrice: number
   stock: number
-  minStock: number
   unit: string
   isActive: boolean
   category: { id: string; name: string; color: string | null } | null
+  batches?: ProductBatchData[]
+}
+
+export interface ProductBatchData {
+  id: string
+  productId: string
+  branchId: string
+  supplierId: string | null
+  supplier?: { id: string; name: string } | null
+  batchNumber: string | null
+  quantity: number
+  costPrice: number
+  salePrice: number
+  expiryDate: string | null
+  isActive: boolean
+  createdAt: string
 }
 
 // Category Types
@@ -131,11 +146,9 @@ export interface CashRegisterData {
 // Notifications
 export interface NotificationData {
   id: string
-  type: "LOW_STOCK" | "CREDIT_OVERDUE" | "CREDIT_DUE" | "CREDIT_DUE_SOON" | "OVERDUE_CREDIT" | "DUE_SOON_CREDIT"
   title: string
   message: string
   data?: Record<string, unknown>
-  createdAt: string
   createdAt: string
   isRead: boolean
 }

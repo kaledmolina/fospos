@@ -13,6 +13,9 @@ import { formatCurrency, getDaysOverdue } from "@/lib/utils"
 export const usePOS = (session: any) => {
   // POS state
   const [posTab, setPosTab] = useState("dashboard")
+  const [batchDialogOpen, setBatchDialogOpen] = useState(false)
+  const [activeProductForBatch, setActiveProductForBatch] = useState<ProductData | null>(null)
+  const [availableBatches, setAvailableBatches] = useState<ProductBatchData[]>([])
   const [products, setProducts] = useState<ProductData[]>([])
   const [categories, setCategories] = useState<CategoryData[]>([])
   const [customers, setCustomers] = useState<CustomerData[]>([])
@@ -448,6 +451,18 @@ export const usePOS = (session: any) => {
     }
   }, [session])
 
+  const fetchProductBatches = async (productId: string) => {
+    if (!selectedBranch) return []
+    try {
+      const res = await fetch(`/api/products/${productId}/batches?branchId=${selectedBranch}`)
+      const data = await res.json()
+      return data.success ? data.data : []
+    } catch (error) {
+      console.error("Error fetching batches:", error)
+      return []
+    }
+  }
+
   const fetchCredits = useCallback(async () => {
     try {
       const query = selectedBranch ? `?branchId=${selectedBranch}` : ""
@@ -797,28 +812,48 @@ export const usePOS = (session: any) => {
     } catch { toast.error("Error al crear cliente") }
   }
 
-  const addToCart = (product: ProductData) => {
-    // Check if stock is 0
+  const addToCart = async (product: ProductData, selectedBatch?: ProductBatchData) => {
+    // Check if stock is 0 (global or branch)
     if (product.stock <= 0) {
       toast.error(`Producto sin stock: ${product.name}`)
       return
     }
 
-    const existing = cart.find(item => item.id === product.id)
-    if (existing) {
-      if (existing.quantity + 1 > product.stock) {
-        toast.error(`No hay suficiente stock para ${product.name}`)
+    // SI TIENE LOTES Y NO SE HA SELECCIONADO UNO, BUSCARLOS
+    if (!selectedBatch) {
+      const batches = await fetchProductBatches(product.id)
+      if (batches.length > 0) {
+        setActiveProductForBatch(product)
+        setAvailableBatches(batches)
+        setBatchDialogOpen(true)
         return
       }
-      setCart(cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item))
+    }
+
+    // Si llegamos aquí, o no hay lotes, o ya se seleccionó uno
+    const cartItemId = selectedBatch ? `${product.id}-${selectedBatch.id}` : product.id
+    const existing = cart.find(item => item.id === cartItemId)
+    
+    // El precio debe ser el del lote si se seleccionó, de lo contrario el del producto
+    const priceToUse = selectedBatch ? selectedBatch.salePrice : product.salePrice
+    const stockToConsider = selectedBatch ? selectedBatch.quantity : product.stock
+
+    if (existing) {
+      if (existing.quantity + 1 > stockToConsider) {
+        toast.error(`No hay suficiente stock ${selectedBatch ? 'en este lote' : ''} para ${product.name}`)
+        return
+      }
+      setCart(cart.map(item => item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item))
     } else {
       setCart([...cart, { 
-        id: product.id, 
-        name: product.name, 
-        price: product.salePrice, 
+        id: cartItemId, 
+        name: selectedBatch ? `${product.name} (${selectedBatch.batchNumber || 'Lote'})` : product.name, 
+        price: priceToUse, 
         quantity: 1, 
         type: "PRODUCT", 
-        data: product 
+        data: product,
+        batchId: selectedBatch?.id || null,
+        batchNumber: selectedBatch?.batchNumber || null
       }])
     }
   }

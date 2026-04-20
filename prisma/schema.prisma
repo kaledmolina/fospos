@@ -98,6 +98,7 @@ model Branch {
   credits       Credit[]
   expenses      Expense[]
   purchaseOrders PurchaseOrder[]
+  batches       ProductBatch[]
   
   products      Product[]
   categories    Category[]
@@ -177,6 +178,7 @@ model Supplier {
   
   inventoryMovements InventoryMovement[]
   purchaseOrders     PurchaseOrder[]
+  batches            ProductBatch[]
   
   @@unique([tenantId, name])
   @@map("suppliers")
@@ -253,10 +255,38 @@ model Product {
   stockByBranch ProductStock[]
   movements     InventoryMovement[]
   purchaseOrderItems PurchaseOrderItem[]
+  batches       ProductBatch[]
   
   @@unique([tenantId, code]) // Código de barras único por tenant
   @@unique([tenantId, sku])  // SKU único por tenant
   @@map("products")
+}
+
+/// Lote específico de un producto (manejo de múltiples costos/proveedores)
+model ProductBatch {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId      String
+  branch        Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  supplierId    String?
+  supplier      Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  
+  batchNumber   String?  // Ej: LOT-2024-001
+  quantity      Float    @default(0) // Stock actual en este lote
+  costPrice     Float    @default(0)
+  salePrice     Float    @default(0)
+  expiryDate    DateTime?
+  
+  isActive      Boolean  @default(true)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  saleItems     SaleItem[]
+  movements     InventoryMovement[]
+
+  @@map("product_batches")
 }
 
 /// Stock por sucursal
@@ -298,6 +328,10 @@ model InventoryMovement {
   // Proveedor (si es compra)
   supplierId    String?
   supplier      Supplier?  @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  
+  // Lote relacionado
+  batchId       String?
+  batch         ProductBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
   
   // Costo del movimiento
   unitCost      Float?     @default(0)
@@ -429,6 +463,10 @@ model SaleItem {
   discount      Float    @default(0)
   subtotal      Float    // unitPrice * quantity - discount
   
+  // Lote relacionado
+  batchId       String?
+  batch         ProductBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  
   @@map("sale_items")
 }
 
@@ -499,6 +537,11 @@ model PurchaseOrderItem {
   quantity        Float    // Cantidad comprada
   unitCost        Float    // Costo unitario acordado
   subtotal        Float    // quantity * unitCost
+  
+  // Datos para creación de lote automática al recibir
+  batchNumber     String?
+  expiryDate      DateTime?
+  salePrice       Float?   // Precio de venta sugerido para este lote
 
   @@map("purchase_order_items")
 }
