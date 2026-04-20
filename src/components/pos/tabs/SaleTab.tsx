@@ -117,6 +117,7 @@ export const SaleTab = ({
   businessSettings,
   currentBranch
 }: SaleTabProps) => {
+  const [showDiscounts, setShowDiscounts] = useState(false)
   const isAdmin = userRole === "TENANT_ADMIN"
   const giftCardInputRef = useRef<HTMLInputElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -564,74 +565,104 @@ export const SaleTab = ({
                 )}
               </div>
 
-              {/* Descuentos y Beneficios - Consolidado en Tabs para ahorrar espacio */}
+              {/* Descuentos y Beneficios - Colapsable para simplificar el carrito */}
               {((loyaltyConfig?.isActive && cartCustomer) || true) && (
-                <div className="mb-4">
-                  {isAdmin ? (
-                    <Tabs defaultValue="loyalty" className="w-full">
-                      <TabsList className="grid grid-cols-2 h-8 p-0.5 bg-muted/50">
-                        <TabsTrigger value="loyalty" className="text-[10px] uppercase font-bold gap-1.5 h-7">
-                          <Star className="w-3 h-3 text-amber-500" /> Puntos
-                        </TabsTrigger>
-                        <TabsTrigger value="coupon" className="text-[10px] uppercase font-bold gap-1.5 h-7">
-                          <Ticket className="w-3 h-3 text-blue-500" /> Cupón
-                        </TabsTrigger>
-                      </TabsList>
-                      
-                      <TabsContent value="loyalty" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
-                            <span className="text-[10px] font-bold uppercase text-muted-foreground">Disponibles: <span className="text-amber-600 dark:text-amber-500">{cartCustomer?.points || 0} pts</span></span>
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={`h-7 px-2 text-[10px] font-black uppercase tracking-widest transition-all duration-300 gap-2 ${showDiscounts ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-primary"}`}
+                      onClick={() => setShowDiscounts(!showDiscounts)}
+                    >
+                      <Plus className={`w-3 h-3 transition-transform duration-300 ${showDiscounts ? "rotate-45" : ""}`} />
+                      {appliedCoupon || redeemPoints > 0 ? "Beneficios Aplicados" : "Aplicar Cupón / Puntos"}
+                    </Button>
+                    
+                    {(appliedCoupon || redeemPoints > 0) && (
+                      <Badge variant="outline" className="h-5 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[9px] font-black uppercase px-2 animate-pulse">
+                        Activo
+                      </Badge>
+                    )}
+                  </div>
+
+                  <AnimatePresence>
+                    {(showDiscounts || appliedCoupon || redeemPoints > 0) && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+                        className="overflow-hidden"
+                      >
+                        {isAdmin ? (
+                          <Tabs defaultValue="loyalty" className="w-full">
+                            <TabsList className="grid grid-cols-2 h-8 p-0.5 bg-muted/50">
+                              <TabsTrigger value="loyalty" className="text-[10px] uppercase font-bold gap-1.5 h-7">
+                                <Star className="w-3 h-3 text-amber-500" /> Puntos
+                              </TabsTrigger>
+                              <TabsTrigger value="coupon" className="text-[10px] uppercase font-bold gap-1.5 h-7">
+                                <Ticket className="w-3 h-3 text-blue-500" /> Cupón
+                              </TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="loyalty" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
+                                  <span className="text-[10px] font-bold uppercase text-muted-foreground">Disponibles: <span className="text-amber-600 dark:text-amber-500">{cartCustomer?.points || 0} pts</span></span>
+                                </div>
+                                {loyaltyConfig?.isActive && (cartCustomer?.points >= loyaltyConfig.minPointsToRedeem) && (
+                                  <Button size="sm" variant="ghost" className="h-5 text-[9px] text-primary hover:bg-primary/10 px-1 font-black" onClick={() => onSetRedeemPoints(cartCustomer?.points || 0)}>
+                                    USAR TODOS
+                                  </Button>
+                                )}
+                              </div>
+                              <div className="flex gap-2 items-center">
+                                <Input 
+                                  type="number" 
+                                  placeholder="Pts..." 
+                                  className="h-7 text-xs bg-background/50 border-amber-500/20 focus-visible:ring-amber-500/30"
+                                  value={redeemPoints || ""}
+                                  max={cartCustomer?.points || 0}
+                                  onChange={(e) => onSetRedeemPoints(Math.min(parseInt(e.target.value) || 0, cartCustomer?.points || 0))}
+                                />
+                                <div className="shrink-0 px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[10px] font-black border border-amber-500/20">
+                                  -{formatCurrency(loyaltyDiscount)}
+                                </div>
+                              </div>
+                            </TabsContent>
+                            
+                            <TabsContent value="coupon" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
+                              <div className="flex gap-1.5">
+                                <Input 
+                                  placeholder="CÓDIGO DE CUPÓN..." 
+                                  className="h-8 text-xs uppercase bg-background/50 border-blue-500/20 focus-visible:ring-blue-500/30"
+                                  value={couponCode}
+                                  onChange={(e) => onSetCouponCode(e.target.value)}
+                                />
+                                <Button size="sm" variant="outline" className="h-8 px-2 text-[10px] font-bold border-blue-500/30 text-blue-600 hover:bg-blue-50" onClick={onValidateCoupon}>
+                                  {appliedCoupon ? <CheckCircle2 className="w-3 h-3 text-primary" /> : "APLICAR"}
+                                </Button>
+                              </div>
+                              {appliedCoupon && (
+                                <p className="text-[9px] text-primary dark:text-primary font-bold px-1 flex items-center gap-1">
+                                  <CheckCircle2 className="w-2.5 h-2.5" /> {appliedCoupon.description || appliedCoupon.code} (-{formatCurrency(couponDiscount)})
+                                </p>
+                              )}
+                            </TabsContent>
+                          </Tabs>
+                        ) : (
+                          <div className="p-3 bg-slate-100/50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-border flex items-center gap-3 opacity-60">
+                             <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                                <Ticket className="w-4 h-4 text-slate-400" />
+                             </div>
+                             <p className="text-[10px] font-medium text-muted-foreground uppercase leading-tight">Descuentos y cupones desactivados.<br/><span className="font-black text-[9px] text-slate-400">REQUIERE AUTORIZACIÓN ADMIN</span></p>
                           </div>
-                          {loyaltyConfig?.isActive && (cartCustomer?.points >= loyaltyConfig.minPointsToRedeem) && (
-                            <Button size="sm" variant="ghost" className="h-5 text-[9px] text-primary hover:bg-primary/10 px-1 font-black" onClick={() => onSetRedeemPoints(cartCustomer?.points || 0)}>
-                              USAR TODOS
-                            </Button>
-                          )}
-                        </div>
-                        <div className="flex gap-2 items-center">
-                          <Input 
-                            type="number" 
-                            placeholder="Pts..." 
-                            className="h-7 text-xs bg-background/50 border-amber-500/20 focus-visible:ring-amber-500/30"
-                            value={redeemPoints || ""}
-                            max={cartCustomer?.points || 0}
-                            onChange={(e) => onSetRedeemPoints(Math.min(parseInt(e.target.value) || 0, cartCustomer?.points || 0))}
-                          />
-                          <div className="shrink-0 px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded text-[10px] font-black border border-amber-500/20">
-                            -{formatCurrency(loyaltyDiscount)}
-                          </div>
-                        </div>
-                      </TabsContent>
-                      
-                      <TabsContent value="coupon" className="mt-2 space-y-2 p-2 bg-muted/20 rounded-lg border border-dashed border-border/60">
-                        <div className="flex gap-1.5">
-                          <Input 
-                            placeholder="CÓDIGO DE CUPÓN..." 
-                            className="h-8 text-xs uppercase bg-background/50 border-blue-500/20 focus-visible:ring-blue-500/30"
-                            value={couponCode}
-                            onChange={(e) => onSetCouponCode(e.target.value)}
-                          />
-                          <Button size="sm" variant="outline" className="h-8 px-2 text-[10px] font-bold border-blue-500/30 text-blue-600 hover:bg-blue-50" onClick={onValidateCoupon}>
-                            {appliedCoupon ? <CheckCircle2 className="w-3 h-3 text-primary" /> : "APLICAR"}
-                          </Button>
-                        </div>
-                        {appliedCoupon && (
-                          <p className="text-[9px] text-primary dark:text-primary font-bold px-1 flex items-center gap-1">
-                            <CheckCircle2 className="w-2.5 h-2.5" /> {appliedCoupon.description || appliedCoupon.code} (-{formatCurrency(couponDiscount)})
-                          </p>
                         )}
-                      </TabsContent>
-                    </Tabs>
-                  ) : (
-                    <div className="p-3 bg-slate-100/50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-border flex items-center gap-3 opacity-60">
-                       <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-                          <Ticket className="w-4 h-4 text-slate-400" />
-                       </div>
-                       <p className="text-[10px] font-medium text-muted-foreground uppercase leading-tight">Descuentos y cupones desactivados.<br/><span className="font-black text-[9px] text-slate-400">REQUIERE AUTORIZACIÓN ADMIN</span></p>
-                    </div>
-                  )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
               
