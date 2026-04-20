@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect, useRef, useLayoutEffect } from "react"
 import { toast } from "sonner"
 import { 
   ProductData, CategoryData, CustomerData, CreditWithDetails, 
@@ -564,8 +564,8 @@ export const usePOS = (session: any) => {
     }
   }, [cart.length, cartDiscount, redeemPoints, appliedCoupon, cartPaymentMethod])
 
-  // Aplicar tema de la sede dinámicamente
-  useEffect(() => {
+  // Aplicar tema de la sede dinámicamente (usando useLayoutEffect para evitar parpadeos)
+  useLayoutEffect(() => {
     if (!selectedBranch || branches.length === 0) return
     const branch = branches.find((b: any) => b.id === selectedBranch)
     const baseColor = branch?.themeColor || '#10b981'

@@ -15,9 +15,9 @@ import { POSView } from "@/components/pos/POSView"
 
 export default function Home() {
   const { data: session, status } = useSession()
-  const [showLanding, setShowLanding] = useState(true)
+  const [showLanding, setShowLanding] = useState(false) // Default to false to avoid flash
   const [authTab, setAuthTab] = useState<"login" | "register" | "staff">("login")
-  const [view, setView] = useState<"auth" | "pos" | "superadmin" | "setup">("auth")
+  const [view, setView] = useState<"auth" | "pos" | "superadmin" | "setup" | null>(null) // Initialize as null
   const [needsSetup, setNeedsSetup] = useState(false)
   const [loadingSetup, setLoadingSetup] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -79,6 +79,7 @@ export default function Home() {
       }
     } else if (status === "unauthenticated") {
       setView("auth")
+      setShowLanding(true) // Only show landing if definitively unauthenticated
     }
   }, [status, session, needsSetup, loadingSetup])
 
@@ -175,14 +176,14 @@ export default function Home() {
 
 
 
-  // LOADING STATE
-  if (status === "loading") {
+  // LOADING STATE (Auth loading, Setup checking, or view not determined)
+  if (status === "loading" || loadingSetup || (status === "authenticated" && !view)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <motion.div 
           animate={{ rotate: 360 }} 
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full"
+          className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.2)]"
         />
       </div>
     )
