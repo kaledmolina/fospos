@@ -362,6 +362,14 @@ export const POSView = ({
         editingProduct={pos.editingProduct}
         userRole={pos.session?.user?.role}
         suppliers={pos.suppliers}
+        onOpenCategoryDialog={() => {
+          pos.handleOpenProductDialog(false)
+          pos.setCategoryDialog(true)
+        }}
+        onOpenSupplierDialog={() => {
+          pos.handleOpenProductDialog(false)
+          pos.setSupplierDialog(true)
+        }}
       />
       <CategoryDialog
         open={pos.categoryDialog}

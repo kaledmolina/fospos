@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
 
         const user = await db.user.findUnique({
           where: { email: credentials.email },
-          include: { tenant: true, branch: true }
+          include: { tenant: true, branches: true }
         })
 
         if (!user) {
@@ -103,8 +103,8 @@ export const authOptions: NextAuthOptions = {
           tenantId: user.tenantId,
           tenantName: user.tenant?.businessName,
           tenantStatus: user.tenant?.status,
-          branchId: user.branchId,
-          branchName: user.branch?.name,
+          branchId: user.branches?.[0]?.id || null,
+          branchName: user.branches?.[0]?.name || null,
           theme: user.theme || "light"
         }
       }

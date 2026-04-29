@@ -164,8 +164,8 @@ export async function POST(request: NextRequest) {
           password: hashedPassword,
           name: ownerName,
           role: "TENANT_ADMIN",
-          tenantId: tenant.id,
-          branchId: branch.id
+          tenant: { connect: { id: tenant.id } },
+          branches: { connect: [{ id: branch.id }] }
         }
       })
 

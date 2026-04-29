@@ -637,6 +637,15 @@ export const usePOS = (session: any) => {
   // Handlers
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!productForm.name?.trim()) {
+      return toast.error("El nombre del producto es obligatorio")
+    }
+    
+    if (!productForm.salePrice || parseFloat(String(productForm.salePrice)) <= 0) {
+      return toast.error("El precio de venta debe ser mayor a 0")
+    }
+
     try {
       // Saneamiento de datos antes de enviar
       const payload = {
@@ -679,6 +688,15 @@ export const usePOS = (session: any) => {
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingProduct) return
+    
+    if (!productForm.name?.trim()) {
+      return toast.error("El nombre del producto es obligatorio")
+    }
+    
+    if (!productForm.salePrice || parseFloat(String(productForm.salePrice)) <= 0) {
+      return toast.error("El precio de venta debe ser mayor a 0")
+    }
+
     try {
       const payload = {
         ...productForm,
@@ -823,11 +841,14 @@ export const usePOS = (session: any) => {
     // SI TIENE LOTES Y NO SE HA SELECCIONADO UNO, BUSCARLOS
     if (!selectedBatch) {
       const batches = await fetchProductBatches(product.id)
-      if (batches.length > 0) {
+      if (batches.length > 1) {
         setActiveProductForBatch(product)
         setAvailableBatches(batches)
         setBatchDialogOpen(true)
         return
+      } else if (batches.length === 1) {
+        // Si solo hay un lote, seleccionarlo automáticamente
+        selectedBatch = batches[0]
       }
     }
 

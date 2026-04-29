@@ -27,6 +27,8 @@ interface ProductDialogProps {
   editingProduct?: any
   userRole?: string
   suppliers: any[]
+  onOpenCategoryDialog?: () => void
+  onOpenSupplierDialog?: () => void
 }
 
 export const ProductDialog = ({
@@ -38,7 +40,9 @@ export const ProductDialog = ({
   onSubmit,
   editingProduct,
   userRole,
-  suppliers
+  suppliers,
+  onOpenCategoryDialog,
+  onOpenSupplierDialog
 }: ProductDialogProps) => {
   const [uploading, setUploading] = useState(false)
   const [activeTab, setActiveTab] = useState("basic")
@@ -112,7 +116,45 @@ export const ProductDialog = ({
           </DialogDescription>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col min-h-0">
+        {(!categories || categories.length === 0) && (
+          <div className="mx-8 mt-6 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 rounded-xl flex items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-bold text-amber-800 dark:text-amber-500">Atención: No has creado ninguna categoría</h4>
+                <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1">
+                  Para poder registrar un producto, es obligatorio asignarle una categoría.
+                </p>
+              </div>
+            </div>
+            {onOpenCategoryDialog && (
+              <Button size="sm" type="button" onClick={onOpenCategoryDialog} className="bg-amber-500 hover:bg-amber-600 text-white shrink-0 shadow-md">
+                Crear Categoría
+              </Button>
+            )}
+          </div>
+        )}
+        
+        {(!suppliers || suppliers.length === 0) && (
+          <div className="mx-8 mt-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-4 rounded-xl flex items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-bold text-blue-800 dark:text-blue-500">Sugerencia: Sin proveedores registrados</h4>
+                <p className="text-xs text-blue-700/80 dark:text-blue-400/80 mt-1">
+                  Te recomendamos registrar tus proveedores para llevar una mejor trazabilidad del inventario.
+                </p>
+              </div>
+            </div>
+            {onOpenSupplierDialog && (
+              <Button size="sm" type="button" onClick={onOpenSupplierDialog} className="bg-blue-500 hover:bg-blue-600 text-white shrink-0 shadow-md">
+                Crear Proveedor
+              </Button>
+            )}
+          </div>
+        )}
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full flex-1 flex flex-col min-h-0 ${(!categories || categories.length === 0) ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="px-8 border-b border-slate-100 dark:border-zinc-800/50 flex items-center justify-between bg-slate-50/50 dark:bg-zinc-900/30">
             <TabsList className="bg-slate-200/50 dark:bg-zinc-800/50 h-12 p-1 gap-1 rounded-2xl my-3">
               <TabsTrigger 
@@ -413,7 +455,7 @@ export const ProductDialog = ({
                             value={productForm.batchNumber || ""} 
                             onChange={e => onProductFormChange({ ...productForm, batchNumber: e.target.value })} 
                             placeholder="LOT-70" 
-                            className="h-11 font-bold bg-white dark:bg-zinc-950 rounded-full border-slate-200 dark:border-zinc-800 px-4 hover:border-slate-300 focus:border-indigo-500 shadow-sm transition-all text-center uppercase"
+                            className="h-11 text-xs font-bold bg-white dark:bg-zinc-950 rounded-full border-slate-200 dark:border-zinc-800 px-3 hover:border-slate-300 focus:border-indigo-500 shadow-sm transition-all text-center uppercase"
                           />
                         </div>
                         <div className="space-y-2 group">
@@ -424,7 +466,7 @@ export const ProductDialog = ({
                             type="date" 
                             value={productForm.expiryDate || ""} 
                             onChange={e => onProductFormChange({ ...productForm, expiryDate: e.target.value })} 
-                            className="h-11 font-bold bg-white dark:bg-zinc-950 rounded-full border-slate-200 dark:border-zinc-800 px-4 hover:border-slate-300 focus:border-indigo-500 shadow-sm transition-all text-center cursor-pointer text-sm"
+                            className="h-11 text-xs font-bold bg-white dark:bg-zinc-950 rounded-full border-slate-200 dark:border-zinc-800 px-3 hover:border-slate-300 focus:border-indigo-500 shadow-sm transition-all cursor-pointer w-full"
                           />
                         </div>
                       </div>
@@ -456,7 +498,8 @@ export const ProductDialog = ({
                 </Button>
                 <Button 
                   type="submit" 
-                  className="flex-1 sm:flex-none min-w-[160px] h-11 bg-primary hover:bg-primary/90 rounded-xl font-bold text-sm uppercase shadow-lg shadow-primary/20 transition-all active:scale-[0.98] hover:-translate-y-0.5"
+                  disabled={!categories || categories.length === 0}
+                  className="flex-1 sm:flex-none min-w-[160px] h-11 bg-primary hover:bg-primary/90 rounded-xl font-bold text-sm uppercase shadow-lg shadow-primary/20 transition-all active:scale-[0.98] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editingProduct ? "Actualizar Producto" : "Guardar Producto"}
                 </Button>

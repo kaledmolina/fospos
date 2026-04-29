@@ -59,8 +59,8 @@ export async function GET(request: NextRequest) {
 
       if (branchId) {
         const branchStock = p.stockByBranch.find(s => s.branchId === branchId)
-        currentStock = branchStock?.stock || 0
-        currentMinStock = branchStock?.minStock || p.minStock
+        currentStock = branchStock ? branchStock.stock : p.stock
+        currentMinStock = branchStock ? branchStock.minStock : p.minStock
       }
 
       return {
@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log("DEBUG: Creating product with body:", JSON.stringify(body, null, 2))
     const { 
       code, sku, name, description, imageUrl,
       costPrice, salePrice, wholesalePrice, stock, minStock,
@@ -177,18 +178,17 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // 2. Crear lote inicial si hay stock y proveedor
-      if (stock > 0 && supplierId) {
+      // 2. Crear lote inicial si hay stock
+      if (stock > 0) {
         const batchName = batchNumber || `LOT-${Math.floor(100000 + Math.random() * 900000)}`
         
         const batch = await tx.productBatch.create({
           data: {
             productId: mainProduct.id,
             branchId: targetBranchId,
-            supplierId: supplierId,
+            supplierId: supplierId || null,
             batchNumber: batchName,
-            initialStock: stock,
-            currentStock: stock,
+            quantity: stock,
             costPrice: costPrice || 0,
             salePrice: salePrice,
             expiryDate: safeDate
@@ -198,14 +198,18 @@ export async function POST(request: NextRequest) {
         // 3. Registrar movimiento inicial
         await tx.inventoryMovement.create({
           data: {
+            tenantId: session.user.tenantId,
             productId: mainProduct.id,
             branchId: targetBranchId,
             batchId: batch.id,
             type: "IN",
             quantity: stock,
+            previousStock: 0,
+            newStock: stock,
             reason: "Inventario Inicial",
-            reference: `Carga inicial de producto: ${batchName}`,
-            userId: session.user.id
+            referenceType: "adjustment",
+            referenceId: batchName,
+            createdBy: session.user.id
           }
         })
       }
@@ -233,8 +237,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Error creating product details:", {
       message: error.message,
-      stack: error.stack,
-      body: await request.clone().json().catch(() => ({}))
+      stack: error.stack
     })
     return NextResponse.json(
       { success: false, error: "Error al crear producto: " + (error.message || "Error interno") },
