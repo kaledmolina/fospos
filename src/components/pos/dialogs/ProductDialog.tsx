@@ -125,7 +125,13 @@ export const ProductDialog = ({
                 value="advanced" 
                 className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-primary data-[state=active]:shadow-sm relative font-bold text-xs px-6 h-full rounded-xl transition-all duration-300"
               >
-                2. Precios e Inventario
+                2. Precios
+              </TabsTrigger>
+              <TabsTrigger 
+                value="inventory" 
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-primary data-[state=active]:shadow-sm relative font-bold text-xs px-6 h-full rounded-xl transition-all duration-300"
+              >
+                3. Existencias
               </TabsTrigger>
             </TabsList>
             
@@ -322,9 +328,12 @@ export const ProductDialog = ({
                     </div>
                   </div>
                 </div>
+              </TabsContent>
 
+              {/* Tab 3: Inventory and Logistics */}
+              <TabsContent value="inventory" className="mt-0 space-y-8">
                 {/* Logistics Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 px-1">
                       <Layers className="w-4 h-4 text-blue-500" />
