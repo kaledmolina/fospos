@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Store, X, LogOut, Menu, Bell, Package, AlertCircle, 
   Clock, BarChart3, ShoppingBag, Users, CreditCard, 
-  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe, Ticket, Truck, ShieldCheck, Maximize2, Minimize2
+  Receipt, Wallet, RefreshCw, Building2, Home, Plus, Star, FolderOpen, Globe, Ticket, Truck, ShieldCheck, Maximize2, Minimize2, ChevronDown
 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { BranchSelector } from "./shared/BranchSelector"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -66,6 +66,65 @@ export const POSDashboard = ({
 }: POSDashboardProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [canShowTooltip, setCanShowTooltip] = useState(false)
+  const [openGroups, setOpenGroups] = useState<string[]>(["Operaciones"])
+
+  const toggleGroup = (groupTitle: string) => {
+    if (openGroups.includes(groupTitle)) {
+      setOpenGroups(openGroups.filter(g => g !== groupTitle))
+    } else {
+      setOpenGroups([...openGroups, groupTitle])
+    }
+  }
+
+  const menuGroups = useMemo(() => [
+    {
+      title: "Operaciones",
+      icon: ShoppingBag,
+      items: [
+        { id: "dashboard", icon: BarChart3, label: "Dashboard" },
+        { id: "sale", icon: ShoppingBag, label: "Venta" },
+        { id: "transactions", icon: Receipt, label: "Historial" },
+        { id: "cash", icon: Wallet, label: "Caja" },
+      ]
+    },
+    {
+      title: "Inventario",
+      icon: Package,
+      items: [
+        { id: "products", icon: Package, label: "Productos" },
+        { id: "categories", icon: FolderOpen, label: "Categorías" },
+        { id: "advanced-inventory", icon: Truck, label: "Inventario Pro" },
+        { id: "suppliers", icon: Users, label: "Proveedores" },
+      ]
+    },
+    {
+      title: "Clientes",
+      icon: Users,
+      items: [
+        { id: "customers", icon: Users, label: "Clientes" },
+        { id: "credits", icon: CreditCard, label: "Fiados" },
+        ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "loyalty", icon: Star, label: "Fidelización" }] : []),
+        { id: "giftcards", icon: Ticket, label: "Gift Cards" },
+      ]
+    },
+    {
+      title: "Servicios y Gastos",
+      icon: RefreshCw,
+      items: [
+        { id: "subscriptions", icon: RefreshCw, label: "Suscripciones" },
+        { id: "expenses", icon: Receipt, label: "Gastos" },
+      ]
+    },
+    {
+      title: "Configuración",
+      icon: ShieldCheck,
+      items: [
+        ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "branches", icon: Building2, label: "Sucursales" }] : []),
+        ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "users", icon: Users, label: "Usuarios" }] : []),
+        ...(session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN" ? [{ id: "logs", icon: ShieldCheck, label: "Auditoría" }] : [])
+      ]
+    }
+  ].filter(group => group.items.length > 0), [session])
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -161,67 +220,86 @@ export const POSDashboard = ({
           </Button>
         </div>
         
-        <ScrollArea className="flex-1 px-2.5 py-4 min-h-0">
+        <ScrollArea className="flex-1 px-2 py-4 min-h-0">
           <TooltipProvider delayDuration={0}>
-            <nav className="space-y-2">
-              {[
-                { id: "dashboard", icon: BarChart3, label: "Dashboard" },
-                { id: "sale", icon: ShoppingBag, label: "Nueva Venta" },
-                { id: "transactions", icon: Receipt, label: "Historial" },
-                { id: "categories", icon: FolderOpen, label: "Categorías" },
-                { id: "products", icon: Package, label: "Productos" },
-                { id: "advanced-inventory", icon: Truck, label: "Inventario Pro" },
-                { id: "customers", icon: Users, label: "Clientes" },
-                { id: "suppliers", icon: Users, label: "Proveedores" },
-                { id: "credits", icon: CreditCard, label: "Fiados" },
-                { id: "expenses", icon: Receipt, label: "Gastos" },
-                { id: "cash", icon: Wallet, label: "Caja" },
-                { id: "subscriptions", icon: RefreshCw, label: "Suscripciones" },
-                { id: "giftcards", icon: Ticket, label: "Gift Cards" },
-                ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "loyalty", icon: Star, label: "Fidelización" }] : []),
-                ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "branches", icon: Building2, label: "Sucursales" }] : []),
-                ...(session?.user?.role === "TENANT_ADMIN" ? [{ id: "users", icon: Users, label: "Usuarios" }] : []),
-                ...(session?.user?.role === "TENANT_ADMIN" || session?.user?.role === "SUPER_ADMIN" ? [{ id: "logs", icon: ShieldCheck, label: "Auditoría" }] : [])
-              ].map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.02 }}
-                >
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={posTab === item.id ? "default" : "ghost"}
-                        className={`w-full ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} cursor-pointer h-10 transition-all duration-200 relative group rounded-xl
-                          ${posTab === item.id 
-                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
-                            : "hover:bg-primary/10 text-muted-foreground hover:text-primary"}`}
-                        onClick={() => onTabChangeWithEffects(item.id)}
+            <nav className="space-y-4">
+              {menuGroups.map((group, groupIdx) => (
+                <div key={group.title} className="space-y-1">
+                  {sidebarOpen ? (
+                    <button
+                      onClick={() => toggleGroup(group.title)}
+                      className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60 hover:text-primary transition-colors group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <group.icon className="w-3.5 h-3.5" />
+                        <span>{group.title}</span>
+                      </div>
+                      <ChevronDown 
+                        className={`w-3 h-3 transition-transform duration-300 ${openGroups.includes(group.title) ? "rotate-180" : ""}`} 
+                      />
+                    </button>
+                  ) : (
+                    <div className="flex justify-center py-2">
+                      <div className="w-6 h-px bg-white/10" />
+                    </div>
+                  )}
+
+                  <AnimatePresence initial={false}>
+                    {(openGroups.includes(group.title) || !sidebarOpen) && (
+                      <motion.div
+                        initial={sidebarOpen ? { height: 0, opacity: 0 } : {}}
+                        animate={sidebarOpen ? { height: "auto", opacity: 1 } : {}}
+                        exit={sidebarOpen ? { height: 0, opacity: 0 } : {}}
+                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                        className="overflow-hidden space-y-1"
                       >
-                        <item.icon className={`${sidebarOpen ? "w-4.5 h-4.5 mr-3" : "w-5 h-5"} shrink-0 transition-transform group-hover:scale-110`} />
-                        {sidebarOpen && (
-                          <motion.span
+                        {group.items.map((item, index) => (
+                          <motion.div
+                            key={item.id}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="truncate font-black uppercase text-[11px] tracking-widest"
+                            transition={{ delay: index * 0.02 + groupIdx * 0.05 }}
                           >
-                            {item.label}
-                          </motion.span>
-                        )}
-                        {posTab === item.id && (
-                          <motion.div
-                            layoutId="activePill"
-                            className="absolute left-0 top-2 bottom-2 w-1 bg-primary-foreground rounded-r-full"
-                          />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                      <TooltipContent side="right" sideOffset={15} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[11px] tracking-widest shadow-2xl">
-                        {item.label}
-                      </TooltipContent>
-                  </Tooltip>
-                </motion.div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant={posTab === item.id ? "default" : "ghost"}
+                                  className={`w-full ${sidebarOpen ? "justify-start px-3 pl-6" : "justify-center px-0"} cursor-pointer h-10 transition-all duration-200 relative group rounded-xl
+                                    ${posTab === item.id 
+                                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
+                                      : "hover:bg-primary/5 text-muted-foreground/80 hover:text-primary"}`}
+                                  onClick={() => onTabChangeWithEffects(item.id)}
+                                >
+                                  <item.icon className={`${sidebarOpen ? "w-4 h-4 mr-3" : "w-5 h-5"} shrink-0 transition-transform group-hover:scale-110`} />
+                                  {sidebarOpen && (
+                                    <motion.span
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      className="truncate font-bold uppercase text-[10px] tracking-widest"
+                                    >
+                                      {item.label}
+                                    </motion.span>
+                                  )}
+                                  {posTab === item.id && (
+                                    <motion.div
+                                      layoutId="activePill"
+                                      className="absolute left-0 top-2 bottom-2 w-1 bg-primary-foreground rounded-r-full"
+                                    />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              {!sidebarOpen && (
+                                <TooltipContent side="right" sideOffset={15} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[11px] tracking-widest shadow-2xl">
+                                  {item.label}
+                                </TooltipContent>
+                              )}
+                            </Tooltip>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ))}
             </nav>
           </TooltipProvider>
