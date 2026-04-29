@@ -144,7 +144,7 @@ export const DashboardTab = ({
         <div className="flex flex-col gap-4">
           <AnimatePresence>
             {(dashboardStats?.expiredCount || 0) > 0 && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <motion.div key="expired" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
                 <Card className="border-red-500/10 bg-red-500/5 backdrop-blur-sm overflow-hidden border-none shadow-sm">
                   <CardContent className="p-3 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -165,7 +165,7 @@ export const DashboardTab = ({
               </motion.div>
             )}
             {(dashboardStats?.nearExpiryCount || 0) > 0 && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <motion.div key="near-expiry" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
                 <Card className="border-orange-500/10 bg-orange-500/5 backdrop-blur-sm border-none shadow-sm">
                   <CardContent className="p-3 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export const DashboardTab = ({
               </motion.div>
             )}
             {(dashboardStats?.lowStockProducts || 0) > 0 && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <motion.div key="low-stock" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
                 <Card className="border-yellow-500/10 bg-yellow-500/5 backdrop-blur-sm border-none shadow-sm">
                   <CardContent className="p-3 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -196,8 +196,8 @@ export const DashboardTab = ({
                       </p>
                     </div>
                     <div className="flex flex-col gap-1">
-                      {dashboardStats?.stockItems?.slice(0, 2).map((item: any) => (
-                        <div key={item.id} className="text-xs font-black bg-yellow-500/5 px-2 py-1 rounded border border-yellow-500/10 flex justify-between items-center text-yellow-700 dark:text-yellow-300">
+                      {dashboardStats?.stockItems?.slice(0, 2).map((item: any, i: number) => (
+                        <div key={item.id || `stock-${i}`} className="text-xs font-black bg-yellow-500/5 px-2 py-1 rounded border border-yellow-500/10 flex justify-between items-center text-yellow-700 dark:text-yellow-300">
                           <span className="truncate mr-2 uppercase">{item.name}</span>
                           <span className="shrink-0">{item.stock}</span>
                         </div>
@@ -209,7 +209,7 @@ export const DashboardTab = ({
               </motion.div>
             )}
             {overdueCredits.length > 0 && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <motion.div key="overdue" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
                 <Card className="border-red-500/20 bg-red-500/10 backdrop-blur-sm">
                   <CardContent className="p-4 flex flex-col gap-3">
                     <div className="flex items-center gap-3">
@@ -249,8 +249,8 @@ export const DashboardTab = ({
           <CardHeader><CardTitle className="text-lg">Productos Más Vendidos</CardTitle></CardHeader>
           <CardContent className="p-4">
             <div className="space-y-2">
-              {dashboardStats?.topProducts.map((product, i) => (
-                <div key={product.id || i} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors">
+              {dashboardStats?.topProducts?.map((product: any, i: number) => (
+                <div key={product.id || `top-${i}`} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <span className="w-5 h-5 bg-primary/20 text-primary border border-primary/20 rounded flex items-center justify-center text-xs font-black">{i + 1}</span>
                     <div>
@@ -276,8 +276,8 @@ export const DashboardTab = ({
           <CardContent>
             <ScrollArea className="h-56">
               <div className="space-y-2">
-                {dashboardStats?.recentSales.map(sale => (
-                  <div key={sale.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors">
+                {dashboardStats?.recentSales?.map((sale: any, i: number) => (
+                  <div key={sale.id || `sale-${i}`} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors">
                     <div>
                       <p className="text-xs font-black">{formatCurrency(sale.total)}</p>
                       <p className="text-[10px] text-muted-foreground truncate max-w-[120px]">{sale.customer?.name || "Cliente general"}</p>
