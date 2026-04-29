@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle,
   LayoutGrid, ArrowRightLeft, Minus, Search, Package, RefreshCw, ShoppingBag, 
-  AlertTriangle, Wallet, CreditCard, FileText, DollarSign, Wand2
+  AlertTriangle, Wallet, CreditCard, FileText, DollarSign, Wand2, Clock
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { fadeInUp, staggerContainer } from "@/lib/animations"
 import { formatCurrency } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   Tooltip,
   TooltipContent,
