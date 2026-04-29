@@ -177,15 +177,16 @@ export const POSDashboard = ({
 
       {/* Modern Floating Sidebar */}
       <aside
-        className={`fixed lg:relative z-50 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col h-[calc(100vh-1rem)] m-2
-          ${sidebarOpen ? "w-64 translate-x-0" : "w-16 -translate-x-[calc(100%+2rem)] lg:translate-x-0"}
-          bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-2xl overflow-hidden`}
+        className={`fixed lg:relative z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col h-[calc(100vh-1rem)] m-2
+          ${sidebarOpen ? "w-72 translate-x-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)]" : "w-24 -translate-x-[calc(100%+2rem)] lg:translate-x-0 shadow-xl"}
+          bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] overflow-hidden group/sidebar`}
       >
-        <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-3 border-b border-white/5 shrink-0 h-14`}>
-          <div className="flex items-center gap-3 overflow-hidden">
+        <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-5 border-b border-white/10 dark:border-white/5 shrink-0 h-20`}>
+          <div className="flex items-center gap-4 overflow-hidden">
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
-              className="w-10 h-10 shrink-0 overflow-hidden bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 border-2 border-white/20"
+              whileTap={{ scale: 0.9 }}
+              className="w-12 h-12 shrink-0 overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-2xl flex items-center justify-center shadow-[0_10px_20px_rgba(var(--primary),0.3)] border-2 border-white/30"
             >
               {currentBranch?.logoUrl ? (
                 <img src={currentBranch.logoUrl} alt="Logo" className="w-full h-full object-cover" />
@@ -228,68 +229,85 @@ export const POSDashboard = ({
                   {sidebarOpen ? (
                     <button
                       onClick={() => toggleGroup(group.title)}
-                      className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60 hover:text-primary transition-colors group"
+                      className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 hover:text-primary transition-all duration-300 group/groupbtn"
                     >
-                      <div className="flex items-center gap-2">
-                        <group.icon className="w-3.5 h-3.5" />
-                        <span>{group.title}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg bg-primary/5 flex items-center justify-center group-hover/groupbtn:bg-primary/10 transition-colors">
+                          <group.icon className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="opacity-80">{group.title}</span>
                       </div>
                       <ChevronDown 
-                        className={`w-3 h-3 transition-transform duration-300 ${openGroups.includes(group.title) ? "rotate-180" : ""}`} 
+                        className={`w-3.5 h-3.5 transition-transform duration-500 ease-out ${openGroups.includes(group.title) ? "rotate-180" : "opacity-40"}`} 
                       />
                     </button>
                   ) : (
-                    <div className="flex justify-center py-2">
-                      <div className="w-6 h-px bg-white/10" />
+                    <div className="flex flex-col items-center py-2 space-y-1">
+                      <div className="w-10 h-[2px] bg-gradient-to-r from-transparent via-primary/20 to-transparent rounded-full" />
+                      <group.icon className="w-3 h-3 text-muted-foreground/30" />
                     </div>
                   )}
 
                   <AnimatePresence initial={false}>
                     {(openGroups.includes(group.title) || !sidebarOpen) && (
                       <motion.div
-                        initial={sidebarOpen ? { height: 0, opacity: 0 } : {}}
-                        animate={sidebarOpen ? { height: "auto", opacity: 1 } : {}}
-                        exit={sidebarOpen ? { height: 0, opacity: 0 } : {}}
-                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                        className="overflow-hidden space-y-1"
+                        initial={sidebarOpen ? { height: 0, opacity: 0, scale: 0.95 } : {}}
+                        animate={sidebarOpen ? { height: "auto", opacity: 1, scale: 1 } : {}}
+                        exit={sidebarOpen ? { height: 0, opacity: 0, scale: 0.95 } : {}}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        className="overflow-hidden space-y-1.5 px-2"
                       >
                         {group.items.map((item, index) => (
                           <motion.div
                             key={item.id}
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.02 + groupIdx * 0.05 }}
+                            transition={{ delay: index * 0.03 + groupIdx * 0.05 }}
+                            className="relative"
                           >
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
                                   variant={posTab === item.id ? "default" : "ghost"}
-                                  className={`w-full ${sidebarOpen ? "justify-start px-3 pl-6" : "justify-center px-0"} cursor-pointer h-10 transition-all duration-200 relative group rounded-xl
+                                  className={`w-full ${sidebarOpen ? "justify-start px-4 h-12" : "justify-center px-0 h-14"} cursor-pointer transition-all duration-300 relative group rounded-[1.25rem] border border-transparent
                                     ${posTab === item.id 
-                                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
-                                      : "hover:bg-primary/5 text-muted-foreground/80 hover:text-primary"}`}
+                                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-[0_10px_20px_rgba(var(--primary),0.25)] border-white/10" 
+                                      : "hover:bg-white dark:hover:bg-zinc-800 hover:shadow-xl hover:shadow-black/5 hover:border-slate-200 dark:hover:border-zinc-700 text-muted-foreground/70 hover:text-primary"}`}
                                   onClick={() => onTabChangeWithEffects(item.id)}
                                 >
-                                  <item.icon className={`${sidebarOpen ? "w-4 h-4 mr-3" : "w-5 h-5"} shrink-0 transition-transform group-hover:scale-110`} />
+                                  <div className={`flex items-center justify-center rounded-xl transition-all duration-300 
+                                    ${sidebarOpen ? "p-2" : "w-11 h-11"}
+                                    ${posTab === item.id ? "bg-white/20 shadow-inner" : "bg-transparent group-hover:bg-primary/10"}`}>
+                                    <item.icon className={`${sidebarOpen ? "w-4.5 h-4.5" : "w-6 h-6"} shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`} />
+                                  </div>
+                                  
                                   {sidebarOpen && (
                                     <motion.span
                                       initial={{ opacity: 0, x: -10 }}
                                       animate={{ opacity: 1, x: 0 }}
-                                      className="truncate font-bold uppercase text-[10px] tracking-widest"
+                                      className={`truncate ml-3 font-bold uppercase text-[10px] tracking-[0.1em] ${posTab === item.id ? "font-black" : ""}`}
                                     >
                                       {item.label}
                                     </motion.span>
                                   )}
+
+                                  {!sidebarOpen && posTab === item.id && (
+                                    <motion.div
+                                      layoutId="activeGlow"
+                                      className="absolute inset-0 bg-primary/20 blur-xl rounded-full -z-10 animate-pulse"
+                                    />
+                                  )}
+                                  
                                   {posTab === item.id && (
                                     <motion.div
-                                      layoutId="activePill"
-                                      className="absolute left-0 top-2 bottom-2 w-1 bg-primary-foreground rounded-r-full"
+                                      layoutId="activeIndicator"
+                                      className={`absolute bg-white rounded-full shadow-[0_0_10px_#fff] ${sidebarOpen ? "right-3 w-1.5 h-1.5" : "bottom-1 w-1 h-1"}`}
                                     />
                                   )}
                                 </Button>
                               </TooltipTrigger>
                               {!sidebarOpen && (
-                                <TooltipContent side="right" sideOffset={15} className="bg-zinc-900 border-zinc-800 text-white font-black uppercase text-[11px] tracking-widest shadow-2xl">
+                                <TooltipContent side="right" sideOffset={20} className="bg-zinc-950/90 backdrop-blur-xl border border-white/10 text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl py-3 px-4 rounded-xl">
                                   {item.label}
                                 </TooltipContent>
                               )}
@@ -305,36 +323,43 @@ export const POSDashboard = ({
           </TooltipProvider>
         </ScrollArea>
         
-        <div className="p-3 bg-primary/5 backdrop-blur-md shrink-0">
-          <div 
-            className={`flex items-center ${sidebarOpen ? "gap-3" : "justify-center"} p-3 rounded-[1.5rem] bg-white dark:bg-zinc-900 border border-white/10 hover:shadow-xl cursor-pointer transition-all duration-300 group overflow-hidden`}
+        <div className={`p-4 bg-gradient-to-t from-primary/10 via-primary/5 to-transparent backdrop-blur-xl shrink-0 flex flex-col items-center ${sidebarOpen ? "space-y-3" : "space-y-4"}`}>
+          <motion.div 
+            whileHover={{ y: -5, scale: sidebarOpen ? 1 : 1.1 }}
+            className={`flex items-center ${sidebarOpen ? "gap-4 p-4 rounded-[2rem] w-full" : "justify-center w-14 h-14 rounded-2xl"} bg-white/60 dark:bg-zinc-800/60 border border-white/20 dark:border-white/10 hover:shadow-2xl cursor-pointer transition-all duration-500 group overflow-hidden relative`}
             onClick={onProfileOpen}
-            title={!sidebarOpen ? "Perfil" : ""}
           >
-            <div className="w-10 h-10 shrink-0 bg-gradient-to-tr from-primary to-primary/60 rounded-xl flex items-center justify-center text-white shadow-md group-hover:rotate-6 transition-transform">
-              <Users className="w-5 h-5" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <div className={`${sidebarOpen ? "w-12 h-12" : "w-10 h-10"} shrink-0 bg-gradient-to-tr from-primary to-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:rotate-6 transition-all duration-500 relative z-10`}>
+              <Users className={`${sidebarOpen ? "w-6 h-6" : "w-5 h-5"}`} />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-zinc-800 rounded-full animate-pulse" />
             </div>
+            
             {sidebarOpen && (
               <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex-1 min-w-0"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex-1 min-w-0 relative z-10"
               >
-                <p className="text-xs font-black truncate text-foreground">{session?.user?.name}</p>
-                <Badge variant="outline" className="h-4 text-[8px] font-black uppercase border-primary/20 bg-primary/5 text-primary">
-                  {session?.user?.role === "TENANT_ADMIN" ? "Admin" : "Usuario"}
+                <p className="text-xs font-black truncate text-foreground group-hover:text-primary transition-colors">{session?.user?.name}</p>
+                <Badge variant="outline" className="h-5 text-[9px] font-black uppercase border-primary/20 bg-primary/10 text-primary mt-0.5 rounded-full px-2">
+                  {session?.user?.role === "TENANT_ADMIN" ? "Administrador" : "Usuario"}
                 </Badge>
               </motion.div>
             )}
-          </div>
+          </motion.div>
+
           <Button 
             variant="ghost" 
-            className={`w-full mt-2 ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 font-black h-10 uppercase text-[10px] tracking-widest`} 
+            className={`flex items-center ${sidebarOpen ? "justify-start px-5 w-full" : "justify-center w-14 h-14 p-0"} text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-[1.5rem] transition-all duration-300 font-black uppercase text-[10px] tracking-[0.2em] border border-transparent hover:border-destructive/20`} 
             onClick={onSignOut}
             title={!sidebarOpen ? "Cerrar Sesión" : ""}
           >
-            <LogOut className={`${sidebarOpen ? "w-4 h-4 mr-3" : "w-5 h-5"}`} />
-            {sidebarOpen && <span>Salir</span>}
+            <div className={`flex items-center justify-center rounded-xl bg-destructive/5 group-hover:bg-destructive/10 transition-colors ${sidebarOpen ? "p-2" : "w-10 h-10"}`}>
+              <LogOut className={`${sidebarOpen ? "w-4 h-4" : "w-5 h-5"}`} />
+            </div>
+            {sidebarOpen && <span className="ml-3">Cerrar Sesión</span>}
           </Button>
         </div>
       </aside>
