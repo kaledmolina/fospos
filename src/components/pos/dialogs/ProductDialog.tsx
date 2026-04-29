@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   ImagePlus, X, Loader2, Package, Tag, 
   DollarSign, Barcode, Calendar, Info, Layers, 
-  TrendingUp, LayoutGrid, Briefcase, AlertTriangle
+  TrendingUp, LayoutGrid, Briefcase, AlertTriangle, Scale, Plus, Trash2
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -98,7 +98,7 @@ export const ProductDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-2xl rounded-2xl bg-white dark:bg-zinc-950 flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-2xl rounded-2xl bg-white dark:bg-zinc-950 flex flex-col max-h-[95vh]">
         {/* Header - Clean and Professional */}
         <div className="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-8 py-6">
           <div className="flex items-center gap-3 mb-2">
@@ -161,7 +161,7 @@ export const ProductDialog = ({
                 value="basic" 
                 className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-primary data-[state=active]:shadow-sm relative font-bold text-xs px-6 h-full rounded-xl transition-all duration-300"
               >
-                1. Datos Básicos
+                1. General
               </TabsTrigger>
               <TabsTrigger 
                 value="advanced" 
@@ -173,7 +173,13 @@ export const ProductDialog = ({
                 value="inventory" 
                 className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-primary data-[state=active]:shadow-sm relative font-bold text-xs px-6 h-full rounded-xl transition-all duration-300"
               >
-                3. Existencias
+                3. Stock
+              </TabsTrigger>
+              <TabsTrigger 
+                value="presentations" 
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-primary data-[state=active]:shadow-sm relative font-bold text-xs px-6 h-full rounded-xl transition-all duration-300"
+              >
+                4. Unidades
               </TabsTrigger>
             </TabsList>
             
@@ -472,6 +478,120 @@ export const ProductDialog = ({
                       </div>
                     </div>
                   </div>
+                </div>
+              </TabsContent>
+              
+              {/* Tab 4: Sales Presentations */}
+              <TabsContent value="presentations" className="mt-0 space-y-6">
+                <div className="flex items-center justify-between px-1">
+                  <div className="space-y-1">
+                    <Label className="text-sm font-bold flex items-center gap-2">
+                      <Scale className="w-4 h-4 text-primary" /> Presentaciones de Venta
+                    </Label>
+                    <p className="text-[10px] text-slate-500 font-medium">Define cómo vendes este producto (libras, cajas, etc.) respecto a su unidad base ({productForm.unit})</p>
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => onProductFormChange({
+                      ...productForm,
+                      presentations: [...(productForm.presentations || []), { name: "", unit: "", conversionFactor: 1, price: null }]
+                    })}
+                    className="h-8 text-[10px] font-bold uppercase tracking-wider gap-1.5 rounded-xl border-primary/20 text-primary hover:bg-primary/10"
+                  >
+                    <Plus className="w-3 h-3" /> Añadir Presentación
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  {(productForm.presentations || []).map((pres: any, idx: number) => (
+                    <div key={idx} className="bg-slate-50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 p-4 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div className="space-y-2">
+                          <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Nombre (Ej: Libra)</Label>
+                          <Input 
+                            value={pres.name}
+                            onChange={e => {
+                              const newPres = [...productForm.presentations]
+                              newPres[idx].name = e.target.value
+                              onProductFormChange({ ...productForm, presentations: newPres })
+                            }}
+                            className="h-9 font-bold rounded-xl"
+                            placeholder="Libra"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Unidad (Ej: lb)</Label>
+                          <Input 
+                            value={pres.unit}
+                            onChange={e => {
+                              const newPres = [...productForm.presentations]
+                              newPres[idx].unit = e.target.value
+                              onProductFormChange({ ...productForm, presentations: newPres })
+                            }}
+                            className="h-9 font-bold rounded-xl"
+                            placeholder="lb"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[9px] font-black uppercase text-indigo-500 ml-1">Factor de Conversión</Label>
+                          <Input 
+                            type="number"
+                            step="any"
+                            value={pres.conversionFactor}
+                            onChange={e => {
+                              const newPres = [...productForm.presentations]
+                              newPres[idx].conversionFactor = parseFloat(e.target.value) || 0
+                              onProductFormChange({ ...productForm, presentations: newPres })
+                            }}
+                            className="h-9 font-black rounded-xl border-indigo-200 dark:border-indigo-900/50"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="flex-1 space-y-2">
+                            <Label className="text-[9px] font-black uppercase text-emerald-500 ml-1">Precio Específico (Opcional)</Label>
+                            <Input 
+                              type="number"
+                              value={pres.price || ""}
+                              onChange={e => {
+                                const newPres = [...productForm.presentations]
+                                newPres[idx].price = e.target.value === "" ? null : parseFloat(e.target.value)
+                                onProductFormChange({ ...productForm, presentations: newPres })
+                              }}
+                              className="h-9 font-black rounded-xl border-emerald-200 dark:border-emerald-900/50"
+                              placeholder="Usar cálculo automático"
+                            />
+                          </div>
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => {
+                              const newPres = productForm.presentations.filter((_: any, i: number) => i !== idx)
+                              onProductFormChange({ ...productForm, presentations: newPres })
+                            }}
+                            className="h-9 w-9 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="mt-3 px-1 flex items-center gap-2">
+                        <Info className="w-3 h-3 text-slate-400" />
+                        <span className="text-[10px] font-medium text-slate-500 italic">
+                          Vender 1 {pres.name || '...'} descontará {pres.conversionFactor} {productForm.unit} del inventario.
+                          {!pres.price && ` Precio calculado: $${(productForm.salePrice * pres.conversionFactor).toLocaleString()}`}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(productForm.presentations || []).length === 0 && (
+                    <div className="text-center py-10 border-2 border-dashed border-slate-100 dark:border-zinc-900 rounded-3xl">
+                      <p className="text-xs font-medium text-slate-400">No hay presentaciones adicionales. El producto se vende solo por {productForm.unit}.</p>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </div>

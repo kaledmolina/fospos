@@ -27,7 +27,8 @@ export async function GET(
         branchId: session.user.branchId || undefined
       },
       include: {
-        category: true
+        category: true,
+        presentations: true
       }
     })
 
@@ -119,24 +120,49 @@ export async function PATCH(
       }
     }
 
-    const product = await db.product.update({
-      where: { id },
-      data: {
-        code,
-        name,
-        description,
-        imageUrl,
-        costPrice,
-        salePrice,
-        stock,
-        minStock,
-        unit,
-        categoryId: categoryId || null,
-        isActive
-      },
-      include: {
-        category: true
+    const product = await db.$transaction(async (tx) => {
+      // Sincronizar presentaciones
+      if (body.presentations && Array.isArray(body.presentations)) {
+        // Eliminar las que no están en el nuevo array o simplemente recrear todas
+        await tx.productPresentation.deleteMany({
+          where: { productId: id }
+        })
+
+        for (const pres of body.presentations) {
+          if (pres.name && pres.conversionFactor) {
+            await tx.productPresentation.create({
+              data: {
+                productId: id,
+                name: pres.name,
+                unit: pres.unit || "",
+                conversionFactor: parseFloat(String(pres.conversionFactor)) || 1,
+                price: pres.price ? parseFloat(String(pres.price)) : null
+              }
+            })
+          }
+        }
       }
+
+      return tx.product.update({
+        where: { id },
+        data: {
+          code,
+          name,
+          description,
+          imageUrl,
+          costPrice,
+          salePrice,
+          stock,
+          minStock,
+          unit,
+          categoryId: categoryId || null,
+          isActive
+        },
+        include: {
+          category: true,
+          presentations: true
+        }
+      })
     })
 
     // REGISTRO DE AUDITORÍA: Si hubo cambios sensibles

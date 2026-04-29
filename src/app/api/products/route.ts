@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         category: true,
+        presentations: true,
         stockByBranch: branchId ? {
           where: { branchId }
         } : true
@@ -224,6 +225,23 @@ export async function POST(request: NextRequest) {
             minStock: minStock || 5
           }
         })
+      }
+
+      // 4. Crear presentaciones si existen
+      if (body.presentations && Array.isArray(body.presentations)) {
+        for (const pres of body.presentations) {
+          if (pres.name && pres.conversionFactor) {
+            await tx.productPresentation.create({
+              data: {
+                productId: mainProduct.id,
+                name: pres.name,
+                unit: pres.unit || "",
+                conversionFactor: parseFloat(String(pres.conversionFactor)) || 1,
+                price: pres.price ? parseFloat(String(pres.price)) : null
+              }
+            })
+          }
+        }
       }
 
       return mainProduct

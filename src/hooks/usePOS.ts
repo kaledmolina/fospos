@@ -71,6 +71,9 @@ export const usePOS = (session: any) => {
   const [userDialog, setUserDialog] = useState(false)
   const [stockAdjustmentDialog, setStockAdjustmentDialog] = useState(false)
   const [supplierDialog, setSupplierDialog] = useState(false)
+  const [presentationDialogOpen, setPresentationDialogOpen] = useState(false)
+  const [activeProductForPresentation, setActiveProductForPresentation] = useState<any>(null)
+  const [activePresentation, setActivePresentation] = useState<any>(null)
   const [selectedProductForStock, setSelectedProductForStock] = useState<any>(null)
   
   // Form states
@@ -78,7 +81,8 @@ export const usePOS = (session: any) => {
     code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
     stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
     expiryDate: "", imageUrl: "",
-    supplierId: "", batchNumber: ""
+    supplierId: "", batchNumber: "",
+    presentations: [] as any[]
   })
   const [categoryForm, setCategoryForm] = useState({ name: "", description: "", color: "#10B981", icon: "🏷️", imageUrl: "" })
   const [customerForm, setCustomerForm] = useState({ name: "", document: "", phone: "", email: "", address: "", creditLimit: 0 })
@@ -657,11 +661,12 @@ export const usePOS = (session: any) => {
         costPrice: parseFloat(String(productForm.costPrice)) || 0,
         salePrice: parseFloat(String(productForm.salePrice)) || 0,
         wholesalePrice: productForm.wholesalePrice ? parseFloat(String(productForm.wholesalePrice)) : null,
-        stock: parseInt(String(productForm.stock)) || 0,
-        minStock: parseInt(String(productForm.minStock)) || 5,
+        stock: parseFloat(String(productForm.stock)) || 0,
+        minStock: parseFloat(String(productForm.minStock)) || 5,
         expiryDate: productForm.expiryDate && productForm.expiryDate !== "" ? productForm.expiryDate : null,
         categoryId: productForm.categoryId || null,
-        branchId: selectedBranch // Asegurar que se crea en la sucursal seleccionada
+        branchId: selectedBranch,
+        presentations: productForm.presentations
       }
 
       const res = await fetch("/api/products", {
@@ -676,7 +681,7 @@ export const usePOS = (session: any) => {
         setProductForm({ 
           code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
-          expiryDate: "", imageUrl: ""
+          expiryDate: "", imageUrl: "", presentations: []
         })
         fetchPOSData()
       } else {
@@ -708,10 +713,11 @@ export const usePOS = (session: any) => {
         costPrice: parseFloat(String(productForm.costPrice)) || 0,
         salePrice: parseFloat(String(productForm.salePrice)) || 0,
         wholesalePrice: productForm.wholesalePrice ? parseFloat(String(productForm.wholesalePrice)) : null,
-        stock: parseInt(String(productForm.stock)) || 0,
-        minStock: parseInt(String(productForm.minStock)) || 5,
+        stock: parseFloat(String(productForm.stock)) || 0,
+        minStock: parseFloat(String(productForm.minStock)) || 5,
         expiryDate: productForm.expiryDate && productForm.expiryDate !== "" ? productForm.expiryDate : null,
-        categoryId: productForm.categoryId || null
+        categoryId: productForm.categoryId || null,
+        presentations: productForm.presentations
       }
 
       const res = await fetch(`/api/products/${editingProduct.id}`, {
@@ -727,7 +733,7 @@ export const usePOS = (session: any) => {
         setProductForm({ 
           code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
-          expiryDate: "", imageUrl: ""
+          expiryDate: "", imageUrl: "", presentations: []
         })
         fetchPOSData()
       } else {
@@ -831,10 +837,17 @@ export const usePOS = (session: any) => {
     } catch { toast.error("Error al crear cliente") }
   }
 
-  const addToCart = async (product: ProductData, selectedBatch?: ProductBatchData) => {
+  const addToCart = async (product: ProductData, selectedBatch?: ProductBatchData, selectedPresentation?: any) => {
     // Check if stock is 0 (global or branch)
     if (product.stock <= 0) {
       toast.error(`Producto sin stock: ${product.name}`)
+      return
+    }
+
+    // SI TIENE PRESENTACIONES Y NO SE HA SELECCIONADO UNA, PREGUNTAR
+    if (!selectedPresentation && product.presentations && product.presentations.length > 0) {
+      setActiveProductForPresentation(product)
+      setPresentationDialogOpen(true)
       return
     }
 
@@ -845,6 +858,8 @@ export const usePOS = (session: any) => {
         setActiveProductForBatch(product)
         setAvailableBatches(batches)
         setBatchDialogOpen(true)
+        // Guardamos la presentación seleccionada para usarla cuando se elija el lote
+        setActivePresentation(selectedPresentation)
         return
       } else if (batches.length === 1) {
         // Si solo hay un lote, seleccionarlo automáticamente
@@ -853,31 +868,59 @@ export const usePOS = (session: any) => {
     }
 
     // Si llegamos aquí, o no hay lotes, o ya se seleccionó uno
-    const cartItemId = selectedBatch ? `${product.id}-${selectedBatch.id}` : product.id
+    const cartItemId = `${product.id}${selectedBatch ? '-' + selectedBatch.id : ''}${selectedPresentation ? '-pres-' + selectedPresentation.id : ''}`
     const existing = cart.find(item => item.id === cartItemId)
     
     // El precio debe ser el del lote si se seleccionó, de lo contrario el del producto
-    const priceToUse = selectedBatch ? selectedBatch.salePrice : product.salePrice
+    let priceToUse = selectedBatch ? selectedBatch.salePrice : product.salePrice
     const stockToConsider = selectedBatch ? selectedBatch.quantity : product.stock
 
+    // Si hay presentación, aplicar factor de conversión al precio
+    if (selectedPresentation) {
+      priceToUse = selectedPresentation.price || (priceToUse * selectedPresentation.conversionFactor)
+    }
+
+    const quantityToAdd = 1 // En el POS siempre se añade de a 1 por defecto
+    const stockQuantityToDeduct = selectedPresentation ? (quantityToAdd * selectedPresentation.conversionFactor) : quantityToAdd
+
     if (existing) {
-      if (existing.quantity + 1 > stockToConsider) {
+      const currentStockDeducted = cart.reduce((acc, item) => {
+        if (item.data.id === product.id && (selectedBatch ? item.batchId === selectedBatch.id : !item.batchId)) {
+          const factor = item.presentation?.conversionFactor || 1
+          return acc + (item.quantity * factor)
+        }
+        return acc
+      }, 0)
+
+      if (currentStockDeducted + stockQuantityToDeduct > stockToConsider) {
         toast.error(`No hay suficiente stock ${selectedBatch ? 'en este lote' : ''} para ${product.name}`)
         return
       }
       setCart(cart.map(item => item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item))
     } else {
+      if (stockQuantityToDeduct > stockToConsider) {
+        toast.error(`No hay suficiente stock para ${product.name}`)
+        return
+      }
+
       setCart([...cart, { 
         id: cartItemId, 
-        name: selectedBatch ? `${product.name} (${selectedBatch.batchNumber || 'Lote'})` : product.name, 
+        name: selectedPresentation 
+          ? `${product.name} (${selectedPresentation.name})` 
+          : (selectedBatch ? `${product.name} (${selectedBatch.batchNumber || 'Lote'})` : product.name), 
         price: priceToUse, 
         quantity: 1, 
         type: "PRODUCT", 
         data: product,
         batchId: selectedBatch?.id || null,
-        batchNumber: selectedBatch?.batchNumber || null
+        batchNumber: selectedBatch?.batchNumber || null,
+        presentation: selectedPresentation || null,
+        presentationId: selectedPresentation?.id || null
       }])
     }
+    
+    // Limpiar estados temporales
+    setActivePresentation(null)
   }
 
   const addServiceToCart = (service: SubscriptionServiceData, isSubscription: boolean = true) => {

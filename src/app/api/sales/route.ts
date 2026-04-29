@@ -320,33 +320,47 @@ export async function POST(request: NextRequest) {
           const salePrice = item.unitPrice || product.salePrice;
           const costPrice = currentBatch?.costPrice || product.costPrice || 0;
 
+          // Gestión de Presentación (Unidades/Fraccionamiento)
+          let conversionFactor = 1;
+          let presentationName = "";
+          if (item.presentationId) {
+            const presentation = await tx.productPresentation.findUnique({ where: { id: item.presentationId } });
+            if (presentation) {
+              conversionFactor = presentation.conversionFactor;
+              presentationName = ` (${presentation.name})`;
+            }
+          }
+
+          const quantityToDeduct = item.quantity * conversionFactor;
+
           const itemSubtotal = salePrice * item.quantity - (item.discount || 0);
           subtotal += itemSubtotal;
 
           saleItems.push({
             productId: product.id,
-            productName: product.name,
+            productName: product.name + presentationName,
             productCode: product.code,
             unitPrice: salePrice,
             costPrice: costPrice,
             quantity: item.quantity,
-            unit: product.unit,
+            unit: item.presentationId ? (item.unit || product.unit) : product.unit,
             discount: item.discount || 0,
             subtotal: itemSubtotal,
-            batchId: item.batchId || null
+            batchId: item.batchId || null,
+            presentationId: item.presentationId || null
           });
 
           const previousStock = productStock.stock;
-          const newStock = previousStock - item.quantity;
+          const newStock = previousStock - quantityToDeduct;
 
           await tx.productStock.update({ where: { id: productStock.id }, data: { stock: newStock } });
-          await tx.product.update({ where: { id: product.id }, data: { stock: { decrement: item.quantity } } });
+          await tx.product.update({ where: { id: product.id }, data: { stock: { decrement: quantityToDeduct } } });
 
           // Deducción del lote si aplica
           if (item.batchId) {
             await tx.productBatch.update({
               where: { id: item.batchId },
-              data: { quantity: { decrement: item.quantity } }
+              data: { quantity: { decrement: quantityToDeduct } }
             });
           }
 
@@ -357,15 +371,15 @@ export async function POST(request: NextRequest) {
               productId: product.id,
               branchId: userBranchId || "",
               type: "SALE",
-              quantity: item.quantity,
+              quantity: quantityToDeduct,
               previousStock,
               newStock,
               referenceType: "SALE",
-              referenceId: invoiceNumber, // Usamos el número de factura como referencia
+              referenceId: invoiceNumber,
               batchId: item.batchId || null,
-              unitCost: currentBatch?.costPrice || product.costPrice || 0,
-              totalCost: (currentBatch?.costPrice || product.costPrice || 0) * item.quantity,
-              notes: `Venta POS #${invoiceNumber}${item.batchId ? ` (Lote: ${currentBatch?.batchNumber})` : ''}`,
+              unitCost: costPrice,
+              totalCost: costPrice * quantityToDeduct,
+              notes: `Venta POS #${invoiceNumber}${presentationName}${item.batchId ? ` (Lote: ${currentBatch?.batchNumber})` : ''}`,
               createdBy: session.user.id
             }
           });

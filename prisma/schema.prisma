@@ -237,9 +237,9 @@ model Product {
   wholesalePrice Float?  // Precio mayoreo (opcional)
   
   // Stock total (para compatibilidad)
-  stock         Int      @default(0)
-  minStock      Int      @default(5)  // Stock mínimo para alertas
-  maxStock      Int      @default(100) // Stock máximo
+  stock         Float    @default(0)
+  minStock      Float    @default(5)  // Stock mínimo para alertas
+  maxStock      Float    @default(100) // Stock máximo
   
   // Unidad de medida
   unit          String   @default("unidad") // unidad, kg, litro, etc.
@@ -256,6 +256,7 @@ model Product {
   movements     InventoryMovement[]
   purchaseOrderItems PurchaseOrderItem[]
   batches       ProductBatch[]
+  presentations ProductPresentation[]
   
   @@unique([tenantId, code]) // Código de barras único por tenant
   @@unique([tenantId, sku])  // SKU único por tenant
@@ -297,8 +298,8 @@ model ProductStock {
   branchId    String
   branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
   
-  stock       Int      @default(0)  // Cantidad en esta sucursal
-  minStock    Int      @default(5)  // Mínimo para esta sucursal
+  stock       Float    @default(0)  // Cantidad en esta sucursal
+  minStock    Float    @default(5)  // Mínimo para esta sucursal
   
   updatedAt   DateTime @updatedAt
   
@@ -317,9 +318,9 @@ model InventoryMovement {
   branch        Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
   
   type          MovementType
-  quantity      Int         // Cantidad movida (positivo para entradas, negativo para salidas)
-  previousStock Int         // Stock anterior
-  newStock      Int         // Stock nuevo
+  quantity      Float       // Cantidad movida (positivo para entradas, negativo para salidas)
+  previousStock Float       // Stock anterior
+  newStock      Float       // Stock nuevo
   
   // Origen del movimiento
   referenceType String?    // "sale", "purchase", "adjustment", "transfer"
@@ -345,6 +346,27 @@ model InventoryMovement {
   createdAt     DateTime   @default(now())
   
   @@map("inventory_movements")
+}
+
+/// Presentaciones de venta de un producto (ej: Libra de un producto en KG)
+model ProductPresentation {
+  id               String  @id @default(cuid())
+  productId        String
+  product          Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  name             String  // Nombre de la presentación (ej: "Libra", "Docena")
+  unit             String  // Unidad (ej: "lb", "doz")
+  conversionFactor Float   // Factor multiplicador respecto a la unidad base (ej: 0.5 para libra si base es kg)
+  price            Float?  // Precio opcional para esta presentación específica (si es null, usa el del producto * factor)
+  
+  isActive         Boolean @default(true)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  saleItems        SaleItem[]
+
+  @@map("product_presentations")
 }
 
 enum MovementType {
@@ -466,6 +488,10 @@ model SaleItem {
   // Lote relacionado
   batchId       String?
   batch         ProductBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  
+  // Presentación relacionada (si aplica)
+  presentationId String?
+  presentation   ProductPresentation? @relation(fields: [presentationId], references: [id], onDelete: SetNull)
   
   @@map("sale_items")
 }

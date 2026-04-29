@@ -44,6 +44,7 @@ import {
 } from "./dialogs/SubscriptionDialogs"
 import { ProfileDialog } from "./dialogs/ProfileDialog"
 import { BatchSelectionDialog } from "./dialogs/BatchSelectionDialog"
+import { PresentationSelectionDialog } from "./dialogs/PresentationSelectionDialog"
 import { AnimatePresence } from "framer-motion"
 
 interface POSViewProps {
@@ -566,7 +567,14 @@ export const POSView = ({
         onOpenChange={pos.setBatchDialogOpen}
         product={pos.activeProductForBatch}
         batches={pos.availableBatches}
-        onSelect={(batch) => pos.addToCart(pos.activeProductForBatch!, batch)}
+        onSelect={(batch) => pos.addToCart(pos.activeProductForBatch!, batch, pos.activePresentation)}
+      />
+
+      <PresentationSelectionDialog 
+        open={pos.presentationDialogOpen}
+        onOpenChange={pos.setPresentationDialogOpen}
+        product={pos.activeProductForPresentation}
+        onSelect={(pres) => pos.addToCart(pos.activeProductForPresentation!, undefined, pres)}
       />
     </>
   )
