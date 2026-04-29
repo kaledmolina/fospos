@@ -19,6 +19,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { fadeInUp, staggerContainer } from "@/lib/animations"
 import { formatCurrency } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface SaleTabProps {
   cashRegister: any
@@ -65,7 +71,12 @@ interface SaleTabProps {
   onPrintGiftCard: (card: any) => void
   userRole?: string
   businessSettings?: any
-  currentBranch?: any
+  currentBranch?: any;
+  // Held Carts
+  heldCarts?: any[];
+  onHoldCart?: () => void;
+  onResumeCart?: (id: string) => void;
+  onDeleteHeldCart?: (id: string) => void;
 }
 
 export const SaleTab = ({
@@ -115,7 +126,11 @@ export const SaleTab = ({
   onUpdatePayment,
   userRole,
   businessSettings,
-  currentBranch
+  currentBranch,
+  heldCarts = [],
+  onHoldCart,
+  onResumeCart,
+  onDeleteHeldCart
 }: SaleTabProps) => {
   const [showDiscounts, setShowDiscounts] = useState(false)
   const isAdmin = userRole === "TENANT_ADMIN"
@@ -257,7 +272,14 @@ export const SaleTab = ({
                   onKeyDown={handleSearchKeyDown}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                   <Badge variant="outline" className="text-[9px] font-black opacity-40">ENTER PARA AGREGAR</Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline" className="text-[9px] font-black opacity-40 cursor-help">ENTER PARA AGREGAR</Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>Presiona Enter para agregar el producto buscado directamente al carrito</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
               <div className="flex items-center gap-4 px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest opacity-60">
@@ -504,8 +526,80 @@ export const SaleTab = ({
           <Card className="h-full flex flex-col">
             <CardHeader className="p-2 pb-1 px-3 mb-0.5">
               <CardTitle className="flex items-center justify-between">
-                <span className="text-sm font-black uppercase tracking-tight">Carrito</span>
-                {cart.length > 0 && <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold" onClick={onClearCart}>Limpiar</Button>}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-black uppercase tracking-tight">Carrito</span>
+                  {heldCarts.length > 0 && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-6 px-2 text-[9px] font-black bg-amber-500/10 text-amber-600 border-amber-500/20 rounded-full animate-pulse">
+                          {heldCarts.length} EN COLA
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-0 shadow-2xl rounded-2xl border-border bg-card/95 backdrop-blur-md overflow-hidden" align="start">
+                        <div className="p-3 bg-amber-500/10 border-b border-amber-500/10 flex items-center justify-between">
+                          <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-600">Ventas en Espera</h3>
+                          <Badge variant="outline" className="text-[9px] bg-white/50">{heldCarts.length}</Badge>
+                        </div>
+                        <ScrollArea className="h-64">
+                          <div className="p-2 space-y-2">
+                            {heldCarts.map(held => (
+                              <div key={held.id} className="p-3 rounded-xl border border-border bg-background/50 hover:bg-accent/30 transition-colors group">
+                                <div className="flex items-center justify-between mb-1">
+                                  <p className="text-[10px] font-black uppercase tracking-tighter truncate max-w-[150px]">
+                                    {held.customer?.name || "Cliente General"}
+                                  </p>
+                                  <p className="text-[9px] font-bold text-muted-foreground">
+                                    {new Date(held.heldAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <p className="text-sm font-black text-primary">{formatCurrency(held.total)}</p>
+                                  <div className="flex gap-1">
+                                    <Button 
+                                      size="sm" 
+                                      variant="ghost" 
+                                      className="h-7 w-7 p-0 text-red-500 hover:bg-red-50" 
+                                      onClick={() => onDeleteHeldCart?.(held.id)}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button 
+                                      size="sm" 
+                                      className="h-7 text-[10px] font-black uppercase px-3 bg-primary hover:bg-primary/90" 
+                                      onClick={() => onResumeCart?.(held.id)}
+                                    >
+                                      Reanudar
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  {cart.length > 0 && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-[10px] font-black border-amber-500/30 text-amber-600 hover:bg-amber-50" 
+                            onClick={onHoldCart}
+                          >
+                            <Clock className="w-3.5 h-3.5 mr-1" /> PAUSAR
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Poner esta venta en espera para atender a otro cliente</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {cart.length > 0 && <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold" onClick={onClearCart}>Limpiar</Button>}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col overflow-hidden p-2">
@@ -520,15 +614,21 @@ export const SaleTab = ({
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="shrink-0 text-primary border-primary/20 bg-primary/5 hover:bg-primary hover:text-white transition-all cursor-pointer"
-                    title="Nuevo Cliente"
-                    onClick={() => onSetCustomerDialog(true)}
-                  >
-                    <UserPlus className="w-4 h-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="shrink-0 text-primary border-primary/20 bg-primary/5 hover:bg-primary hover:text-white transition-all cursor-pointer"
+                          onClick={() => onSetCustomerDialog(true)}
+                        >
+                          <UserPlus className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">Registrar nuevo cliente</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 
                 {cartCustomer && (
@@ -713,36 +813,41 @@ export const SaleTab = ({
               
               <div className="mb-2">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Método de Pago</p>
-                <div className="grid grid-cols-3 gap-1.5 mt-1.5">
-                  {[
-                    { id: "CASH", label: "Efectivo", icon: Wallet },
-                    { id: "CARD", label: "Tarjeta", icon: CreditCard },
-                    { id: "TRANSFER", label: "Transf.", icon: RefreshCw },
-                    { id: "CREDIT", label: "Crédito", icon: FileText },
-                    { id: "GIFT_CARD", label: "Regalo", icon: Ticket },
-                    { id: "MIXED", label: "Mixto", icon: LayoutGrid }
-                  ].filter(m => {
-                    // Filter priority: 1. Branch specific settings 2. Business global settings
-                    const branchMethods = currentBranch?.enabledPaymentMethods?.split(",").filter(Boolean);
-                    if (branchMethods && branchMethods.length > 0) {
-                      return branchMethods.includes(m.id);
-                    }
-                    
-                    if (!businessSettings?.enabledPaymentMethods) return true;
-                    const enabled = businessSettings.enabledPaymentMethods.split(",").filter(Boolean);
-                    return enabled.includes(m.id);
-                  }).map(method => (
-                    <motion.div key={method.id} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                        <Button
-                          variant={cartPaymentMethod === method.id ? "default" : "outline"}
-                          className={`w-full h-8 px-1 text-[11px] font-black uppercase cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-sm" : "hover:border-emerald-300"}`}
-                          onClick={() => onSetCartPaymentMethod(method.id)}
-                        >
-                          <method.icon className="w-4 h-4 mr-1" />{method.label}
-                        </Button>
-                    </motion.div>
-                  ))}
-                </div>
+                  <TooltipProvider>
+                    <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+                      {[
+                        { id: "CASH", label: "Efectivo", icon: Wallet, tip: "Pago en efectivo" },
+                        { id: "CARD", label: "Tarjeta", icon: CreditCard, tip: "Pago con tarjeta de débito/crédito" },
+                        { id: "TRANSFER", label: "Transf.", icon: RefreshCw, tip: "Transferencia bancaria / QR" },
+                        { id: "CREDIT", label: "Crédito", icon: FileText, tip: "Venta a crédito para el cliente" },
+                        { id: "GIFT_CARD", label: "Regalo", icon: Ticket, tip: "Redimir tarjeta de regalo" },
+                        { id: "MIXED", label: "Mixto", icon: LayoutGrid, tip: "Múltiples medios de pago" }
+                      ].filter(m => {
+                        const branchMethods = currentBranch?.enabledPaymentMethods?.split(",").filter(Boolean);
+                        if (branchMethods && branchMethods.length > 0) {
+                          return branchMethods.includes(m.id);
+                        }
+                        if (!businessSettings?.enabledPaymentMethods) return true;
+                        const enabled = businessSettings.enabledPaymentMethods.split(",").filter(Boolean);
+                        return enabled.includes(m.id);
+                      }).map(method => (
+                        <Tooltip key={method.id}>
+                          <TooltipTrigger asChild>
+                            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                <Button
+                                  variant={cartPaymentMethod === method.id ? "default" : "outline"}
+                                  className={`w-full h-8 px-1 text-[11px] font-black uppercase cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-sm" : "hover:border-emerald-300"}`}
+                                  onClick={() => onSetCartPaymentMethod(method.id)}
+                                >
+                                  <method.icon className="w-4 h-4 mr-1" />{method.label}
+                                </Button>
+                            </motion.div>
+                          </TooltipTrigger>
+                          <TooltipContent>{method.tip}</TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  </TooltipProvider>
               </div>
               
               <div className="border-t pt-2 space-y-1">

@@ -149,6 +149,16 @@ export const usePOS = (session: any) => {
   const [couponCode, setCouponCode] = useState<string>("")
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
   
+  // Held Carts (Ventas en Espera)
+  const [heldCarts, setHeldCarts] = useState<{
+    id: string;
+    customer: CustomerData | null;
+    cart: any[];
+    total: number;
+    heldAt: string;
+    paymentMethod: string;
+  }[]>([])
+  
   // Gift Cards state
   const [giftCards, setGiftCards] = useState<any[]>([])
   const [giftCardCode, setGiftCardCode] = useState<string>("")
@@ -1730,6 +1740,53 @@ export const usePOS = (session: any) => {
     }
   }
 
+  // Held Carts Handlers
+  const handleHoldCart = useCallback(() => {
+    if (cart.length === 0) return;
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const newHeldCart = {
+      id: `HELD-${Date.now()}`,
+      customer: cartCustomer,
+      cart: [...cart],
+      total: total,
+      heldAt: new Date().toISOString(),
+      paymentMethod: cartPaymentMethod
+    };
+    
+    setHeldCarts(prev => [newHeldCart, ...prev]);
+    setCart([]);
+    setCartCustomer(null);
+    setCartPaymentMethod("CASH");
+    setRedeemPoints(0);
+    setAppliedCoupon(null);
+    setAppliedGiftCard(null);
+    toast.success("Venta puesta en espera");
+  }, [cart, cartCustomer, cartPaymentMethod]);
+
+  const handleResumeCart = useCallback((heldId: string) => {
+    const held = heldCarts.find(h => h.id === heldId);
+    if (!held) return;
+    
+    // If current cart is not empty, offer to hold it or clear it?
+    // For simplicity, we'll just merge or replace. Usually REPLACE is safer for "resuming".
+    if (cart.length > 0) {
+      toast.error("El carrito actual no está vacío. Por favor límpialo o ponlo en espera primero.");
+      return;
+    }
+    
+    setCart(held.cart);
+    setCartCustomer(held.customer);
+    setCartPaymentMethod(held.paymentMethod);
+    setHeldCarts(prev => prev.filter(h => h.id !== heldId));
+    toast.success("Venta reanudada");
+  }, [heldCarts, cart]);
+
+  const handleDeleteHeldCart = useCallback((heldId: string) => {
+    setHeldCarts(prev => prev.filter(h => h.id !== heldId));
+    toast.info("Venta en espera descartada");
+  }, []);
+
   // Helper values
   const unreadNotifications = notifications.filter(n => !n.isRead).length
   const overdueCredits = credits.filter(c => c.status === "OVERDUE")
@@ -1900,6 +1957,7 @@ export const usePOS = (session: any) => {
     profileDialog, setProfileDialog, profileForm, setProfileForm, handleUpdateProfile,
     cartPayments, setCartPayments, handleAddPayment, handleUpdatePayment, handleRemovePayment,
     businessSettings, handleUpdateBusinessSettings,
-    batchDialogOpen, setBatchDialogOpen, availableBatches, activeProductForBatch
+    batchDialogOpen, setBatchDialogOpen, availableBatches, activeProductForBatch,
+    heldCarts, handleHoldCart, handleResumeCart, handleDeleteHeldCart
   }
 }

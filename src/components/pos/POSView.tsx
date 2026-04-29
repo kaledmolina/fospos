@@ -166,6 +166,10 @@ export const POSView = ({
               userRole={pos.session?.user?.role}
               businessSettings={pos.businessSettings}
               currentBranch={pos.branches.find((b: any) => b.id === pos.selectedBranch)}
+              heldCarts={pos.heldCarts}
+              onHoldCart={pos.handleHoldCart}
+              onResumeCart={pos.handleResumeCart}
+              onDeleteHeldCart={pos.handleDeleteHeldCart}
             />
           )}
           {pos.posTab === "loyalty" && (

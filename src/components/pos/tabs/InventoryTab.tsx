@@ -9,6 +9,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { fadeInUp, staggerContainer } from "@/lib/animations"
 import { formatCurrency } from "@/lib/utils"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface InventoryTabProps {
   products: any[]
@@ -41,23 +47,42 @@ export const InventoryTab = ({
     <motion.div key="products" variants={fadeInUp} initial="initial" animate="animate" exit="exit">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-foreground">Productos</h1>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button variant="outline" className="cursor-pointer transition-all duration-200" onClick={() => onSetBulkUploadDialog(true)}>
-              <Upload className="w-4 h-4 mr-2" />Carga Masiva
-            </Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button variant="outline" className="cursor-pointer transition-all duration-200" onClick={() => onSetCategoryDialog(true)}>
-              <Plus className="w-4 h-4 mr-2" />Categoría
-            </Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => onSetProductDialog(true)}>
-              <Plus className="w-4 h-4 mr-2" />Producto
-            </Button>
-          </motion.div>
-        </div>
+        <TooltipProvider>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button variant="outline" className="cursor-pointer transition-all duration-200" onClick={() => onSetBulkUploadDialog(true)}>
+                    <Upload className="w-4 h-4 mr-2" />Carga Masiva
+                  </Button>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent>Importar productos desde un archivo Excel/CSV</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button variant="outline" className="cursor-pointer transition-all duration-200" onClick={() => onSetCategoryDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />Categoría
+                  </Button>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent>Crear una nueva categoría para organizar tus productos</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer transition-all duration-200 shadow-md shadow-primary/25" onClick={() => onSetProductDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />Producto
+                  </Button>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent>Registrar un nuevo producto en el sistema</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       </div>
       
       {categories.length > 0 && (
@@ -105,40 +130,59 @@ export const InventoryTab = ({
                   )}
                   {(userRole === "TENANT_ADMIN" || userRole === "SUPER_ADMIN" || userRole === "WAREHOUSE") && (
                     <>
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
-                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-primary hover:text-white"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onSetSelectedProductForStock(product)
-                          onSetStockAdjustmentDialog(true)
-                        }}
-                      >
-                        <Settings2 className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
-                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onSetProductDialog(true, product)
-                        }}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
-                        className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onDeleteProduct(product.id)
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="secondary" 
+                            size="icon" 
+                            className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-primary hover:text-white"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onSetSelectedProductForStock(product)
+                              onSetStockAdjustmentDialog(true)
+                            }}
+                          >
+                            <Settings2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">Ajuste de Stock / Kardex</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="secondary" 
+                            size="icon" 
+                            className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-blue-500 hover:text-white"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onSetProductDialog(true, product)
+                            }}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">Editar Producto</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="secondary" 
+                            size="icon" 
+                            className="w-8 h-8 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-sm opacity-70 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onDeleteProduct(product.id)
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">Eliminar Producto</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     </>
                   )}
                 </div>

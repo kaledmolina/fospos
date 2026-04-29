@@ -69,12 +69,8 @@ export const POSDashboard = ({
   const [openGroups, setOpenGroups] = useState<string[]>(["Operaciones"])
 
   const toggleGroup = (groupTitle: string) => {
-    if (openGroups.includes(groupTitle)) {
-      setOpenGroups(openGroups.filter(g => g !== groupTitle))
-    } else {
-      setOpenGroups([...openGroups, groupTitle])
-    }
-  }
+    setOpenGroups(prev => prev.includes(groupTitle) ? [] : [groupTitle])
+  };
 
   const menuGroups = useMemo(() => [
     {
@@ -186,7 +182,7 @@ export const POSDashboard = ({
             <motion.div
               whileHover={{ rotate: 10, scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="w-12 h-12 shrink-0 overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-2xl flex items-center justify-center shadow-[0_10px_20px_rgba(var(--primary),0.3)] border-2 border-white/30"
+              className="w-12 h-12 shrink-0 overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 border-2 border-white/30"
             >
               {currentBranch?.logoUrl ? (
                 <img src={currentBranch.logoUrl} alt="Logo" className="w-full h-full object-cover" />
@@ -271,7 +267,7 @@ export const POSDashboard = ({
                                   variant={posTab === item.id ? "default" : "ghost"}
                                   className={`w-full ${sidebarOpen ? "justify-start px-4 h-12" : "justify-center px-0 h-14"} cursor-pointer transition-all duration-300 relative group rounded-[1.25rem] border border-transparent
                                     ${posTab === item.id 
-                                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-[0_10px_20px_rgba(var(--primary),0.25)] border-white/10" 
+                                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/25 border-white/10" 
                                       : "hover:bg-white dark:hover:bg-zinc-800 hover:shadow-xl hover:shadow-black/5 hover:border-slate-200 dark:hover:border-zinc-700 text-muted-foreground/70 hover:text-primary"}`}
                                   onClick={() => onTabChangeWithEffects(item.id)}
                                 >
@@ -371,24 +367,34 @@ export const POSDashboard = ({
           <div className="flex-1 flex items-center justify-between bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl h-12 px-4 shadow-xl shadow-black/5">
             <div className="flex items-center gap-4">
               {!sidebarOpen && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95 lg:hidden"
-                  onClick={() => onSidebarOpenChange(true)}
-                >
-                  <Menu className="w-5 h-5" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95 lg:hidden"
+                      onClick={() => onSidebarOpenChange(true)}
+                    >
+                      <Menu className="w-5 h-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Expandir Menú</TooltipContent>
+                </Tooltip>
               )}
               {!sidebarOpen && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95 hidden lg:flex"
-                  onClick={() => onSidebarOpenChange(true)}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95 hidden lg:flex"
+                      onClick={() => onSidebarOpenChange(true)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Abrir Menú lateral</TooltipContent>
+                </Tooltip>
               )}
               <div className="hidden lg:flex items-center gap-3">
                 <div className="w-px h-6 bg-border/50 mx-1" />
@@ -403,80 +409,93 @@ export const POSDashboard = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-xl hover:bg-accent hidden sm:flex h-10 w-10 transition-all active:scale-95"
-                onClick={toggleFullscreen}
-                title={isFullscreen ? "Salir de Pantalla Completa" : "Pantalla Completa"}
-              >
-                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-xl hover:bg-accent hidden sm:flex h-10 w-10 transition-all active:scale-95"
+                    onClick={toggleFullscreen}
+                  >
+                    {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {isFullscreen ? "Salir de Pantalla Completa" : "Pantalla Completa"}
+                </TooltipContent>
+              </Tooltip>
 
               <div className="w-px h-6 bg-border mx-1" />
               <ThemeToggle />
               
-              <Popover onOpenChange={onNotificationsOpenChange}>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-10 h-10 transition-all active:scale-95">
-                    <Bell className="w-5 h-5" />
-                    {unreadNotifications > 0 && (
-                      <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)] animate-pulse" />
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-0 shadow-2xl border-border bg-card/95 backdrop-blur-md rounded-3xl overflow-hidden mt-2" align="end">
-                  <div className="p-4 bg-primary/5 border-b flex items-center justify-between">
-                    <div>
-                      <h3 className="font-black text-xs uppercase tracking-widest text-primary">Notificaciones</h3>
-                      <Badge variant="secondary" className="font-black text-[10px] h-5 mt-1">{unreadNotifications} Nuevas</Badge>
-                    </div>
-                    {(notifications?.length || 0) > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-[10px] h-6 px-2 uppercase font-black hover:text-primary transition-colors hover:bg-primary/10"
-                        onClick={() => {
-                           onClearNotifications()
-                           onNotificationsOpenChange(false)
-                        }}
-                      >
-                        Limpiar Todo
-                      </Button>
-                    )}
-                  </div>
-                  <ScrollArea className="h-80">
-                    {(notifications?.length || 0) === 0 ? (
-                      <div className="p-12 text-center flex flex-col items-center gap-2">
-                        <Bell className="w-8 h-8 text-muted-foreground/10" />
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Todo en orden</p>
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-border/50">
-                        {notifications.map(n => (
-                          <div key={n.id} className={`p-4 transition-colors hover:bg-accent/30 ${!n.isRead ? "bg-primary/5" : ""}`}>
-                            <div className="flex items-start gap-3">
-                              <div className={`mt-1 p-2 rounded-xl ${
-                                n.type === "LOW_STOCK" ? "bg-amber-100 text-amber-600 dark:bg-amber-500/10" :
-                                (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? "bg-red-100 text-red-600 dark:bg-red-500/10" :
-                                "bg-primary/10 text-primary"
-                              }`}>
-                                {n.type === "LOW_STOCK" ? <Package className="w-4 h-4" /> :
-                                 (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? <AlertCircle className="w-4 h-4" /> :
-                                 <Clock className="w-4 h-4" />}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-xs font-black leading-tight mb-1 uppercase tracking-tight">{n.title}</p>
-                                <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{n.message}</p>
-                              </div>
-                            </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex">
+                    <Popover onOpenChange={onNotificationsOpenChange}>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="relative hover:bg-accent rounded-xl w-10 h-10 transition-all active:scale-95">
+                          <Bell className="w-5 h-5" />
+                          {unreadNotifications > 0 && (
+                            <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full shadow-primary/50 animate-pulse" />
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-0 shadow-2xl border-border bg-card/95 backdrop-blur-md rounded-3xl overflow-hidden mt-2" align="end">
+                        <div className="p-4 bg-primary/5 border-b flex items-center justify-between">
+                          <div>
+                            <h3 className="font-black text-xs uppercase tracking-widest text-primary">Notificaciones</h3>
+                            <Badge variant="secondary" className="font-black text-[10px] h-5 mt-1">{unreadNotifications} Nuevas</Badge>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </PopoverContent>
-              </Popover>
+                          {(notifications?.length || 0) > 0 && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-[10px] h-6 px-2 uppercase font-black hover:text-primary transition-colors hover:bg-primary/10"
+                              onClick={() => {
+                                 onClearNotifications()
+                                 onNotificationsOpenChange(false)
+                              }}
+                            >
+                              Limpiar Todo
+                            </Button>
+                          )}
+                        </div>
+                        <ScrollArea className="h-80">
+                          {(notifications?.length || 0) === 0 ? (
+                            <div className="p-12 text-center flex flex-col items-center gap-2">
+                              <Bell className="w-8 h-8 text-muted-foreground/10" />
+                              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Todo en orden</p>
+                            </div>
+                          ) : (
+                            <div className="divide-y divide-border/50">
+                              {notifications.map(n => (
+                                <div key={n.id} className={`p-4 transition-colors hover:bg-accent/30 ${!n.isRead ? "bg-primary/5" : ""}`}>
+                                  <div className="flex items-start gap-3">
+                                    <div className={`mt-1 p-2 rounded-xl ${
+                                      n.type === "LOW_STOCK" ? "bg-amber-100 text-amber-600 dark:bg-amber-500/10" :
+                                      (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? "bg-red-100 text-red-600 dark:bg-red-500/10" :
+                                      "bg-primary/10 text-primary"
+                                    }`}>
+                                      {n.type === "LOW_STOCK" ? <Package className="w-4 h-4" /> :
+                                       (n.type === "CREDIT_OVERDUE" || n.type === "OVERDUE_CREDIT") ? <AlertCircle className="w-4 h-4" /> :
+                                       <Clock className="w-4 h-4" />}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-black leading-tight mb-1 uppercase tracking-tight">{n.title}</p>
+                                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{n.message}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </ScrollArea>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Notificaciones</TooltipContent>
+              </Tooltip>
 
               {/* Branch selector moved to sidebar */}
             </div>
