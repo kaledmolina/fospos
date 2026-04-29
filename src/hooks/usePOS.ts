@@ -665,6 +665,8 @@ export const usePOS = (session: any) => {
         minStock: parseFloat(String(productForm.minStock)) || 5,
         expiryDate: productForm.expiryDate && productForm.expiryDate !== "" ? productForm.expiryDate : null,
         categoryId: productForm.categoryId || null,
+        supplierId: productForm.supplierId || null,
+        batchNumber: productForm.batchNumber || null,
         branchId: selectedBranch,
         presentations: productForm.presentations
       }
@@ -717,6 +719,8 @@ export const usePOS = (session: any) => {
         minStock: parseFloat(String(productForm.minStock)) || 5,
         expiryDate: productForm.expiryDate && productForm.expiryDate !== "" ? productForm.expiryDate : null,
         categoryId: productForm.categoryId || null,
+        supplierId: productForm.supplierId || null,
+        batchNumber: productForm.batchNumber || null,
         presentations: productForm.presentations
       }
 

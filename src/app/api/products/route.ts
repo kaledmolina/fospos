@@ -172,7 +172,8 @@ export async function POST(request: NextRequest) {
           unit: unit || "unidad",
           categoryId: categoryId || null,
           isActive: isActive !== false,
-          expiryDate: safeDate
+          expiryDate: safeDate,
+          supplierId: supplierId || null
         },
         include: {
           category: true

@@ -72,7 +72,7 @@ export async function PATCH(
     const { 
       code, name, description, imageUrl,
       costPrice, salePrice, stock, minStock,
-      unit, categoryId, isActive 
+      unit, categoryId, isActive, supplierId
     } = body
 
     // Verificar que el producto pertenece al tenant
@@ -156,7 +156,8 @@ export async function PATCH(
           minStock,
           unit,
           categoryId: categoryId || null,
-          isActive
+          isActive,
+          supplierId: supplierId || null
         },
         include: {
           category: true,
