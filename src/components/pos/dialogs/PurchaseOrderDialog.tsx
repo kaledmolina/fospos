@@ -33,9 +33,23 @@ export const PurchaseOrderDialog = ({
   const [items, setItems] = useState<any[]>([])
   const [notes, setNotes] = useState("")
   const [loading, setLoading] = useState(false)
+  const [productBatches, setProductBatches] = useState<Record<string, any[]>>({})
+
+  const fetchBatches = async (productId: string) => {
+    if (!productId || productBatches[productId]) return
+    try {
+      const res = await fetch(`/api/products/${productId}/batches`)
+      const data = await res.json()
+      if (data.success) {
+        setProductBatches(prev => ({ ...prev, [productId]: data.data }))
+      }
+    } catch (error) {
+      console.error("Error fetching batches", error)
+    }
+  }
 
   const addItem = () => {
-    setItems([...items, { productId: "", quantity: 1, unitCost: 0, salePrice: 0, batchNumber: "", expiryDate: "" }])
+    setItems([...items, { productId: "", quantity: 1, unitCost: 0, salePrice: 0, batchNumber: "", expiryDate: "", batchId: "" }])
   }
 
   const removeItem = (index: number) => {
@@ -44,7 +58,30 @@ export const PurchaseOrderDialog = ({
 
   const updateItem = (index: number, field: string, value: any) => {
     const newItems = [...items]
-    newItems[index] = { ...newItems[index], [field]: value }
+    const updatedItem = { ...newItems[index], [field]: value }
+    
+    // Si se selecciona un producto, intentar cargar sus lotes
+    if (field === "productId" && value) {
+      fetchBatches(value)
+    }
+
+    // Si se selecciona un lote existente, autopoblar campos
+    if (field === "batchId" && value) {
+      const productId = updatedItem.productId
+      const batch = productBatches[productId]?.find(b => b.id === value)
+      if (batch) {
+        updatedItem.batchNumber = batch.batchNumber || ""
+        updatedItem.expiryDate = batch.expiryDate ? new Date(batch.expiryDate).toISOString().split('T')[0] : ""
+        updatedItem.salePrice = batch.salePrice || 0
+        updatedItem.unitCost = batch.costPrice || 0
+      }
+    } else if (field === "batchId" && value === "new") {
+      updatedItem.batchId = ""
+      updatedItem.batchNumber = ""
+      updatedItem.expiryDate = ""
+    }
+
+    newItems[index] = updatedItem
     setItems(newItems)
   }
 
@@ -196,13 +233,33 @@ export const PurchaseOrderDialog = ({
                         </div>
 
                         <div className="flex gap-4">
+                          <div className="flex-[2] space-y-1.5">
+                            <Label className="text-[9px] uppercase font-black text-indigo-600 dark:text-indigo-400 ml-1 tracking-wider">Lote / Existente</Label>
+                            <Select 
+                              value={item.batchId || "new"} 
+                              onValueChange={(val) => updateItem(index, "batchId", val)}
+                            >
+                              <SelectTrigger className="h-10 bg-indigo-50/50 dark:bg-indigo-900/20 border-none rounded-xl font-bold">
+                                <SelectValue placeholder="Nuevo Lote" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 shadow-xl">
+                                <SelectItem value="new" className="font-bold text-indigo-600 italic">+ Nuevo Lote</SelectItem>
+                                {item.productId && productBatches[item.productId]?.map(b => (
+                                  <SelectItem key={b.id} value={b.id} className="rounded-lg">
+                                    {b.batchNumber || 'Sin código'} <span className="text-[10px] opacity-60 ml-2">(${b.costPrice} | Stock: {b.quantity})</span>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <div className="flex-1 space-y-1.5">
-                            <Label className="text-[9px] uppercase font-black text-muted-foreground ml-1 tracking-wider opacity-60">Número de Lote</Label>
+                            <Label className="text-[9px] uppercase font-black text-muted-foreground ml-1 tracking-wider opacity-60">Código Lote</Label>
                             <Input 
                               value={item.batchNumber} 
                               onChange={(e) => updateItem(index, "batchNumber", e.target.value)}
                               className="h-10 bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20"
                               placeholder="Ej: AB-123"
+                              disabled={item.batchId && item.batchId !== "new"}
                             />
                           </div>
                           <div className="flex-1 space-y-1.5">
@@ -212,6 +269,7 @@ export const PurchaseOrderDialog = ({
                               value={item.expiryDate} 
                               onChange={(e) => updateItem(index, "expiryDate", e.target.value)}
                               className="h-10 bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20"
+                              disabled={item.batchId && item.batchId !== "new"}
                             />
                           </div>
                           <div className="text-right flex flex-col justify-end min-w-[80px] pb-1">
