@@ -66,8 +66,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: po });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating PO:", error);
-    return NextResponse.json({ success: false, error: "Error al crear la orden" }, { status: 500 });
+    return NextResponse.json({ success: false, error: `Error al crear la orden: ${error.message}` }, { status: 500 });
   }
+
 }

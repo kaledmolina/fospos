@@ -55,7 +55,8 @@ export const PurchaseOrderDialog = ({
   }
 
   const addItem = () => {
-    setItems([...items, { productId: "", quantity: 1, unitCost: 0, salePrice: 0, batchNumber: "", expiryDate: "", batchId: "" }])
+    setItems([...items, { productId: "", quantity: 1, unitCost: 0, salePrice: 0, batchNumber: "", expiryDate: "", batchId: null }])
+
   }
 
   const removeItem = (index: number) => {
@@ -87,7 +88,7 @@ export const PurchaseOrderDialog = ({
         updatedItem.unitCost = batch.costPrice || 0
       }
     } else if (field === "batchId" && value === "new") {
-      updatedItem.batchId = ""
+      updatedItem.batchId = null
       updatedItem.batchNumber = ""
       updatedItem.expiryDate = ""
       // Restaurar precios del producto base

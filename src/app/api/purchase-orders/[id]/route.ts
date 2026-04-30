@@ -218,6 +218,7 @@ export async function PATCH(
     return NextResponse.json({ success: false, error: "Estado inválido" }, { status: 400 });
   } catch (error: any) {
     console.error("Error updating PO:", error);
-    return NextResponse.json({ success: false, error: error.message || "Error al actualizar la orden" }, { status: 500 });
+    return NextResponse.json({ success: false, error: `Error al actualizar la orden: ${error.message}` }, { status: 500 });
   }
+
 }
