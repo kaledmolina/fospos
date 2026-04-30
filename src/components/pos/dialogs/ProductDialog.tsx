@@ -399,7 +399,7 @@ export const ProductDialog = ({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl">
-                            {["unidad", "kg", "litro", "metro", "paquete", "caja"].map(u => (
+                            {["unidad", "paquete", "caja", "docena", "bolsa", "kg", "lb", "g", "litro", "ml", "galón", "metro"].map(u => (
                               <SelectItem key={u} value={u} className="font-bold">{u}</SelectItem>
                             ))}
                           </SelectContent>
