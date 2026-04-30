@@ -107,6 +107,14 @@ export const PurchaseOrderDialog = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!supplierId || items.length === 0) return
+    
+    // Validar que todos los items tengan un producto seleccionado
+    const hasInvalidItems = items.some(item => !item.productId)
+    if (hasInvalidItems) {
+      toast.error("Datos incompletos", { description: "Asegúrate de seleccionar un producto para cada fila." })
+      return
+    }
+
 
     setLoading(true)
     try {
