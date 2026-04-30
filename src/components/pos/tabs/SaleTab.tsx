@@ -338,6 +338,13 @@ export const SaleTab = ({
                                   <Badge variant="destructive" className="text-[10px] font-black uppercase tracking-widest shadow-lg">Agotado</Badge>
                                 </div>
                               )}
+                              {product.presentations && product.presentations.length > 0 && (
+                                <div className="absolute top-2 left-2">
+                                  <Badge className="bg-indigo-500/90 text-white border-none shadow-sm text-[8px] font-black uppercase tracking-tighter">
+                                    Múltiples Unidades
+                                  </Badge>
+                                </div>
+                              )}
                               <div className="absolute top-2 right-2">
                                 <Badge className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-[10px] font-black text-primary border-none shadow-sm">
                                   {formatCurrency(product.salePrice)}
@@ -783,7 +790,14 @@ export const SaleTab = ({
                           {item.type === "PRODUCT" ? <Package className="w-4 h-4" /> : <RefreshCw className="w-4 h-4" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm truncate">{item.name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-bold text-sm truncate">{item.name}</p>
+                            {item.presentation && (
+                              <Badge variant="outline" className="h-4 px-1 text-[8px] font-black bg-indigo-50 text-indigo-500 border-indigo-200">
+                                {item.presentation.name}
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-[10px] text-muted-foreground">{formatCurrency(item.price)} x {item.quantity}</p>
                         </div>
                         <div className="flex items-center bg-background rounded-lg border p-0.5 shadow-sm">

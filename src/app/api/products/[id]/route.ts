@@ -143,7 +143,8 @@ export async function PATCH(
         }
       }
 
-      return tx.product.update({
+      // Actualizar el producto principal
+      const updatedProduct = await tx.product.update({
         where: { id },
         data: {
           code,
@@ -152,7 +153,7 @@ export async function PATCH(
           imageUrl,
           costPrice,
           salePrice,
-          stock,
+          stock, // Actualiza el stock global
           minStock,
           unit,
           categoryId: categoryId || null,
@@ -164,6 +165,26 @@ export async function PATCH(
           presentations: true
         }
       })
+
+      // SI se está editando desde una sucursal, actualizar también ProductStock
+      const targetBranchId = session.user.branchId || null
+      if (targetBranchId && stock !== undefined) {
+        await tx.productStock.upsert({
+          where: { productId_branchId: { productId: id, branchId: targetBranchId } },
+          create: {
+            productId: id,
+            branchId: targetBranchId,
+            stock: stock,
+            minStock: minStock || 5
+          },
+          update: {
+            stock: stock,
+            minStock: minStock || 5
+          }
+        })
+      }
+
+      return updatedProduct
     })
 
     // REGISTRO DE AUDITORÍA: Si hubo cambios sensibles

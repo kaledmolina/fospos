@@ -1861,8 +1861,9 @@ export const usePOS = (session: any) => {
           isActive: product.isActive,
           expiryDate: product.expiryDate ? product.expiryDate.split('T')[0] : "",
           imageUrl: product.imageUrl || "",
-          supplierId: "", // Logic to fetch last supplier if needed
-          batchNumber: "" // For existing products, batches are managed in advanced tab
+          supplierId: product.supplierId || "",
+          batchNumber: "", // For existing products, batches are managed in advanced tab
+          presentations: product.presentations || []
         })
       }
       setProductDialog(isOpen)
