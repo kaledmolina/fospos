@@ -129,7 +129,7 @@ export const PurchaseOrderDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-[650px] max-h-[90vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950 rounded-[2rem]">
+      <DialogContent className="w-[95vw] sm:max-w-[750px] h-[90vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-zinc-950 rounded-[2rem]">
         <div className="p-6 bg-slate-50/50 dark:bg-zinc-900/30 border-b backdrop-blur-md shrink-0">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-2xl font-black text-primary">
@@ -144,9 +144,9 @@ export const PurchaseOrderDialog = ({
           </DialogHeader>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 bg-white dark:bg-zinc-950">
-          <ScrollArea className="flex-1 p-6">
-            <div className="space-y-6 pb-4">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col h-full min-h-0 bg-white dark:bg-zinc-950 overflow-hidden">
+          <ScrollArea className="flex-1 min-h-0">
+            <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground ml-1">Sucursal de Destino</Label>
