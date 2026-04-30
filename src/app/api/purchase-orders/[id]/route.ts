@@ -33,12 +33,13 @@ export async function GET(
       where: {
         referenceType: "PURCHASE_ORDER",
         referenceId: po.id,
-        type: "IN"
+        type: { in: ["IN", "PURCHASE"] } // Soportar ambos por compatibilidad
       },
       select: {
         batchId: true,
         productId: true
       }
+
     });
 
     const batchIds = movements.map(m => m.batchId).filter(Boolean) as string[];
