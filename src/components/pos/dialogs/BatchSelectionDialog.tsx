@@ -63,7 +63,10 @@ export const BatchSelectionDialog = ({
                   key={batch.id}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedId(batch.id)}
+                  onClick={() => {
+                    onSelect(batch)
+                    onOpenChange(false)
+                  }}
                   className={`
                     cursor-pointer p-4 rounded-2xl border-2 transition-all duration-300
                     ${selectedId === batch.id 
@@ -113,24 +116,8 @@ export const BatchSelectionDialog = ({
             </div>
           </ScrollArea>
         </div>
-
-        <DialogFooter className="p-4 bg-slate-50 dark:bg-zinc-900/50 border-t border-slate-100 dark:border-zinc-800 gap-2 sm:gap-0">
-          <Button 
-            variant="ghost" 
-            className="rounded-xl font-bold text-xs uppercase cursor-pointer"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            disabled={!selectedId}
-            className="rounded-xl bg-primary hover:bg-primary font-black text-xs uppercase tracking-widest px-8 shadow-lg shadow-primary/20 cursor-pointer transition-all hover:scale-105 active:scale-95"
-            onClick={handleConfirm}
-          >
-            Siguiente
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
+
   )
 }
