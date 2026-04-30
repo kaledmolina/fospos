@@ -124,10 +124,23 @@ export const PurchaseOrderDetailDialog = ({
                       ROI: {po.stats.roi.toFixed(1)}%
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
                     <div className="space-y-1">
-                      <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Recuperado</p>
+                      <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Ventas Totales</p>
                       <p className="text-xl font-black tabular-nums">{formatCurrency(po.stats.totalRecovered)}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Dinero en Caja</p>
+                      <p className="text-xl font-black tabular-nums text-white">
+                        {formatCurrency(po.stats.actualCashRecovered)}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-bold text-amber-200 uppercase tracking-wider">Por Cobrar</p>
+                      <p className="text-xl font-black tabular-nums text-amber-200">
+                        {formatCurrency(po.stats.pendingCredit)}
+                      </p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Ganancia Real</p>
@@ -135,24 +148,27 @@ export const PurchaseOrderDetailDialog = ({
                         {formatCurrency(po.stats.grossProfit)}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Balance OC</p>
-                      <p className={`text-xl font-black tabular-nums ${po.stats.recoveryBalance >= 0 ? 'text-white' : 'text-emerald-200/50'}`}>
-                        {formatCurrency(po.stats.recoveryBalance)}
-                      </p>
-                    </div>
                   </div>
-
                   <div className="pt-2">
-                    <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                    <div className="h-2 bg-black/10 rounded-full overflow-hidden flex">
                       <div 
                         className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-1000" 
-                        style={{ width: `${Math.min(100, (po.stats.totalRecovered / po.totalAmount) * 100)}%` }} 
+                        style={{ width: `${Math.min(100, (po.stats.actualCashRecovered / po.totalAmount) * 100)}%` }} 
+                      />
+                      <div 
+                        className="h-full bg-amber-400/50 transition-all duration-1000" 
+                        style={{ width: `${Math.min(100, (po.stats.pendingCredit / po.totalAmount) * 100)}%` }} 
                       />
                     </div>
-                    <p className="text-[9px] font-bold mt-2 text-emerald-100/80">
-                      Has recuperado el {((po.stats.totalRecovered / po.totalAmount) * 100).toFixed(1)}% de la inversión inicial
-                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-[9px] font-bold text-emerald-100/80">
+                        Liquidez: {((po.stats.actualCashRecovered / po.totalAmount) * 100).toFixed(1)}% 
+                        {po.stats.pendingCredit > 0 && ` (+${((po.stats.pendingCredit / po.totalAmount) * 100).toFixed(1)}% en crédito)`}
+                      </p>
+                      <p className="text-[9px] font-black uppercase tracking-tighter text-emerald-100/50">
+                        Balance OC: {formatCurrency(po.stats.recoveryBalance)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}

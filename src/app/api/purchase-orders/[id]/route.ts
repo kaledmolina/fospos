@@ -44,10 +44,17 @@ export async function GET(
 
     const batchIds = movements.map(m => m.batchId).filter(Boolean) as string[];
 
-    // Obtener todas las ventas ligadas a estos lotes
+    // Obtener todas las ventas ligadas a estos lotes e incluir información de crédito
     const sales = await db.saleItem.findMany({
       where: {
         batchId: { in: batchIds }
+      },
+      include: {
+        sale: {
+          include: {
+            credit: true
+          }
+        }
       }
     });
 
@@ -75,6 +82,19 @@ export async function GET(
     const grossProfit = totalRecovered - totalCostOfSold;
     const recoveryBalance = totalRecovered - po.totalAmount;
 
+    // Calcular qué parte de lo recuperado está aún en crédito (pendiente de cobro)
+    const pendingCredit = sales.reduce((sum, s) => {
+      if (s.sale.credit) {
+        // El crédito es por el TOTAL de la venta, prorrateamos la parte de este item
+        const itemWeight = s.subtotal / s.sale.totalAmount;
+        const itemPending = (s.sale.credit.totalAmount - s.sale.credit.paidAmount) * itemWeight;
+        return sum + itemPending;
+      }
+      return sum;
+    }, 0);
+
+    const actualCashRecovered = totalRecovered - pendingCredit;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -84,8 +104,11 @@ export async function GET(
           totalRecovered,
           grossProfit,
           recoveryBalance,
+          pendingCredit,
+          actualCashRecovered,
           roi: po.totalAmount > 0 ? (recoveryBalance / po.totalAmount) * 100 : 0
         }
+
       }
     });
 
