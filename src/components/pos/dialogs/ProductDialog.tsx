@@ -494,13 +494,48 @@ export const ProductDialog = ({
                     type="button" 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => onProductFormChange({
-                      ...productForm,
-                      presentations: [...(productForm.presentations || []), { name: "", unit: "", conversionFactor: 1, price: null }]
-                    })}
+                    onClick={() => {
+                      const baseUnit = productForm.unit?.toLowerCase();
+                      const existing = productForm.presentations || [];
+                      let newPres = { name: "", unit: "", conversionFactor: 1, price: null };
+
+                      // Sugerencias inteligentes basadas en unidad base
+                      if (baseUnit === "kg") {
+                        const suggestions = [
+                          { name: "Libra", unit: "lb", conversionFactor: 0.5 },
+                          { name: "Media Libra", unit: "1/2 lb", conversionFactor: 0.25 },
+                          { name: "Gramos", unit: "g", conversionFactor: 0.001 }
+                        ];
+                        const next = suggestions.find(s => !existing.some((e: any) => e.name.toLowerCase() === s.name.toLowerCase()));
+                        if (next) newPres = { ...next, price: null };
+                      } else if (baseUnit === "litro") {
+                        const suggestions = [
+                          { name: "Medio Litro", unit: "500ml", conversionFactor: 0.5 },
+                          { name: "Cuarto de Litro", unit: "250ml", conversionFactor: 0.25 },
+                          { name: "Mililitros", unit: "ml", conversionFactor: 0.001 }
+                        ];
+                        const next = suggestions.find(s => !existing.some((e: any) => e.name.toLowerCase() === s.name.toLowerCase()));
+                        if (next) newPres = { ...next, price: null };
+                      } else if (baseUnit === "unidad") {
+                        const suggestions = [
+                          { name: "Docena", unit: "doc", conversionFactor: 12 },
+                          { name: "Media Docena", unit: "1/2 doc", conversionFactor: 6 },
+                          { name: "Paca / Paquete", unit: "pq", conversionFactor: 24 }
+                        ];
+                        const next = suggestions.find(s => !existing.some((e: any) => e.name.toLowerCase() === s.name.toLowerCase()));
+                        if (next) newPres = { ...next, price: null };
+                      } else if (baseUnit === "paquete" || baseUnit === "caja") {
+                        newPres = { name: "Unidad Individual", unit: "und", conversionFactor: (1/12), price: null };
+                      }
+
+                      onProductFormChange({
+                        ...productForm,
+                        presentations: [...existing, newPres]
+                      });
+                    }}
                     className="h-8 text-[10px] font-bold uppercase tracking-wider gap-1.5 rounded-xl border-primary/20 text-primary hover:bg-primary/10"
                   >
-                    <Plus className="w-3 h-3" /> Añadir Presentación
+                    <Plus className="w-3 h-3" /> Añadir Sugerencia
                   </Button>
                 </div>
 
