@@ -105,6 +105,7 @@ export const StockAdjustmentDialog = ({
             <Input 
               id="quantity"
               type="number" 
+              step="any"
               value={quantity} 
               onChange={(e) => setQuantity(Number(e.target.value))}
               placeholder={type === "ADJUSTMENT" ? "Ej: 100" : "Ej: 10"}

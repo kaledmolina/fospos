@@ -306,20 +306,6 @@ export async function POST(request: NextRequest) {
           });
           if (!productStock) throw new Error(`El producto ${product.name} no está en esta sucursal`);
           
-          // Validación y deducción por LOTE
-          let currentBatch = null;
-          if (item.batchId) {
-            currentBatch = await tx.productBatch.findUnique({ where: { id: item.batchId } });
-            if (!currentBatch) throw new Error(`Lote ${item.batchId} no encontrado`);
-            if (currentBatch.quantity < item.quantity) throw new Error(`Stock insuficiente en el lote seleccionado (${currentBatch.batchNumber})`);
-          } else if (productStock.stock < item.quantity) {
-             throw new Error(`Stock insuficiente para ${product.name}`);
-          }
-
-          // El precio de venta viene del carrito (que ya considera el lote si se eligió)
-          const salePrice = item.unitPrice || product.salePrice;
-          const costPrice = currentBatch?.costPrice || product.costPrice || 0;
-
           // Gestión de Presentación (Unidades/Fraccionamiento)
           let conversionFactor = 1;
           let presentationName = "";
@@ -332,6 +318,22 @@ export async function POST(request: NextRequest) {
           }
 
           const quantityToDeduct = item.quantity * conversionFactor;
+
+          // Validación y deducción por LOTE o Stock General
+          let currentBatch = null;
+          if (item.batchId) {
+            currentBatch = await tx.productBatch.findUnique({ where: { id: item.batchId } });
+            if (!currentBatch) throw new Error(`Lote ${item.batchId} no encontrado`);
+            if (currentBatch.quantity < quantityToDeduct) {
+              throw new Error(`Stock insuficiente en el lote seleccionado (${currentBatch.batchNumber}). Requerido: ${quantityToDeduct}, Disponible: ${currentBatch.quantity}`);
+            }
+          } else if (productStock.stock < quantityToDeduct) {
+             throw new Error(`Stock insuficiente para ${product.name}. Requerido: ${quantityToDeduct}, Disponible: ${productStock.stock}`);
+          }
+
+          // El precio de venta viene del carrito (que ya considera el lote si se eligió)
+          const salePrice = item.unitPrice || product.salePrice;
+          const costPrice = currentBatch?.costPrice || product.costPrice || 0;
 
           const itemSubtotal = salePrice * item.quantity - (item.discount || 0);
           subtotal += itemSubtotal;

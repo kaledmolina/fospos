@@ -409,8 +409,9 @@ export const ProductDialog = ({
                         <Label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-wider">Carga<br/>Inicial</Label>
                         <Input 
                           type="number" 
+                          step="any"
                           value={productForm.stock} 
-                          onChange={e => onProductFormChange({ ...productForm, stock: parseInt(e.target.value) || 0 })} 
+                          onChange={e => onProductFormChange({ ...productForm, stock: parseFloat(e.target.value) || 0 })} 
                           className="h-8 font-black text-xl border-none bg-transparent focus:ring-0 shadow-none p-0"
                         />
                       </div>
@@ -423,8 +424,9 @@ export const ProductDialog = ({
                         </div>
                         <Input 
                           type="number" 
+                          step="any"
                           value={productForm.minStock} 
-                          onChange={e => onProductFormChange({ ...productForm, minStock: parseInt(e.target.value) || 5 })} 
+                          onChange={e => onProductFormChange({ ...productForm, minStock: parseFloat(e.target.value) || 5 })} 
                           className="w-16 h-10 text-xl font-black text-rose-600 border-none bg-transparent focus:ring-0 shadow-none text-right p-0"
                         />
                       </div>

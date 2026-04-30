@@ -67,7 +67,9 @@ export async function GET(request: NextRequest) {
       return {
         ...p,
         stock: currentStock,
-        minStock: currentMinStock
+        minStock: currentMinStock,
+        presentations: p.presentations || [], // Asegurar que las presentaciones se incluyan
+        category: p.category
       }
     })
 

@@ -41,6 +41,15 @@ export interface ProductData {
   isActive: boolean
   category: { id: string; name: string; color: string | null } | null
   batches?: ProductBatchData[]
+  presentations?: ProductPresentationData[]
+}
+
+export interface ProductPresentationData {
+  id: string
+  name: string
+  unit: string
+  conversionFactor: number
+  price: number | null
 }
 
 export interface ProductBatchData {

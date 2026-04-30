@@ -851,7 +851,7 @@ export const usePOS = (session: any) => {
     } catch { toast.error("Error al crear cliente") }
   }
 
-  const addToCart = async (product: ProductData, selectedBatch?: ProductBatchData, selectedPresentation?: any) => {
+  const addToCart = async (product: ProductData, selectedBatch?: ProductBatchData, selectedPresentation?: any, skipPresentationCheck: boolean = false) => {
     // Check if stock is 0 (global or branch)
     if (product.stock <= 0) {
       toast.error(`Producto sin stock: ${product.name}`)
@@ -859,7 +859,7 @@ export const usePOS = (session: any) => {
     }
 
     // SI TIENE PRESENTACIONES Y NO SE HA SELECCIONADO UNA, PREGUNTAR
-    if (!selectedPresentation && product.presentations && product.presentations.length > 0) {
+    if (!selectedPresentation && !skipPresentationCheck && product.presentations && product.presentations.length > 0) {
       setActiveProductForPresentation(product)
       setPresentationDialogOpen(true)
       return
@@ -910,14 +910,14 @@ export const usePOS = (session: any) => {
         toast.error(`No hay suficiente stock ${selectedBatch ? 'en este lote' : ''} para ${product.name}`)
         return
       }
-      setCart(cart.map(item => item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item))
+      setCart(prev => prev.map(item => item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item))
     } else {
       if (stockQuantityToDeduct > stockToConsider) {
         toast.error(`No hay suficiente stock para ${product.name}`)
         return
       }
 
-      setCart([...cart, { 
+      setCart(prev => [...prev, { 
         id: cartItemId, 
         name: selectedPresentation 
           ? `${product.name} (${selectedPresentation.name})` 
@@ -1028,12 +1028,17 @@ export const usePOS = (session: any) => {
     }
 
     const item = cart.find(c => c.id === id)
-    if (item && item.type === "PRODUCT" && quantity > item.data.stock) {
-      toast.error(`Stock insuficiente para ${item.name}`)
-      return
+    if (item && item.type === "PRODUCT") {
+      const factor = item.presentation?.conversionFactor || 1
+      const totalStockNeeded = quantity * factor
+      
+      if (totalStockNeeded > item.data.stock) {
+        toast.error(`Stock insuficiente para ${item.name}. Disponible: ${item.data.stock} ${item.data.unit}`)
+        return
+      }
     }
 
-    setCart(cart.map(item => item.id === id ? { ...item, quantity } : item))
+    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity } : item))
   }
 
   const getCartTotal = () => {
@@ -1840,7 +1845,8 @@ export const usePOS = (session: any) => {
           code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
           expiryDate: "", imageUrl: "", supplierId: "",
-          batchNumber: `LOT-${Math.floor(100000 + Math.random() * 900000)}` // Auto-generate lot
+          batchNumber: `LOT-${Math.floor(100000 + Math.random() * 900000)}`, // Auto-generate lot
+          presentations: []
         })
         setEditingProduct(null)
       } else if (isOpen && product) {

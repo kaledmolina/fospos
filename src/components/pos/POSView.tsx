@@ -571,14 +571,14 @@ export const POSView = ({
         onOpenChange={pos.setBatchDialogOpen}
         product={pos.activeProductForBatch}
         batches={pos.availableBatches}
-        onSelect={(batch) => pos.addToCart(pos.activeProductForBatch!, batch, pos.activePresentation)}
+        onSelect={(batch) => pos.addToCart(pos.activeProductForBatch!, batch, pos.activePresentation, true)}
       />
 
       <PresentationSelectionDialog 
         open={pos.presentationDialogOpen}
         onOpenChange={pos.setPresentationDialogOpen}
         product={pos.activeProductForPresentation}
-        onSelect={(pres) => pos.addToCart(pos.activeProductForPresentation!, undefined, pres)}
+        onSelect={(pres) => pos.addToCart(pos.activeProductForPresentation!, undefined, pres, true)}
       />
     </>
   )
