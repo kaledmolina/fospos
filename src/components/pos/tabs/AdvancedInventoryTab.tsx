@@ -254,14 +254,83 @@ export const AdvancedInventoryTab = ({ products, branches, selectedBranch, onRef
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="space-y-4"
+            className="space-y-6"
           >
+            {/* Stats Section */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="border-none shadow-xl shadow-primary/5 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl overflow-hidden group hover:scale-[1.02] transition-all duration-500">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary/20">
+                      <TrendingUp className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-black text-primary tracking-widest opacity-70">Inversión Total</p>
+                      <h3 className="text-xl font-black tracking-tighter">{formatCurrency(purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0))}</h3>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-none shadow-xl shadow-emerald-500/5 bg-gradient-to-br from-emerald-500/5 to-transparent rounded-3xl overflow-hidden group hover:scale-[1.02] transition-all duration-500">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-emerald-500 rounded-2xl shadow-lg shadow-emerald-500/20">
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-black text-emerald-600 tracking-widest opacity-70">Recibidas</p>
+                      <h3 className="text-xl font-black tracking-tighter">
+                        {purchaseOrders.filter(po => po.status === "RECEIVED").length} <span className="text-xs font-bold text-muted-foreground ml-1">órdenes</span>
+                      </h3>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-none shadow-xl shadow-amber-500/5 bg-gradient-to-br from-amber-500/5 to-transparent rounded-3xl overflow-hidden group hover:scale-[1.02] transition-all duration-500">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-amber-500 rounded-2xl shadow-lg shadow-amber-500/20">
+                      <Clock className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-black text-amber-600 tracking-widest opacity-70">Pendientes</p>
+                      <h3 className="text-xl font-black tracking-tighter">
+                        {purchaseOrders.filter(po => po.status === "PENDING").length} <span className="text-xs font-bold text-muted-foreground ml-1">órdenes</span>
+                      </h3>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-none shadow-xl shadow-blue-500/5 bg-gradient-to-br from-blue-500/5 to-transparent rounded-3xl overflow-hidden group hover:scale-[1.02] transition-all duration-500">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-500 rounded-2xl shadow-lg shadow-blue-500/20">
+                      <Calendar className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-black text-blue-600 tracking-widest opacity-70">Inversión Mes</p>
+                      <h3 className="text-xl font-black tracking-tighter">
+                        {formatCurrency(
+                          purchaseOrders
+                            .filter(po => new Date(po.createdAt).getMonth() === new Date().getMonth())
+                            .reduce((sum, po) => sum + po.totalAmount, 0)
+                        )}
+                      </h3>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card className="border border-slate-100 dark:border-zinc-800 shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl rounded-3xl overflow-hidden">
               <CardHeader className="pb-4 border-b border-slate-50 dark:border-zinc-900/50 bg-slate-50/30 dark:bg-zinc-900/20">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <CardTitle className="text-xl font-black tracking-tight">Órdenes de Compra</CardTitle>
-                    <CardDescription className="text-sm font-medium">Abastece tu inventario con tus proveedores estratégicos</CardDescription>
+                    <CardTitle className="text-xl font-black tracking-tight">Registro de Órdenes</CardTitle>
+                    <CardDescription className="text-sm font-medium">Historial detallado de compras a proveedores</CardDescription>
                   </div>
                   <Button 
                     className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary shadow-xl shadow-primary/20 rounded-xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer disabled:cursor-not-allowed group"
@@ -271,7 +340,8 @@ export const AdvancedInventoryTab = ({ products, branches, selectedBranch, onRef
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
+
                 <div className="grid grid-cols-1 gap-4">
                   {purchaseOrders.map((po) => (
                     <div key={po.id} className="group p-5 rounded-3xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-primary/50 transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-primary/5">

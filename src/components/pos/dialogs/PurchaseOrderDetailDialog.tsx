@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/utils"
 import { Truck, Printer, Package, Calendar, User, FileText } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { useState, useEffect } from "react"
 
 interface PurchaseOrderDetailDialogProps {
   open: boolean
@@ -21,8 +22,34 @@ interface PurchaseOrderDetailDialogProps {
 export const PurchaseOrderDetailDialog = ({
   open,
   onOpenChange,
-  po
+  po: initialPo
 }: PurchaseOrderDetailDialogProps) => {
+  const [po, setPo] = useState<any>(initialPo)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (open && initialPo) {
+      fetchDetailedPO()
+    } else {
+      setPo(initialPo)
+    }
+  }, [open, initialPo])
+
+  const fetchDetailedPO = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/purchase-orders/${initialPo.id}`)
+      const data = await res.json()
+      if (data.success) {
+        setPo(data.data)
+      }
+    } catch (error) {
+      console.error("Error fetching detailed PO:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (!po) return null
 
   const handlePrint = () => {
@@ -85,6 +112,43 @@ export const PurchaseOrderDetailDialog = ({
                   <p className="text-xs text-muted-foreground font-medium">Recepción: {po.status === "RECEIVED" ? "Confirmada" : "Pendiente"}</p>
                 </div>
               </div>
+
+              {po.stats && po.status === "RECEIVED" && (
+                <div className="md:col-span-2 p-5 rounded-[2.5rem] bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-xl shadow-emerald-500/20 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-emerald-200" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Seguimiento de Recuperación</span>
+                    </div>
+                    <Badge className="bg-white/20 text-white border-none font-black text-[10px]">
+                      ROI: {po.stats.roi.toFixed(1)}%
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-emerald-100/70">Dinero Recuperado (Ventas)</p>
+                      <p className="text-3xl font-black tabular-nums">{formatCurrency(po.stats.totalRecovered)}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-emerald-100/70">Utilidad Bruta</p>
+                      <p className={`text-3xl font-black tabular-nums ${po.stats.totalProfit >= 0 ? 'text-white' : 'text-red-200'}`}>
+                        {formatCurrency(po.stats.totalProfit)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-2">
+                    <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-1000" 
+                        style={{ width: `${Math.min(100, (po.stats.totalRecovered / po.totalAmount) * 100)}%` }} 
+                      />
+                    </div>
+                    <p className="text-[9px] font-bold mt-2 text-emerald-100/80">
+                      Has recuperado el {((po.stats.totalRecovered / po.totalAmount) * 100).toFixed(1)}% de la inversión inicial
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Tabla de Productos */}
@@ -102,8 +166,8 @@ export const PurchaseOrderDetailDialog = ({
                       <th className="px-6 py-4 text-center">Cantidad</th>
                       <th className="px-6 py-4 text-center">Lote / Vence</th>
                       <th className="px-6 py-4 text-right">Costo Unit.</th>
-                      <th className="px-6 py-4 text-right">Venta Sug.</th>
                       <th className="px-6 py-4 text-right">Subtotal</th>
+                      {po.stats && <th className="px-6 py-4 text-right bg-emerald-500/5">Recuperado</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-zinc-800/50">
@@ -127,12 +191,23 @@ export const PurchaseOrderDetailDialog = ({
                         <td className="px-6 py-4 text-right font-medium text-muted-foreground tabular-nums">
                           {formatCurrency(item.unitCost)}
                         </td>
-                        <td className="px-6 py-4 text-right font-bold text-emerald-600 tabular-nums">
-                          {formatCurrency(item.salePrice || 0)}
-                        </td>
                         <td className="px-6 py-4 text-right font-black text-foreground tabular-nums">
                           {formatCurrency(item.subtotal)}
                         </td>
+                        {item.stats && (
+                          <td className="px-6 py-4 text-right bg-emerald-500/5">
+                            <div className="font-black text-emerald-600 tabular-nums">{formatCurrency(item.stats.amountRecovered)}</div>
+                            <div className="text-[9px] font-bold text-muted-foreground">
+                              {item.stats.quantitySold} / {item.quantity} vendidas
+                            </div>
+                            <div className="w-full h-1 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                              <div 
+                                className="h-full bg-emerald-500" 
+                                style={{ width: `${item.stats.percentageRecovered}%` }}
+                              />
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

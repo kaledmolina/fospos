@@ -3,6 +3,93 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+// GET - Obtener detalle de orden con estadísticas de recuperación (ROI)
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user.tenantId) return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
+
+    const po = await db.purchaseOrder.findUnique({
+      where: { id },
+      include: {
+        supplier: true,
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    if (!po) return NextResponse.json({ success: false, error: "Orden no encontrada" }, { status: 404 });
+
+    // Calcular estadísticas de recuperación
+    // Buscamos los movimientos de entrada vinculados a esta OC para obtener los lotes
+    const movements = await db.inventoryMovement.findMany({
+      where: {
+        referenceType: "PURCHASE_ORDER",
+        referenceId: po.id,
+        type: "IN"
+      },
+      select: {
+        batchId: true,
+        productId: true
+      }
+    });
+
+    const batchIds = movements.map(m => m.batchId).filter(Boolean) as string[];
+
+    // Obtener todas las ventas ligadas a estos lotes
+    const sales = await db.saleItem.findMany({
+      where: {
+        batchId: { in: batchIds }
+      }
+    });
+
+    // Calcular recuperación por producto
+    const itemsWithStats = po.items.map(item => {
+      // Encontrar el lote correspondiente a este producto en esta OC
+      const movement = movements.find(m => m.productId === item.productId);
+      const batchSales = sales.filter(s => s.batchId === movement?.batchId);
+      
+      const quantitySold = batchSales.reduce((sum, s) => sum + s.quantity, 0);
+      const amountRecovered = batchSales.reduce((sum, s) => sum + s.subtotal, 0);
+      
+      return {
+        ...item,
+        stats: {
+          quantitySold,
+          amountRecovered,
+          percentageRecovered: item.quantity > 0 ? (quantitySold / item.quantity) * 100 : 0
+        }
+      };
+    });
+
+    const totalRecovered = sales.reduce((sum, s) => sum + s.subtotal, 0);
+    const totalProfit = totalRecovered - po.totalAmount;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...po,
+        items: itemsWithStats,
+        stats: {
+          totalRecovered,
+          totalProfit,
+          roi: po.totalAmount > 0 ? (totalProfit / po.totalAmount) * 100 : 0
+        }
+      }
+    });
+
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
 // PATCH - Actualizar estado de orden de compra (Recibir mercancía)
 export async function PATCH(
   request: NextRequest,
@@ -57,6 +144,8 @@ export async function PATCH(
           });
 
           // 4. CREACIÓN DE LOTE (Nuevo: Sistema de Gestión de Lotes)
+          const product = await tx.product.findUnique({ where: { id: item.productId } });
+          
           const batch = await tx.productBatch.create({
             data: {
               productId: item.productId,
@@ -65,10 +154,11 @@ export async function PATCH(
               batchNumber: item.batchNumber || `LOT-${new Date().getTime().toString().slice(-6)}`,
               quantity: item.quantity,
               costPrice: item.unitCost,
-              salePrice: item.salePrice || product.salePrice, // Si no se define en la PO, usar el actual del producto
+              salePrice: item.salePrice || product?.salePrice || 0,
               expiryDate: item.expiryDate || null,
             }
           });
+
 
           // 5. Registrar en Kardex
           await tx.inventoryMovement.create({
