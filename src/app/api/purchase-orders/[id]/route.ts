@@ -202,6 +202,9 @@ export async function PATCH(
           where: { id },
           data: { status: "RECEIVED" }
         });
+      }, {
+        maxWait: 5000,
+        timeout: 15000
       });
 
       return NextResponse.json({ success: true, data: result });

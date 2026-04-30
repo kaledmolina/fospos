@@ -614,7 +614,11 @@ export async function POST(request: NextRequest) {
       }
 
       return sale;
+    }, {
+      maxWait: 5000,
+      timeout: 15000
     });
+
 
     return NextResponse.json({ success: true, message: "Éxito", data: result });
   } catch (error: any) {
