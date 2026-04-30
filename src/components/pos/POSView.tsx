@@ -350,6 +350,7 @@ export const POSView = ({
             <AdvancedInventoryTab 
               products={pos.products}
               branches={pos.branches}
+              selectedBranch={pos.selectedBranch}
               onRefreshData={pos.fetchPOSData}
             />
           )}

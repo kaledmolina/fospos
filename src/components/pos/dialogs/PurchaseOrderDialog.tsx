@@ -19,6 +19,8 @@ interface PurchaseOrderDialogProps {
   onOpenChange: (open: boolean) => void
   suppliers: any[]
   products: any[]
+  branches?: any[]
+  selectedBranch?: string | null
   onCreate: (data: any) => Promise<void>
 }
 
@@ -27,18 +29,22 @@ export const PurchaseOrderDialog = ({
   onOpenChange,
   suppliers,
   products,
+  branches = [],
+  selectedBranch: initialBranch = null,
   onCreate
 }: PurchaseOrderDialogProps) => {
   const [supplierId, setSupplierId] = useState("")
+  const [targetBranchId, setTargetBranchId] = useState<string>(initialBranch || "")
   const [items, setItems] = useState<any[]>([])
   const [notes, setNotes] = useState("")
   const [loading, setLoading] = useState(false)
   const [productBatches, setProductBatches] = useState<Record<string, any[]>>({})
 
   const fetchBatches = async (productId: string) => {
-    if (!productId || productBatches[productId]) return
+    if (!productId || !targetBranchId) return
+    // Reset batches for this product if branch changed
     try {
-      const res = await fetch(`/api/products/${productId}/batches`)
+      const res = await fetch(`/api/products/${productId}/batches?branchId=${targetBranchId}`)
       const data = await res.json()
       if (data.success) {
         setProductBatches(prev => ({ ...prev, [productId]: data.data }))
@@ -106,6 +112,7 @@ export const PurchaseOrderDialog = ({
     try {
       await onCreate({
         supplierId,
+        branchId: targetBranchId,
         items,
         notes
       })
@@ -140,28 +147,50 @@ export const PurchaseOrderDialog = ({
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 bg-white dark:bg-zinc-950">
           <ScrollArea className="flex-1 p-6">
             <div className="space-y-6 pb-4">
-              <div className="space-y-2">
-                <Label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground ml-1">Proveedor</Label>
-                <Select value={supplierId} onValueChange={setSupplierId}>
-                  <SelectTrigger className="h-12 border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 rounded-xl focus:ring-emerald-500/20 transition-all">
-                    <SelectValue placeholder={suppliers.length === 0 ? "No hay proveedores registrados" : "Selecciona un proveedor"} />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 shadow-xl">
-                    {suppliers.length === 0 ? (
-                      <div className="p-4 text-center">
-                        <p className="text-xs text-muted-foreground mb-2">No tienes proveedores creados</p>
-                        <p className="text-[10px] font-bold text-primary">Ve a la pestaña de Proveedores para crear uno</p>
-                      </div>
-                    ) : (
-                      suppliers.map(s => (
-                        <SelectItem key={s.id} value={s.id} className="rounded-lg focus:bg-primary/10">
-                          {s.name} <span className="text-[10px] text-muted-foreground ml-2 opacity-60">({s.taxId || "Sin NIT"})</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground ml-1">Sucursal de Destino</Label>
+                  <Select value={targetBranchId} onValueChange={(val) => {
+                    setTargetBranchId(val)
+                    setProductBatches({}) // Reset batches when branch changes
+                  }}>
+                    <SelectTrigger className="h-12 border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 rounded-xl focus:ring-primary/20 transition-all">
+                      <SelectValue placeholder="Selecciona sucursal" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 shadow-xl">
+                      {branches.map(b => (
+                        <SelectItem key={b.id} value={b.id} className="rounded-lg">
+                          {b.name}
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground ml-1">Proveedor</Label>
+                  <Select value={supplierId} onValueChange={setSupplierId}>
+                    <SelectTrigger className="h-12 border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 rounded-xl focus:ring-emerald-500/20 transition-all">
+                      <SelectValue placeholder={suppliers.length === 0 ? "No hay proveedores registrados" : "Selecciona un proveedor"} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 shadow-xl">
+                      {suppliers.length === 0 ? (
+                        <div className="p-4 text-center">
+                          <p className="text-xs text-muted-foreground mb-2">No tienes proveedores creados</p>
+                          <p className="text-[10px] font-bold text-primary">Ve a la pestaña de Proveedores para crear uno</p>
+                        </div>
+                      ) : (
+                        suppliers.map(s => (
+                          <SelectItem key={s.id} value={s.id} className="rounded-lg focus:bg-primary/10">
+                            {s.name} <span className="text-[10px] text-muted-foreground ml-2 opacity-60">({s.taxId || "Nit: " + s.nit || "Sin Nit"})</span>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">

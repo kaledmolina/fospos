@@ -23,10 +23,11 @@ import { toast } from "sonner"
 interface AdvancedInventoryTabProps {
   products: any[]
   branches: any[]
+  selectedBranch: string | null
   onRefreshData?: () => void
 }
 
-export const AdvancedInventoryTab = ({ products, branches, onRefreshData }: AdvancedInventoryTabProps) => {
+export const AdvancedInventoryTab = ({ products, branches, selectedBranch, onRefreshData }: AdvancedInventoryTabProps) => {
   const [activeTab, setActiveTab] = useState("kardex")
   const [movements, setMovements] = useState<any[]>([])
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([])
@@ -356,6 +357,8 @@ export const AdvancedInventoryTab = ({ products, branches, onRefreshData }: Adva
         onOpenChange={setShowPODialog}
         suppliers={suppliers}
         products={products}
+        branches={branches}
+        selectedBranch={selectedBranch}
         onCreate={handleCreatePO}
       />
 
