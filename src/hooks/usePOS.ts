@@ -311,7 +311,7 @@ export const usePOS = (session: any) => {
       const statsQuery = selectedBranch ? `?type=stats&branchId=${selectedBranch}` : "?type=stats"
       
       const [productsRes, categoriesRes, customersRes, statsRes, cashRes, creditsRes] = await Promise.all([
-        fetch(`/api/products${query}`),
+        fetch(`/api/products${query}`, { cache: "no-store" }),
         fetch(`/api/categories${query}`),
         fetch(`/api/customers`), // Clientes usualmente son compartidos por tenant
         fetch(`/api/sales${statsQuery}`),
@@ -325,7 +325,10 @@ export const usePOS = (session: any) => {
         return
       }
       
-      if (productsRes.ok) setProducts((await productsRes.json()).data)
+      if (productsRes.ok) {
+        const productsData = await productsRes.json()
+        setProducts(productsData.data)
+      }
       if (categoriesRes.ok) setCategories((await categoriesRes.json()).data)
       if (customersRes.ok) setCustomers((await customersRes.json()).data)
       if (statsRes.ok) setDashboardStats((await statsRes.json()).data)
@@ -343,6 +346,8 @@ export const usePOS = (session: any) => {
       console.error("Error fetching POS data:", error)
     }
   }, [session, selectedBranch, fetchBusinessSettings])
+  
+
 
   const fetchNotifications = useCallback(async () => {
     if (!session?.user?.tenantId) return
@@ -898,32 +903,29 @@ export const usePOS = (session: any) => {
     const conversionFactor = selectedPresentation ? (parseFloat(String(selectedPresentation.conversionFactor)) || 1) : 1
     const stockQuantityToDeduct = selectedPresentation ? (quantityToAdd * conversionFactor) : quantityToAdd
 
+    let canAdd = true
+    let isUpdate = false
+
     setCart(prev => {
       const existing = prev.find(item => item.id === cartItemId)
       
-      if (existing) {
-        const currentStockDeducted = prev.reduce((acc, item) => {
-          if (item.data.id === product.id && (selectedBatch ? item.batchId === selectedBatch.id : !item.batchId)) {
-            const factor = item.presentation?.conversionFactor || 1
-            return acc + (item.quantity * factor)
-          }
-          return acc
-        }, 0)
-
-        if (currentStockDeducted + stockQuantityToDeduct > stockToConsider) {
-          toast.error(`Stock insuficiente para añadir más ${product.name}`)
-          return prev
+      const currentStockDeducted = prev.reduce((acc, item) => {
+        if (item.data.id === product.id && (selectedBatch ? item.batchId === selectedBatch.id : !item.batchId)) {
+          const factor = item.presentation?.conversionFactor || 1
+          return acc + (item.quantity * factor)
         }
+        return acc
+      }, 0)
 
-        toast.success("Cantidad actualizada", { duration: 1000 })
+      if (currentStockDeducted + stockQuantityToDeduct > stockToConsider) {
+        canAdd = false
+        return prev
+      }
+
+      if (existing) {
+        isUpdate = true
         return prev.map(item => item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item)
       } else {
-        if (stockQuantityToDeduct > stockToConsider) {
-          toast.error(`Stock insuficiente para ${product.name}`)
-          return prev
-        }
-
-        toast.success(`${product.name} añadido al carrito`, { icon: "🛒", duration: 1500 })
         return [...prev, { 
           id: cartItemId, 
           name: selectedPresentation 
@@ -941,7 +943,13 @@ export const usePOS = (session: any) => {
       }
     })
     
-    // Limpiar estados temporales
+    // Feedback
+    if (!canAdd) {
+      toast.error(`Stock insuficiente para ${product.name}`)
+    } else {
+      toast.success(isUpdate ? "Cantidad actualizada" : `${product.name} añadido`)
+    }
+    
     setActivePresentation(null)
   }
 
@@ -1976,6 +1984,8 @@ export const usePOS = (session: any) => {
     cartPayments, setCartPayments, handleAddPayment, handleUpdatePayment, handleRemovePayment,
     businessSettings, handleUpdateBusinessSettings,
     batchDialogOpen, setBatchDialogOpen, availableBatches, activeProductForBatch,
+    presentationDialogOpen, setPresentationDialogOpen, activeProductForPresentation, activePresentation,
     heldCarts, handleHoldCart, handleResumeCart, handleDeleteHeldCart
+
   }
 }

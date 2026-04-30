@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
 
     // Mapear stock según la sucursal seleccionada
     let mappedProducts = products.map(p => {
+
       let currentStock = p.stock
       let currentMinStock = p.minStock
 
@@ -69,11 +70,24 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        ...p,
+        id: p.id,
+        name: p.name,
+        code: p.code,
+        sku: p.sku,
+        description: p.description,
+        salePrice: p.salePrice,
+        costPrice: p.costPrice,
+        wholesalePrice: p.wholesalePrice,
+        unit: p.unit,
         stock: currentStock,
         minStock: currentMinStock,
-        presentations: p.presentations || [], // Asegurar que las presentaciones se incluyan
-        category: p.category
+        presentations: p.presentations || [],
+        category: p.category,
+        imageUrl: p.imageUrl,
+        isActive: p.isActive,
+        expiryDate: p.expiryDate,
+        branchId: p.branchId,
+        tenantId: p.tenantId
       }
     })
 
@@ -254,11 +268,22 @@ export async function POST(request: NextRequest) {
       return mainProduct
     })
 
+    // Refetch the complete product with presentations to return it
+    const fullProduct = await db.product.findUnique({
+      where: { id: product.id },
+      include: {
+        presentations: true,
+        category: true,
+        stockByBranch: true
+      }
+    })
+
     return NextResponse.json({
       success: true,
       message: "Producto creado exitosamente",
-      data: product
+      data: fullProduct
     })
+
   } catch (error: any) {
     console.error("Error creating product details:", {
       message: error.message,
