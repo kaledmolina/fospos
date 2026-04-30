@@ -56,6 +56,7 @@ export const usePOS = (session: any) => {
   }[]>([])
   const [cartCustomer, setCartCustomer] = useState<CustomerData | null>(null)
   const [cartPaymentMethod, setCartPaymentMethod] = useState<string>("CASH")
+  const [interestRate, setInterestRate] = useState(0)
   const [cartPayments, setCartPayments] = useState<{ method: string, amount: number, details?: any }[]>([])
   const [cartDiscount, setCartDiscount] = useState(0)
   
@@ -1077,8 +1078,10 @@ export const usePOS = (session: any) => {
       }
     }
 
-    const total = Math.max(0, subtotal + tax - cartDiscount - loyaltyDiscount - couponDiscount)
-    return { subtotal, tax, total, loyaltyDiscount, couponDiscount }
+    const baseTotal = Math.max(0, subtotal + tax - cartDiscount - loyaltyDiscount - couponDiscount)
+    const interestAmount = Math.round(baseTotal * (interestRate / 100))
+    const total = baseTotal + interestAmount
+    return { subtotal, tax, total, loyaltyDiscount, couponDiscount, interestAmount, interestRate }
   }
 
   const handleSale = async () => {
@@ -1153,6 +1156,7 @@ export const usePOS = (session: any) => {
           discount: cartDiscount,
           pointsRedeemed: redeemPoints,
           couponCode: appliedCoupon?.code,
+          interestRate,
           giftCardCode: appliedGiftCard?.code,
           cashRegisterId: cashRegister?.id,
           cashReceived,
@@ -1178,7 +1182,7 @@ export const usePOS = (session: any) => {
         setAppliedCoupon(null)
         setCashReceived(0)
         setChange(0)
-        setChange(0)
+        setInterestRate(0)
         fetchPOSData()
         fetchCredits()
         fetchNotifications()

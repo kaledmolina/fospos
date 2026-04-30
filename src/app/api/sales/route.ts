@@ -261,8 +261,9 @@ export async function POST(request: NextRequest) {
       discount, cashRegisterId,
       pointsRedeemed, couponCode,
       cashReceived, change,
-      giftCardCode, payments
+      giftCardCode, payments, interestRate
     } = body;
+
     const userBranchId = body.branchId || session.user.branchId;
 
     if (!items || items.length === 0) {
@@ -478,7 +479,13 @@ export async function POST(request: NextRequest) {
       }
 
       const tax = Math.round(subtotal * (tenant.taxRate / 100));
-      const finalTotal = Math.max(0, subtotal + tax - (discount || 0) - pointsValue - couponDiscount);
+      const baseTotal = Math.max(0, subtotal + tax - (discount || 0) - pointsValue - couponDiscount);
+      
+      // Cálculo de interés si es venta a crédito (o tiene pagos a crédito)
+      const rate = Number(interestRate) || 0;
+      const interestAmount = Math.round(baseTotal * (rate / 100));
+      const finalTotal = baseTotal + interestAmount;
+
 
       // 1. Validaciones previas de todos los pagos
       const effectivePayments = (payments && Array.isArray(payments) && payments.length > 0) 
@@ -578,9 +585,12 @@ export async function POST(request: NextRequest) {
               totalAmount: p.amount,
               paidAmount: 0,
               balance: p.amount,
+              interestRate: rate,
+              interestAmount: Math.round(p.amount * (rate / (100 + rate))), // Prorratear interés en el pago
               status: "PENDING",
               branchId: userBranchId || null
             }
+
           });
           await tx.sale.update({ where: { id: sale.id }, data: { creditId: credit.id } });
         }

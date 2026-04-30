@@ -607,9 +607,14 @@ model Credit {
   branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
   
   // Montos
-  totalAmount   Float    // Monto total del crédito
+  totalAmount   Float    // Monto total del crédito (incluyendo interés)
   paidAmount    Float    @default(0) // Monto pagado
-  balance       Float    // Saldo pendiente (totalAmount - paidAmount)
+  balance       Float    // Saldo pendiente
+  
+  // Intereses
+  interestRate  Float    @default(0) // Porcentaje de interés aplicado
+  interestAmount Float   @default(0) // Valor monetario del interés
+
   
   // Estado
   status        CreditStatus @default(PENDING)

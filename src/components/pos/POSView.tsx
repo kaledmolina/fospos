@@ -170,7 +170,11 @@ export const POSView = ({
               onHoldCart={pos.handleHoldCart}
               onResumeCart={pos.handleResumeCart}
               onDeleteHeldCart={pos.handleDeleteHeldCart}
+              interestRate={pos.interestRate}
+              onInterestRateChange={pos.setInterestRate}
             />
+
+
           )}
           {pos.posTab === "loyalty" && (
             <LoyaltyConfigTab
@@ -406,14 +410,7 @@ export const POSView = ({
         onPaymentAmountChange={pos.setPaymentAmount}
         userRole={pos.session?.user?.role}
       />
-      <PaymentDialog
-        open={pos.paymentDialog}
-        onOpenChange={pos.setPaymentDialog}
-        paymentAmount={pos.paymentAmount}
-        onPaymentAmountChange={pos.setPaymentAmount}
-        onSubmit={pos.handlePayment}
-        selectedCredit={pos.selectedCredit}
-      />
+
       <ExpenseDialog
         open={pos.expenseDialog}
         onOpenChange={pos.setExpenseDialog}

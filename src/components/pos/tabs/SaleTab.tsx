@@ -6,8 +6,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle,
   LayoutGrid, ArrowRightLeft, Minus, Search, Package, RefreshCw, ShoppingBag, 
-  AlertTriangle, Wallet, CreditCard, FileText, DollarSign, Wand2, Clock
+  AlertTriangle, Wallet, CreditCard, FileText, DollarSign, Wand2, Clock, Percent
 } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -78,7 +79,10 @@ interface SaleTabProps {
   onHoldCart?: () => void;
   onResumeCart?: (id: string) => void;
   onDeleteHeldCart?: (id: string) => void;
+  interestRate?: number;
+  onInterestRateChange?: (rate: number) => void;
 }
+
 
 export const SaleTab = ({
   cashRegister,
@@ -131,8 +135,11 @@ export const SaleTab = ({
   heldCarts = [],
   onHoldCart,
   onResumeCart,
-  onDeleteHeldCart
+  onDeleteHeldCart,
+  interestRate = 0,
+  onInterestRateChange
 }: SaleTabProps) => {
+
   const [showDiscounts, setShowDiscounts] = useState(false)
   const isAdmin = userRole === "TENANT_ADMIN"
   const giftCardInputRef = useRef<HTMLInputElement>(null)
@@ -883,7 +890,13 @@ export const SaleTab = ({
                   </div>
                 )}
                 
-                <div className="my-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                {interestRate > 0 && (
+                  <div className="flex justify-between text-[10px] font-black text-orange-600 px-2 py-0.5 bg-orange-50 dark:bg-orange-950/20 rounded-md border border-orange-200/50 dark:border-orange-900/30 uppercase">
+                    <span className="flex items-center gap-1"><Percent className="w-3 h-3" /> Interés ({interestRate}%)</span>
+                    <span>+{formatCurrency(Math.round(subtotal * (interestRate / 100)))}</span>
+                  </div>
+                )}
+
                 
                 <div className="flex justify-between items-center p-1.5 px-3 bg-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 transition-all duration-300">
                   <div className="flex flex-col">
@@ -1065,6 +1078,30 @@ export const SaleTab = ({
                         </div>
                       </motion.div>
                     )}
+
+                    {cartPaymentMethod === "CREDIT" && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="p-3 bg-orange-500/5 rounded-lg border border-orange-500/20 space-y-3 mb-4"
+                      >
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-orange-600">Tasa de Interés (%)</Label>
+                          <div className="relative">
+                            <Percent className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-orange-500" />
+                            <Input 
+                              type="number" 
+                              placeholder="0"
+                              value={interestRate || ""}
+                              onChange={(e) => onInterestRateChange?.(parseFloat(e.target.value) || 0)}
+                              className="h-8 pl-7 bg-background border-orange-500/30 font-bold text-orange-600" 
+                            />
+                          </div>
+                          <p className="text-[9px] text-orange-500/70 italic mt-1 font-medium">Se aplicará un cargo extra sobre el total de la venta.</p>
+                        </div>
+                      </motion.div>
+                    )}
+
                   </>
                 )}
 
