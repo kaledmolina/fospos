@@ -394,8 +394,9 @@ export const ProductDialog = ({
                           value={productForm.unit} 
                           onValueChange={v => onProductFormChange({ ...productForm, unit: v })}
                           required
+                          disabled={!!editingProduct}
                         >
-                          <SelectTrigger className="h-8 font-black text-base bg-transparent border-none p-0 focus:ring-0 shadow-none">
+                          <SelectTrigger className={`h-8 font-black text-base bg-transparent border-none p-0 focus:ring-0 shadow-none ${!!editingProduct ? 'opacity-50' : ''}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl">
@@ -404,8 +405,9 @@ export const ProductDialog = ({
                             ))}
                           </SelectContent>
                         </Select>
+                        {!!editingProduct && <p className="text-[8px] text-slate-400 mt-1 italic">No editable con historial</p>}
                       </div>
-                      <div className="bg-slate-50/50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800 p-4 rounded-[20px] transition-all duration-300 hover:shadow-sm">
+                      <div className="bg-slate-50/50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800 p-4 rounded-[20px] transition-all duration-300 hover:shadow-sm relative">
                         <Label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-wider">Carga<br/>Inicial</Label>
                         <Input 
                           type="number" 
@@ -413,8 +415,22 @@ export const ProductDialog = ({
                           value={productForm.stock} 
                           onChange={e => onProductFormChange({ ...productForm, stock: parseFloat(e.target.value) || 0 })} 
                           className="h-8 font-black text-xl border-none bg-transparent focus:ring-0 shadow-none p-0"
+                          disabled={!!editingProduct}
                         />
+                        {!!editingProduct && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="absolute top-2 right-2 cursor-help">
+                                  <Info className="w-3 h-3 text-slate-300" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="text-[10px]">Usa 'Ajuste de Stock' para cambiar existencias</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </div>
+
                       <div className="col-span-2 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/50 dark:border-rose-900/30 p-5 rounded-[20px] flex items-center justify-between">
                         <div className="space-y-1">
                           <Label className="text-[11px] font-bold text-rose-600 uppercase tracking-widest flex items-center gap-1.5">

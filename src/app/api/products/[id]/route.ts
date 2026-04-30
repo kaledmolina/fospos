@@ -121,6 +121,25 @@ export async function PATCH(
     }
 
     const product = await db.$transaction(async (tx) => {
+      // Si el producto tiene historial, restringir ciertos campos
+      const [salesCount, movementsCount, ocItemsCount] = await Promise.all([
+        tx.saleItem.count({ where: { productId: id } }),
+        tx.inventoryMovement.count({ where: { productId: id } }),
+        tx.purchaseOrderItem.count({ where: { productId: id } })
+      ])
+
+      const hasHistory = salesCount > 0 || movementsCount > 0 || ocItemsCount > 0
+
+      if (hasHistory) {
+        if (unit && unit !== existing.unit) {
+          throw new Error("No se puede cambiar la unidad de medida de un producto con historial de ventas o movimientos.")
+        }
+        if (stock !== undefined && stock !== existing.stock && movementsCount > 1) { 
+          // Si hay más de un movimiento (más que el inicial), no permitir edición directa de stock
+          throw new Error("El stock no puede editarse directamente desde aquí si ya existen movimientos. Usa el módulo de Ajustes de Stock.")
+        }
+      }
+
       // Sincronizar presentaciones
       if (body.presentations && Array.isArray(body.presentations)) {
         // Eliminar las que no están en el nuevo array o simplemente recrear todas
