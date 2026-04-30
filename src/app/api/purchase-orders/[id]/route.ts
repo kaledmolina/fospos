@@ -78,15 +78,17 @@ export async function GET(
     });
 
     const totalRecovered = sales.reduce((sum, s) => sum + s.subtotal, 0);
-    const totalCostOfSold = sales.reduce((sum, s) => sum + (s.unitCost * s.quantity), 0);
+    const totalCostOfSold = sales.reduce((sum, s) => sum + (s.costPrice * s.quantity), 0);
     const grossProfit = totalRecovered - totalCostOfSold;
     const recoveryBalance = totalRecovered - po.totalAmount;
 
     // Calcular qué parte de lo recuperado está aún en crédito (pendiente de cobro)
     const pendingCredit = sales.reduce((sum, s) => {
-      if (s.sale.credit) {
+      if (s.sale?.credit) {
         // El crédito es por el TOTAL de la venta, prorrateamos la parte de este item
-        const itemWeight = s.subtotal / s.sale.totalAmount;
+        // Usamos s.sale.total que es el nombre correcto en el esquema
+        const totalSale = s.sale.total || 1;
+        const itemWeight = s.subtotal / totalSale;
         const itemPending = (s.sale.credit.totalAmount - s.sale.credit.paidAmount) * itemWeight;
         return sum + itemPending;
       }
@@ -94,6 +96,7 @@ export async function GET(
     }, 0);
 
     const actualCashRecovered = totalRecovered - pendingCredit;
+
 
     return NextResponse.json({
       success: true,
