@@ -376,11 +376,14 @@ model ProductPresentation {
 }
 
 enum MovementType {
-  IN          // Entrada (compra, devolución)
-  OUT         // Salida (venta, merma)
+  IN          // Entrada general
+  OUT         // Salida general
+  SALE        // Venta (Salida)
+  PURCHASE    // Compra (Entrada)
   ADJUSTMENT  // Ajuste de inventario
   TRANSFER    // Transferencia entre sucursales
 }
+
 
 // ==================== CUSTOMERS ====================
 
