@@ -203,22 +203,24 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // 2. Crear lote inicial si hay stock
+      // 2. Crear lote inicial (siempre creamos uno para asegurar trazabilidad)
+      const batchName = batchNumber || `LOT-${Math.floor(100000 + Math.random() * 900000)}`
+      
+      const batch = await tx.productBatch.create({
+        data: {
+          productId: mainProduct.id,
+          branchId: targetBranchId || session.user.branchId || "", // Asegurar que tenga sucursal
+          supplierId: supplierId || null,
+          batchNumber: batchName,
+          quantity: stock || 0,
+          costPrice: costPrice || 0,
+          salePrice: salePrice,
+          expiryDate: safeDate
+        }
+      })
+
+      // 3. Si hay stock inicial, registrar movimiento y crear Orden de Compra automática
       if (stock > 0) {
-        const batchName = batchNumber || `LOT-${Math.floor(100000 + Math.random() * 900000)}`
-        
-        const batch = await tx.productBatch.create({
-          data: {
-            productId: mainProduct.id,
-            branchId: targetBranchId,
-            supplierId: supplierId || null,
-            batchNumber: batchName,
-            quantity: stock,
-            costPrice: costPrice || 0,
-            salePrice: salePrice,
-            expiryDate: safeDate
-          }
-        })
 
         // 3. Registrar movimiento y Opcionalmente crear Orden de Compra
         let referenceType = "adjustment"

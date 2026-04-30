@@ -17,6 +17,7 @@ export async function GET(
     const productId = params.id
     const { searchParams } = new URL(request.url)
     const branchId = searchParams.get("branchId")
+    const includeEmpty = searchParams.get("includeEmpty") === "true"
 
     if (!branchId) {
       return NextResponse.json({ success: false, error: "Sucursal requerida" }, { status: 400 })
@@ -27,7 +28,7 @@ export async function GET(
         productId,
         branchId,
         isActive: true,
-        quantity: { gt: 0 }
+        quantity: includeEmpty ? undefined : { gt: 0 }
       },
       include: {
         supplier: {

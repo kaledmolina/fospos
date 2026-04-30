@@ -44,7 +44,7 @@ export const PurchaseOrderDialog = ({
     if (!productId || !targetBranchId) return
     // Reset batches for this product if branch changed
     try {
-      const res = await fetch(`/api/products/${productId}/batches?branchId=${targetBranchId}`)
+      const res = await fetch(`/api/products/${productId}/batches?branchId=${targetBranchId}&includeEmpty=true`)
       const data = await res.json()
       if (data.success) {
         setProductBatches(prev => ({ ...prev, [productId]: data.data }))
