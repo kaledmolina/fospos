@@ -1105,10 +1105,25 @@ export const usePOS = (session: any) => {
           return
         }
       }
-      if (payment.method === "CREDIT" && !cartCustomer) {
-        toast.error("¡Cliente requerido!", { description: "Para ventas a crédito, debes seleccionar un cliente.", duration: 5000 })
-        return
+      if (payment.method === "CREDIT") {
+        if (!cartCustomer) {
+          toast.error("¡Cliente requerido!", { 
+            description: "Para ventas a crédito, es obligatorio seleccionar un cliente registrado.", 
+            duration: 5000 
+          })
+          return
+        }
+        
+        // Evitar crédito a cliente genérico si existe uno con ese nombre
+        if (cartCustomer.name.toLowerCase().includes("general")) {
+          toast.error("¡Acción no permitida!", { 
+            description: "No se permiten ventas a crédito para el Cliente General. Seleccione un cliente específico.", 
+            duration: 5000 
+          })
+          return
+        }
       }
+
     }
 
     try {

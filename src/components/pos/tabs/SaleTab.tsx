@@ -1081,6 +1081,12 @@ export const SaleTab = ({
                     </p>
                   )
                 )}
+                {cartPaymentMethod === "CREDIT" && !cartCustomer && (
+                  <p className="text-[9px] font-black text-red-500 text-center mb-1 uppercase tracking-tight">
+                    Cliente registrado requerido
+                  </p>
+                )}
+
                 <Button 
                   className={`w-full h-11 cursor-pointer transition-all duration-300 shadow-md ${
                     cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total || !cartCustomer)
@@ -1090,7 +1096,8 @@ export const SaleTab = ({
                   disabled={
                     cart.length === 0 || 
                     !cashRegister ||
-                    (cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total || !cartCustomer))
+                    (cartPaymentMethod === "GIFT_CARD" && (!appliedGiftCard || appliedGiftCard.balance < total || !cartCustomer)) ||
+                    (cartPaymentMethod === "CREDIT" && !cartCustomer)
                   } 
                   onClick={onHandleSale}
                 >
