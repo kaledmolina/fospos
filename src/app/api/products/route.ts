@@ -26,7 +26,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (branchId || session.user.branchId) {
-      where.branchId = branchId || session.user.branchId
+      const targetBranchId = branchId || session.user.branchId
+      where.OR = [
+        { branchId: targetBranchId },
+        { branchId: null }
+      ]
     }
 
     if (search) {

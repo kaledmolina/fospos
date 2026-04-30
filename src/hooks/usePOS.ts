@@ -867,7 +867,9 @@ export const usePOS = (session: any) => {
 
     // SI TIENE LOTES Y NO SE HA SELECCIONADO UNO, BUSCARLOS
     if (!selectedBatch) {
+      const loadingToast = toast.loading("Verificando disponibilidad...")
       const batches = await fetchProductBatches(product.id)
+      toast.dismiss(loadingToast)
       if (batches.length > 1) {
         setActiveProductForBatch(product)
         setAvailableBatches(batches)
@@ -883,8 +885,6 @@ export const usePOS = (session: any) => {
 
     // Si llegamos aquí, o no hay lotes, o ya se seleccionó uno
     const cartItemId = `${product.id}${selectedBatch ? '-' + selectedBatch.id : ''}${selectedPresentation ? '-pres-' + selectedPresentation.id : ''}`
-    const existing = cart.find(item => item.id === cartItemId)
-    
     // El precio debe ser el del lote si se seleccionó, de lo contrario el del producto
     let priceToUse = selectedBatch ? selectedBatch.salePrice : product.salePrice
     const stockToConsider = selectedBatch ? selectedBatch.quantity : product.stock
@@ -895,43 +895,51 @@ export const usePOS = (session: any) => {
     }
 
     const quantityToAdd = 1 // En el POS siempre se añade de a 1 por defecto
-    const stockQuantityToDeduct = selectedPresentation ? (quantityToAdd * selectedPresentation.conversionFactor) : quantityToAdd
+    const conversionFactor = selectedPresentation ? (parseFloat(String(selectedPresentation.conversionFactor)) || 1) : 1
+    const stockQuantityToDeduct = selectedPresentation ? (quantityToAdd * conversionFactor) : quantityToAdd
 
-    if (existing) {
-      const currentStockDeducted = cart.reduce((acc, item) => {
-        if (item.data.id === product.id && (selectedBatch ? item.batchId === selectedBatch.id : !item.batchId)) {
-          const factor = item.presentation?.conversionFactor || 1
-          return acc + (item.quantity * factor)
+    setCart(prev => {
+      const existing = prev.find(item => item.id === cartItemId)
+      
+      if (existing) {
+        const currentStockDeducted = prev.reduce((acc, item) => {
+          if (item.data.id === product.id && (selectedBatch ? item.batchId === selectedBatch.id : !item.batchId)) {
+            const factor = item.presentation?.conversionFactor || 1
+            return acc + (item.quantity * factor)
+          }
+          return acc
+        }, 0)
+
+        if (currentStockDeducted + stockQuantityToDeduct > stockToConsider) {
+          toast.error(`Stock insuficiente para añadir más ${product.name}`)
+          return prev
         }
-        return acc
-      }, 0)
 
-      if (currentStockDeducted + stockQuantityToDeduct > stockToConsider) {
-        toast.error(`No hay suficiente stock ${selectedBatch ? 'en este lote' : ''} para ${product.name}`)
-        return
-      }
-      setCart(prev => prev.map(item => item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item))
-    } else {
-      if (stockQuantityToDeduct > stockToConsider) {
-        toast.error(`No hay suficiente stock para ${product.name}`)
-        return
-      }
+        toast.success("Cantidad actualizada", { duration: 1000 })
+        return prev.map(item => item.id === cartItemId ? { ...item, quantity: item.quantity + 1 } : item)
+      } else {
+        if (stockQuantityToDeduct > stockToConsider) {
+          toast.error(`Stock insuficiente para ${product.name}`)
+          return prev
+        }
 
-      setCart(prev => [...prev, { 
-        id: cartItemId, 
-        name: selectedPresentation 
-          ? `${product.name} (${selectedPresentation.name})` 
-          : (selectedBatch ? `${product.name} (${selectedBatch.batchNumber || 'Lote'})` : product.name), 
-        price: priceToUse, 
-        quantity: 1, 
-        type: "PRODUCT", 
-        data: product,
-        batchId: selectedBatch?.id || null,
-        batchNumber: selectedBatch?.batchNumber || null,
-        presentation: selectedPresentation || null,
-        presentationId: selectedPresentation?.id || null
-      }])
-    }
+        toast.success(`${product.name} añadido al carrito`, { icon: "🛒", duration: 1500 })
+        return [...prev, { 
+          id: cartItemId, 
+          name: selectedPresentation 
+            ? `${product.name} (${selectedPresentation.name})` 
+            : (selectedBatch ? `${product.name} (${selectedBatch.batchNumber || 'Lote'})` : product.name), 
+          price: priceToUse, 
+          quantity: 1, 
+          type: "PRODUCT", 
+          data: product,
+          batchId: selectedBatch?.id || null,
+          batchNumber: selectedBatch?.batchNumber || null,
+          presentation: selectedPresentation || null,
+          presentationId: selectedPresentation?.id || null
+        }]
+      }
+    })
     
     // Limpiar estados temporales
     setActivePresentation(null)
