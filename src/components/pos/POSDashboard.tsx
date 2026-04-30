@@ -172,45 +172,81 @@ export const POSDashboard = ({
       </AnimatePresence>
 
       {/* Modern Floating Sidebar */}
-      <aside
-        className={`fixed lg:relative z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col h-[calc(100vh-1rem)] m-2
-          ${sidebarOpen ? "w-72 translate-x-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)]" : "w-24 -translate-x-[calc(100%+2rem)] lg:translate-x-0 shadow-xl"}
-          bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] overflow-hidden group/sidebar`}
+      <motion.aside
+        initial={false}
+        animate={{ 
+          width: sidebarOpen ? 288 : 96,
+          x: (typeof window !== "undefined" && window.innerWidth < 1024) 
+            ? (sidebarOpen ? 0 : -350) 
+            : 0 
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="fixed lg:relative z-50 flex flex-col h-[calc(100vh-1rem)] m-2 bg-white/40 dark:bg-zinc-900/60 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] overflow-hidden group/sidebar shadow-2xl"
       >
         <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-5 border-b border-white/10 dark:border-white/5 shrink-0 h-20`}>
-          <div className="flex items-center gap-4 overflow-hidden">
-            <motion.div
-              whileHover={{ rotate: 10, scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-12 h-12 shrink-0 overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 border-2 border-white/30"
-            >
-              {currentBranch?.logoUrl ? (
-                <img src={currentBranch.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-              ) : session?.user?.logoUrl ? (
-                <img src={session.user.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
-                <Store className="w-5 h-5 text-white" />
-              )}
-            </motion.div>
-            {/* Branch selector removed from here to avoid redundancy with the header */}
-          </div>
-          
-          {sidebarOpen && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="rounded-full hover:bg-primary/10 text-primary hidden lg:flex"
-              onClick={() => onSidebarOpenChange(false)}
-            >
-              <Minimize2 className="w-4 h-4" />
-            </Button>
-          )}
+          <AnimatePresence mode="wait">
+            {sidebarOpen ? (
+              <motion.div
+                key="open-header"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex items-center justify-between w-full"
+              >
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <motion.div
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="w-12 h-12 shrink-0 overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 border-2 border-white/30"
+                  >
+                    {currentBranch?.logoUrl ? (
+                      <img src={currentBranch.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                    ) : session?.user?.logoUrl ? (
+                      <img src={session.user.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <Store className="w-5 h-5 text-white" />
+                    )}
+                  </motion.div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[11px] font-black uppercase tracking-tighter text-primary truncate">FOST POS</span>
+                    <span className="text-[9px] font-bold text-muted-foreground/60 truncate uppercase">{currentBranch?.name || "Sucursal"}</span>
+                  </div>
+                </div>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full hover:bg-primary/10 text-primary hidden lg:flex h-9 w-9 shrink-0"
+                  onClick={() => onSidebarOpenChange(false)}
+                >
+                  <Minimize2 className="w-4 h-4" />
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="closed-header"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="flex flex-col items-center gap-1 cursor-pointer"
+                onClick={() => onSidebarOpenChange(true)}
+              >
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.8 }}
+                  className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-inner"
+                >
+                  <Store className="w-5 h-5 text-primary" />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Mobile close button */}
           <Button 
             variant="ghost" 
             size="icon" 
-            className="lg:hidden rounded-full h-10 w-10" 
+            className="lg:hidden rounded-full h-10 w-10 text-muted-foreground hover:text-red-500 hover:bg-red-50" 
             onClick={() => onSidebarOpenChange(false)}
           >
             <X className="w-5 h-5" />
@@ -277,15 +313,18 @@ export const POSDashboard = ({
                                     <item.icon className={`${sidebarOpen ? "w-4.5 h-4.5" : "w-6 h-6"} shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`} />
                                   </div>
                                   
-                                  {sidebarOpen && (
-                                    <motion.span
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      className={`truncate ml-3 font-bold uppercase text-[10px] tracking-[0.1em] ${posTab === item.id ? "font-black" : ""}`}
-                                    >
-                                      {item.label}
-                                    </motion.span>
-                                  )}
+                                  <AnimatePresence mode="wait">
+                                    {sidebarOpen && (
+                                      <motion.span
+                                        initial={{ opacity: 0, x: -10, width: 0 }}
+                                        animate={{ opacity: 1, x: 0, width: "auto" }}
+                                        exit={{ opacity: 0, x: -10, width: 0 }}
+                                        className={`truncate ml-3 font-bold uppercase text-[10px] tracking-[0.1em] ${posTab === item.id ? "font-black" : ""}`}
+                                      >
+                                        {item.label}
+                                      </motion.span>
+                                    )}
+                                  </AnimatePresence>
 
                                   {!sidebarOpen && posTab === item.id && (
                                     <motion.div
@@ -297,7 +336,7 @@ export const POSDashboard = ({
                                   {posTab === item.id && (
                                     <motion.div
                                       layoutId="activeIndicator"
-                                      className={`absolute bg-white rounded-full shadow-[0_0_10px_#fff] ${sidebarOpen ? "right-3 w-1.5 h-1.5" : "bottom-1 w-1 h-1"}`}
+                                      className={`absolute bg-white rounded-full shadow-[0_0_12px_#fff,0_0_20px_var(--primary)] ${sidebarOpen ? "right-3 w-2 h-2" : "bottom-1.5 w-1.5 h-1.5"}`}
                                     />
                                   )}
                                 </Button>
@@ -358,7 +397,7 @@ export const POSDashboard = ({
             {sidebarOpen && <span className="ml-3">Cerrar Sesión</span>}
           </Button>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Main Content Area */}
       <main className="flex-1 h-screen flex flex-col overflow-hidden relative z-10">
