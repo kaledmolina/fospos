@@ -28,15 +28,9 @@ export const BatchSelectionDialog = ({
   batches,
   onSelect
 }: BatchSelectionDialogProps) => {
-  const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const handleConfirm = () => {
-    const selected = batches.find(b => b.id === selectedId)
-    if (selected) {
-      onSelect(selected)
-      onOpenChange(false)
-    }
-  }
+
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -67,12 +61,7 @@ export const BatchSelectionDialog = ({
                     onSelect(batch)
                     onOpenChange(false)
                   }}
-                  className={`
-                    cursor-pointer p-4 rounded-2xl border-2 transition-all duration-300
-                    ${selectedId === batch.id 
-                      ? "border-primary bg-primary/5 shadow-md shadow-primary/10" 
-                      : "border-slate-100 dark:border-zinc-800 hover:border-slate-200 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900"}
-                  `}
+                  className="cursor-pointer p-4 rounded-2xl border-2 transition-all duration-300 border-slate-100 dark:border-zinc-800 hover:border-primary/50 hover:bg-primary/5 bg-white dark:bg-zinc-900 group hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">

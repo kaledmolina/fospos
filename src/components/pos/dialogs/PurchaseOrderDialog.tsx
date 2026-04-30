@@ -60,13 +60,18 @@ export const PurchaseOrderDialog = ({
     const newItems = [...items]
     const updatedItem = { ...newItems[index], [field]: value }
     
-    // Si se selecciona un producto, intentar cargar sus lotes
+    // Si se selecciona un producto, intentar cargar sus lotes y poblar precios base
     if (field === "productId" && value) {
       fetchBatches(value)
+      const product = products.find(p => p.id === value)
+      if (product) {
+        updatedItem.unitCost = product.costPrice || 0
+        updatedItem.salePrice = product.salePrice || 0
+      }
     }
 
     // Si se selecciona un lote existente, autopoblar campos
-    if (field === "batchId" && value) {
+    if (field === "batchId" && value && value !== "new") {
       const productId = updatedItem.productId
       const batch = productBatches[productId]?.find(b => b.id === value)
       if (batch) {
@@ -79,6 +84,12 @@ export const PurchaseOrderDialog = ({
       updatedItem.batchId = ""
       updatedItem.batchNumber = ""
       updatedItem.expiryDate = ""
+      // Restaurar precios del producto base
+      const product = products.find(p => p.id === updatedItem.productId)
+      if (product) {
+        updatedItem.unitCost = product.costPrice || 0
+        updatedItem.salePrice = product.salePrice || 0
+      }
     }
 
     newItems[index] = updatedItem
@@ -213,7 +224,8 @@ export const PurchaseOrderDialog = ({
                                 type="number" 
                                 value={item.unitCost} 
                                 onChange={(e) => updateItem(index, "unitCost", parseFloat(e.target.value) || 0)}
-                                className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20"
+                                disabled={item.batchId && item.batchId !== "new"}
+                                className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-primary/20 disabled:opacity-50"
                               />
                             </div>
                           </div>
@@ -225,7 +237,8 @@ export const PurchaseOrderDialog = ({
                                 type="number" 
                                 value={item.salePrice} 
                                 onChange={(e) => updateItem(index, "salePrice", parseFloat(e.target.value) || 0)}
-                                className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-emerald-500/20"
+                                disabled={item.batchId && item.batchId !== "new"}
+                                className="h-10 pl-9 tabular-nums font-bold bg-slate-50 dark:bg-zinc-800/50 border-none rounded-xl focus-visible:ring-emerald-500/20 disabled:opacity-50"
                                 placeholder="Precio venta lote"
                               />
                             </div>
