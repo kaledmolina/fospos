@@ -217,24 +217,60 @@ export async function POST(request: NextRequest) {
           }
         })
 
-        // 3. Registrar movimiento inicial
+        // 3. Registrar movimiento y Opcionalmente crear Orden de Compra
+        let referenceType = "adjustment"
+        let referenceId = batchName
+        let movementType: any = "IN"
+
+        if (supplierId) {
+          // Si hay proveedor, creamos una Orden de Compra automática en estado RECIBIDA
+          const po = await tx.purchaseOrder.create({
+            data: {
+              tenantId: session.user.tenantId,
+              supplierId: supplierId,
+              branchId: targetBranchId,
+              status: "RECEIVED",
+              totalAmount: (costPrice || 0) * stock,
+              notes: "Generada automáticamente desde Inventario Inicial",
+              items: {
+                create: {
+                  productId: mainProduct.id,
+                  quantity: stock,
+                  unitCost: costPrice || 0,
+                  salePrice: salePrice,
+                  batchNumber: batchName,
+                  expiryDate: safeDate,
+                  subtotal: (costPrice || 0) * stock,
+                  batchId: batch.id
+                }
+              }
+            }
+          })
+          referenceType = "PURCHASE_ORDER"
+          referenceId = po.id
+          movementType = "PURCHASE"
+        }
+
         await tx.inventoryMovement.create({
           data: {
             tenantId: session.user.tenantId,
             productId: mainProduct.id,
             branchId: targetBranchId,
             batchId: batch.id,
-            type: "IN",
+            type: movementType,
             quantity: stock,
             previousStock: 0,
             newStock: stock,
             reason: "Inventario Inicial",
-            referenceType: "adjustment",
-            referenceId: batchName,
+            referenceType: referenceType,
+            referenceId: referenceId,
+            unitCost: costPrice || 0,
+            totalCost: (costPrice || 0) * stock,
             createdBy: session.user.id
           }
         })
       }
+
 
       if (targetBranchId) {
         // En un POS con aislamiento de sucursal, solo creamos stock para la sucursal actual
