@@ -76,7 +76,7 @@ export const BatchSelectionDialog = ({
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                       <Badge variant="outline" className={`text-[10px] font-black uppercase ${selectedId === batch.id ? "bg-primary text-white border-primary" : "bg-slate-100 text-slate-500"}`}>
+                       <Badge variant="outline" className="text-[10px] font-black uppercase bg-slate-100 text-slate-500">
                           {batch.batchNumber || "SIN LOTE"}
                        </Badge>
                        {batch.supplier && (
@@ -85,7 +85,7 @@ export const BatchSelectionDialog = ({
                          </div>
                        )}
                     </div>
-                    {selectedId === batch.id && <div className="p-1 bg-primary rounded-full"><Check className="w-3 h-3 text-white" /></div>}
+
                   </div>
 
                   <div className="flex items-end justify-between">
@@ -94,7 +94,7 @@ export const BatchSelectionDialog = ({
                           <Tag className="w-3.5 h-3.5" />
                           <span className="text-[10px] font-bold uppercase">Precio Venta</span>
                        </div>
-                       <p className={`text-2xl font-black tabular-nums transition-colors ${selectedId === batch.id ? "text-primary" : "text-foreground"}`}>
+                       <p className="text-2xl font-black tabular-nums transition-colors text-foreground group-hover:text-primary">
                           {formatCurrency(batch.salePrice)}
                        </p>
                     </div>
