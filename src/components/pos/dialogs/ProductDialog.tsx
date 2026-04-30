@@ -500,32 +500,111 @@ export const ProductDialog = ({
                       let newPres = { name: "", unit: "", conversionFactor: 1, price: null };
 
                       // Sugerencias inteligentes basadas en unidad base
-                      if (baseUnit === "kg") {
-                        const suggestions = [
-                          { name: "Libra", unit: "lb", conversionFactor: 0.5 },
-                          { name: "Media Libra", unit: "1/2 lb", conversionFactor: 0.25 },
-                          { name: "Gramos", unit: "g", conversionFactor: 0.001 }
-                        ];
+                      const normalizedBase = baseUnit.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                      let suggestions: any[] = [];
+
+                      switch (normalizedBase) {
+                        // --- PESO ---
+                        case "kg":
+                        case "kilogramo":
+                          suggestions = [
+                            { name: "Libra Comercial", unit: "lb", conversionFactor: 0.5 },
+                            { name: "Media Libra", unit: "1/2 lb", conversionFactor: 0.25 },
+                            { name: "Gramos", unit: "g", conversionFactor: 0.001 },
+                            { name: "Arroba", unit: "@", conversionFactor: 12.5 },
+                            { name: "Bulto / Saco", unit: "bulto", conversionFactor: 50 }
+                          ];
+                          break;
+                        case "lb":
+                        case "libra":
+                          suggestions = [
+                            { name: "Media Libra", unit: "1/2 lb", conversionFactor: 0.5 },
+                            { name: "Cuarto de Libra", unit: "1/4 lb", conversionFactor: 0.25 },
+                            { name: "Onza", unit: "oz", conversionFactor: 0.0625 },
+                            { name: "Gramos", unit: "g", conversionFactor: 0.002 } // 1lb = 500g comercial
+                          ];
+                          break;
+                        case "g":
+                        case "gramo":
+                        case "gramos":
+                          suggestions = [
+                            { name: "Kilo", unit: "kg", conversionFactor: 1000 },
+                            { name: "Libra Comercial", unit: "lb", conversionFactor: 500 },
+                            { name: "Porción (100g)", unit: "porc", conversionFactor: 100 }
+                          ];
+                          break;
+
+                        // --- VOLUMEN ---
+                        case "litro":
+                        case "l":
+                          suggestions = [
+                            { name: "Medio Litro", unit: "500ml", conversionFactor: 0.5 },
+                            { name: "Cuarto de Litro", unit: "250ml", conversionFactor: 0.25 },
+                            { name: "Botella", unit: "750ml", conversionFactor: 0.75 },
+                            { name: "Mililitros", unit: "ml", conversionFactor: 0.001 },
+                            { name: "Galón", unit: "gal", conversionFactor: 3.785 }
+                          ];
+                          break;
+                        case "ml":
+                        case "mililitro":
+                        case "mililitros":
+                          suggestions = [
+                            { name: "Litro", unit: "L", conversionFactor: 1000 },
+                            { name: "Botella", unit: "bot", conversionFactor: 750 },
+                            { name: "Vaso/Taza", unit: "taza", conversionFactor: 250 }
+                          ];
+                          break;
+                        case "galon":
+                          suggestions = [
+                            { name: "Litro", unit: "L", conversionFactor: 0.264172 },
+                            { name: "Cuarto de Galón", unit: "qt", conversionFactor: 0.25 },
+                            { name: "Botella (750ml)", unit: "bot", conversionFactor: 0.198 }
+                          ];
+                          break;
+
+                        // --- UNIDADES / CONTEO ---
+                        case "unidad":
+                        case "und":
+                          suggestions = [
+                            { name: "Par", unit: "par", conversionFactor: 2 },
+                            { name: "Media Docena", unit: "1/2 doc", conversionFactor: 6 },
+                            { name: "Docena", unit: "doc", conversionFactor: 12 },
+                            { name: "Quincena", unit: "quin", conversionFactor: 15 },
+                            { name: "Cubeta / Panal", unit: "cub", conversionFactor: 30 },
+                            { name: "Paca / Six-Pack", unit: "pack", conversionFactor: 6 }
+                          ];
+                          break;
+                        case "docena":
+                          suggestions = [
+                            { name: "Media Docena", unit: "1/2 doc", conversionFactor: 0.5 },
+                            { name: "Unidad", unit: "und", conversionFactor: 0.083333 }
+                          ];
+                          break;
+                        case "paquete":
+                        case "caja":
+                        case "bolsa":
+                          suggestions = [
+                            { name: "Unidad Individual", unit: "und", conversionFactor: 0.083333 }, // Default 12
+                            { name: "Medio Paquete/Caja", unit: "1/2 pq", conversionFactor: 0.5 }
+                          ];
+                          break;
+
+                        // --- LONGITUD ---
+                        case "metro":
+                        case "m":
+                          suggestions = [
+                            { name: "Medio Metro", unit: "1/2 m", conversionFactor: 0.5 },
+                            { name: "Centímetro", unit: "cm", conversionFactor: 0.01 },
+                            { name: "Milímetro", unit: "mm", conversionFactor: 0.001 },
+                            { name: "Yarda", unit: "yd", conversionFactor: 0.9144 },
+                            { name: "Rollo (50m)", unit: "rollo", conversionFactor: 50 }
+                          ];
+                          break;
+                      }
+
+                      if (suggestions.length > 0) {
                         const next = suggestions.find(s => !existing.some((e: any) => e.name.toLowerCase() === s.name.toLowerCase()));
                         if (next) newPres = { ...next, price: null };
-                      } else if (baseUnit === "litro") {
-                        const suggestions = [
-                          { name: "Medio Litro", unit: "500ml", conversionFactor: 0.5 },
-                          { name: "Cuarto de Litro", unit: "250ml", conversionFactor: 0.25 },
-                          { name: "Mililitros", unit: "ml", conversionFactor: 0.001 }
-                        ];
-                        const next = suggestions.find(s => !existing.some((e: any) => e.name.toLowerCase() === s.name.toLowerCase()));
-                        if (next) newPres = { ...next, price: null };
-                      } else if (baseUnit === "unidad") {
-                        const suggestions = [
-                          { name: "Docena", unit: "doc", conversionFactor: 12 },
-                          { name: "Media Docena", unit: "1/2 doc", conversionFactor: 6 },
-                          { name: "Paca / Paquete", unit: "pq", conversionFactor: 24 }
-                        ];
-                        const next = suggestions.find(s => !existing.some((e: any) => e.name.toLowerCase() === s.name.toLowerCase()));
-                        if (next) newPres = { ...next, price: null };
-                      } else if (baseUnit === "paquete" || baseUnit === "caja") {
-                        newPres = { name: "Unidad Individual", unit: "und", conversionFactor: (1/12), price: null };
                       }
 
                       onProductFormChange({
