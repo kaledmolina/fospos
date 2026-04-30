@@ -1099,15 +1099,18 @@ export const usePOS = (session: any) => {
           payments: cartPayments,
           paymentMethod: cartPaymentMethod,
           items: cart.map(item => {
-            // Si es un servicio, el ID real está en data.id, item.id es el compositeId
-            const realId = item.type === "SERVICE" ? item.data.id : item.id
+            // El ID real de DB está en item.data.id (para productos y servicios)
+            const realId = (item.type === "PRODUCT" || item.type === "SERVICE") ? item.data.id : item.id
             return { 
               id: item.id,
               productId: item.type === "PRODUCT" ? realId : null, 
               serviceId: item.type === "SERVICE" ? realId : null,
               quantity: item.quantity,
               type: item.type,
-              isSubscription: item.isSubscription
+              isSubscription: item.isSubscription,
+              batchId: item.batchId,
+              presentationId: item.presentationId,
+              unitPrice: item.price // Asegurar que enviamos el precio calculado
             }
           }),
           paymentMethod: cartPaymentMethod,
