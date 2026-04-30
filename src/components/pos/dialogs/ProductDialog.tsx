@@ -441,9 +441,13 @@ export const ProductDialog = ({
                     <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-6 rounded-[24px] shadow-sm shadow-slate-200/50 dark:shadow-none space-y-6">
                       <div className="space-y-2">
                         <Label className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5 ml-1">
-                          <Briefcase className="w-3.5 h-3.5"/> Proveedor
+                          <Briefcase className="w-3.5 h-3.5"/> Proveedor <span className="text-red-500">*</span>
                         </Label>
-                        <Select value={productForm.supplierId || ""} onValueChange={v => onProductFormChange({ ...productForm, supplierId: v })}>
+                        <Select 
+                          value={productForm.supplierId || ""} 
+                          onValueChange={v => onProductFormChange({ ...productForm, supplierId: v })}
+                          required
+                        >
                           <SelectTrigger className="h-11 font-bold bg-white dark:bg-zinc-950 rounded-full border-slate-200 dark:border-zinc-800 hover:border-slate-300 px-4 focus:ring-indigo-500/20 shadow-sm transition-all">
                             <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
@@ -453,6 +457,7 @@ export const ProductDialog = ({
                             ))}
                           </SelectContent>
                         </Select>
+
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2 group">

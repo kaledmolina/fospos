@@ -156,10 +156,11 @@ export async function PATCH(
           stock, // Actualiza el stock global
           minStock,
           unit,
-          categoryId: categoryId || null,
+          categoryId: categoryId !== undefined ? (categoryId || null) : undefined,
           isActive,
-          supplierId: supplierId || null
+          supplierId: supplierId !== undefined ? (supplierId || null) : undefined
         },
+
         include: {
           category: true,
           presentations: true
@@ -184,7 +185,61 @@ export async function PATCH(
         })
       }
 
+      // Si estamos añadiendo un proveedor a un producto que no tenía, y tiene stock,
+      // creamos la Orden de Compra que se omitió al inicio para que aparezca en estadísticas
+      if (supplierId && !existing.supplierId && existing.stock > 0) {
+        const poExists = await tx.purchaseOrderItem.findFirst({
+          where: { productId: id }
+        })
+
+        if (!poExists) {
+          const batchName = `LOT-${Math.floor(100000 + Math.random() * 900000)}`
+          
+          // Buscar o crear lote si no existe
+          let batch = await tx.productBatch.findFirst({
+            where: { productId: id, branchId: targetBranchId || "" }
+          })
+
+          if (!batch) {
+            batch = await tx.productBatch.create({
+              data: {
+                productId: id,
+                branchId: targetBranchId || "",
+                supplierId: supplierId,
+                batchNumber: batchName,
+                quantity: existing.stock,
+                costPrice: costPrice || existing.costPrice,
+                salePrice: salePrice || existing.salePrice,
+              }
+            })
+          }
+
+          await tx.purchaseOrder.create({
+            data: {
+              tenantId: session.user.tenantId,
+              supplierId: supplierId,
+              branchId: targetBranchId,
+              status: "RECEIVED",
+              totalAmount: (costPrice || existing.costPrice) * existing.stock,
+              notes: "Generada retroactivamente al asignar proveedor",
+              items: {
+                create: {
+                  productId: id,
+                  quantity: existing.stock,
+                  unitCost: costPrice || existing.costPrice,
+                  salePrice: salePrice || existing.salePrice,
+                  batchNumber: batchName,
+                  subtotal: (costPrice || existing.costPrice) * existing.stock,
+                  batchId: batch.id
+                }
+              }
+            }
+          })
+        }
+      }
+
       return updatedProduct
+
     })
 
     // REGISTRO DE AUDITORÍA: Si hubo cambios sensibles

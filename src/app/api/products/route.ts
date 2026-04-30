@@ -86,9 +86,11 @@ export async function GET(request: NextRequest) {
         imageUrl: p.imageUrl,
         isActive: p.isActive,
         expiryDate: p.expiryDate,
+        supplierId: p.supplierId,
         branchId: p.branchId,
         tenantId: p.tenantId
       }
+
     })
 
     // Filtrar productos con stock bajo
@@ -130,12 +132,13 @@ export async function POST(request: NextRequest) {
       supplierId, batchNumber
     } = body
 
-    if (!name || salePrice === undefined) {
+    if (!name || salePrice === undefined || !supplierId) {
       return NextResponse.json(
-        { success: false, error: "Nombre y precio de venta son requeridos" },
+        { success: false, error: "Nombre, precio de venta y proveedor son requeridos" },
         { status: 400 }
       )
     }
+
 
     // Si tiene código, verificar que sea único
     if (code) {
