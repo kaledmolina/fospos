@@ -71,7 +71,9 @@ export async function GET(
     });
 
     const totalRecovered = sales.reduce((sum, s) => sum + s.subtotal, 0);
-    const totalProfit = totalRecovered - po.totalAmount;
+    const totalCostOfSold = sales.reduce((sum, s) => sum + (s.unitCost * s.quantity), 0);
+    const grossProfit = totalRecovered - totalCostOfSold;
+    const recoveryBalance = totalRecovered - po.totalAmount;
 
     return NextResponse.json({
       success: true,
@@ -80,11 +82,13 @@ export async function GET(
         items: itemsWithStats,
         stats: {
           totalRecovered,
-          totalProfit,
-          roi: po.totalAmount > 0 ? (totalProfit / po.totalAmount) * 100 : 0
+          grossProfit,
+          recoveryBalance,
+          roi: po.totalAmount > 0 ? (recoveryBalance / po.totalAmount) * 100 : 0
         }
       }
     });
+
 
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

@@ -124,18 +124,25 @@ export const PurchaseOrderDetailDialog = ({
                       ROI: {po.stats.roi.toFixed(1)}%
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-2 gap-8">
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-emerald-100/70">Dinero Recuperado (Ventas)</p>
-                      <p className="text-3xl font-black tabular-nums">{formatCurrency(po.stats.totalRecovered)}</p>
+                      <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Recuperado</p>
+                      <p className="text-xl font-black tabular-nums">{formatCurrency(po.stats.totalRecovered)}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-emerald-100/70">Utilidad Bruta</p>
-                      <p className={`text-3xl font-black tabular-nums ${po.stats.totalProfit >= 0 ? 'text-white' : 'text-red-200'}`}>
-                        {formatCurrency(po.stats.totalProfit)}
+                      <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Ganancia Real</p>
+                      <p className="text-xl font-black tabular-nums text-white">
+                        {formatCurrency(po.stats.grossProfit)}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-bold text-emerald-100/70 uppercase tracking-wider">Balance OC</p>
+                      <p className={`text-xl font-black tabular-nums ${po.stats.recoveryBalance >= 0 ? 'text-white' : 'text-emerald-200/50'}`}>
+                        {formatCurrency(po.stats.recoveryBalance)}
                       </p>
                     </div>
                   </div>
+
                   <div className="pt-2">
                     <div className="h-2 bg-black/10 rounded-full overflow-hidden">
                       <div 
