@@ -143,21 +143,37 @@ export async function PATCH(
             }
           });
 
-          // 4. CREACIÓN DE LOTE (Nuevo: Sistema de Gestión de Lotes)
+          // 4. CREACIÓN O ACTUALIZACIÓN DE LOTE
           const product = await tx.product.findUnique({ where: { id: item.productId } });
           
-          const batch = await tx.productBatch.create({
-            data: {
-              productId: item.productId,
-              branchId: po.branchId || "",
-              supplierId: po.supplierId,
-              batchNumber: item.batchNumber || `LOT-${new Date().getTime().toString().slice(-6)}`,
-              quantity: item.quantity,
-              costPrice: item.unitCost,
-              salePrice: item.salePrice || product?.salePrice || 0,
-              expiryDate: item.expiryDate || null,
-            }
-          });
+          let batch;
+          if (item.batchId) {
+            // REABASTECIMIENTO: Actualizar lote existente
+            batch = await tx.productBatch.update({
+              where: { id: item.batchId },
+              data: {
+                quantity: { increment: item.quantity },
+                costPrice: item.unitCost, // Actualizar costo al más reciente
+                salePrice: item.salePrice || product?.salePrice || 0,
+                expiryDate: item.expiryDate ? new Date(item.expiryDate) : undefined
+              }
+            });
+          } else {
+            // NUEVO LOTE
+            batch = await tx.productBatch.create({
+              data: {
+                productId: item.productId,
+                branchId: po.branchId || "",
+                supplierId: po.supplierId,
+                batchNumber: item.batchNumber || `LOT-${new Date().getTime().toString().slice(-6)}`,
+                quantity: item.quantity,
+                costPrice: item.unitCost,
+                salePrice: item.salePrice || product?.salePrice || 0,
+                expiryDate: item.expiryDate || null,
+              }
+            });
+          }
+
 
 
           // 5. Registrar en Kardex

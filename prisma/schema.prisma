@@ -572,9 +572,11 @@ model PurchaseOrderItem {
   batchNumber     String?
   expiryDate      DateTime?
   salePrice       Float?   // Precio de venta sugerido para este lote
+  batchId         String?  // ID del lote existente si es un reabastecimiento
 
   @@map("purchase_order_items")
 }
+
 
 enum PurchaseOrderStatus {
   PENDING    // Pedido realizado, esperando mercancía

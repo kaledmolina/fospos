@@ -51,12 +51,14 @@ export async function POST(request: NextRequest) {
         items: {
           create: items.map((item: any) => ({
             productId: item.productId,
+            batchId: item.batchId || null,
             quantity: item.quantity,
             unitCost: item.unitCost,
             salePrice: item.salePrice || null,
             batchNumber: item.batchNumber || null,
             expiryDate: item.expiryDate ? new Date(item.expiryDate) : null,
             subtotal: item.unitCost * item.quantity
+
           }))
         }
       },
