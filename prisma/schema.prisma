@@ -88,6 +88,8 @@ model Branch {
   logoUrl       String?  // Logo específico de la sede
   themeColor    String?  @default("#10b981") // Color de marca de la sede (Emerald-500 por defecto)
   enabledPaymentMethods String?  @default("CASH,CARD,TRANSFER,CREDIT,MIXED,GIFT_CARD") // Métodos habilitados por sede
+  taxRate       Float?   @default(19.0)  // IVA específico de la sede
+
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
