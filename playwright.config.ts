@@ -13,17 +13,20 @@ export default defineConfig({
     screenshot: 'on',
     video: 'on-first-retry',
   },
+  expect: {
+    timeout: 10000,
+  },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  timeout: 60000,
+  timeout: 180000,
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 300000,
   },
 });

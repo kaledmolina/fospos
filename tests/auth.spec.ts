@@ -16,14 +16,11 @@ test.describe('Autenticación', () => {
 
   test('debe mostrar error con credenciales inválidas', async ({ page }) => {
     // 1. Si está la landing page, entrar a la app
-    const loginButton = page.getByRole('button', { name: /Log In/i });
-    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
-
-    if (await loginButton.isVisible()) {
-      await loginButton.click();
-    } else if (await getStartedButton.isVisible()) {
-      await getStartedButton.click();
-    }
+    const loginBtn = page.getByRole('button', { name: /Log In|Get Started/i }).first();
+    try {
+      await loginBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await loginBtn.click();
+    } catch (e) {}
 
     // 2. Llenar el formulario de login
     // Usamos selectores más específicos por si hay varios inputs
@@ -40,10 +37,11 @@ test.describe('Autenticación', () => {
   });
 
   test('debe permitir cambiar a la pestaña de Registro', async ({ page }) => {
-    const loginButton = page.getByRole('button', { name: /Log In/i });
-    if (await loginButton.isVisible()) {
-      await loginButton.click();
-    }
+    const loginBtn = page.getByRole('button', { name: /Log In|Get Started/i }).first();
+    try {
+      await loginBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await loginBtn.click();
+    } catch (e) {}
 
     // Click en la pestaña "Registrarse"
     await page.click('button:has-text("Registrarse")');

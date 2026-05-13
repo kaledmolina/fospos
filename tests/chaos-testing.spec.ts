@@ -3,11 +3,28 @@ import { test, expect } from '@playwright/test';
 test.describe('Chaos & Security Testing', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const loginBtn = page.getByRole('button', { name: /Log In/i }).first();
-    if (await loginBtn.isVisible()) await loginBtn.click();
-    await page.fill('input[type="email"]', 'test@fostpos.com');
-    await page.fill('input[type="password"]', 'password123');
-    await page.click('button[type="submit"]:has-text("Iniciar Sesión")');
+    
+    // Esperar a que la página cargue y buscar el botón de Log In o Get Started
+    const loginBtn = page.getByRole('button', { name: /Log In|Get Started/i }).first();
+    try {
+      await loginBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await loginBtn.click();
+    } catch (e) {
+      // Si no aparece, tal vez ya estamos en la página de login o dashboard
+      console.log('Botón de login no encontrado o ya en sesión');
+    }
+
+    // Asegurar que el input de email esté visible antes de continuar
+    await page.waitForSelector('input[type="email"]', { timeout: 10000 }).catch(() => {
+      console.log('Email input not found, checking if already logged in');
+    });
+    
+    if (await page.locator('input[type="email"]').isVisible()) {
+      await page.fill('input[type="email"]', 'test@fostpos.com');
+      await page.fill('input[type="password"]', 'password123');
+      await page.click('button[type="submit"]:has-text("Iniciar Sesión")');
+    }
+    
     await expect(page.locator('aside')).toBeVisible({ timeout: 20000 });
   });
 
