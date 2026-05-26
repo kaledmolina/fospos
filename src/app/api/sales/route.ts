@@ -166,9 +166,9 @@ export async function GET(request: NextRequest) {
         } else {
           const user = await db.user.findUnique({
             where: { id: session.user.id },
-            include: { branch: true }
+            include: { branches: true }
           });
-          targetMonthlyGoal = user?.branch?.monthlyGoal || 0;
+          targetMonthlyGoal = user?.branches?.[0]?.monthlyGoal || 0;
           if (targetMonthlyGoal === 0) {
             const mainBranch = await db.branch.findFirst({
               where: { tenantId: session.user.tenantId, isMain: true }
@@ -192,8 +192,8 @@ export async function GET(request: NextRequest) {
           });
           weeklySales.push({
             name: days[d.getDay()],
-            total: daySales._sum.total || 0
-          });
+            total: (daySales._sum.total || 0) as number
+          } as any);
         }
 
         return NextResponse.json({
@@ -284,14 +284,14 @@ export async function POST(request: NextRequest) {
 
       const loyaltyConfig = await tx.pointConfig.findUnique({ where: { tenantId: session.user.tenantId } });
       let couponDiscount = 0;
-      let coupon = null;
+      let coupon: any = null;
       if (couponCode) {
-        coupon = await tx.coupon.findUnique({
+        const foundCoupon = await tx.coupon.findUnique({
           where: { tenantId_code: { tenantId: session.user.tenantId, code: couponCode.toUpperCase() } }
         });
-        if (coupon && coupon.isActive && (!coupon.expiresAt || new Date(coupon.expiresAt) > new Date())) {
-          if (!coupon.maxUses || coupon.currentUses >= coupon.maxUses) coupon = null;
-        } else coupon = null;
+        if (foundCoupon && foundCoupon.isActive && (!foundCoupon.expiresAt || new Date(foundCoupon.expiresAt) > new Date())) {
+          if (!foundCoupon.maxUses || foundCoupon.currentUses < foundCoupon.maxUses) coupon = foundCoupon;
+        }
       }
 
       let subtotal = 0;
@@ -321,7 +321,7 @@ export async function POST(request: NextRequest) {
           const quantityToDeduct = item.quantity * conversionFactor;
 
           // Validación y deducción por LOTE o Stock General
-          let currentBatch = null;
+          let currentBatch: any = null;
           if (item.batchId) {
             currentBatch = await tx.productBatch.findUnique({ where: { id: item.batchId } });
             if (!currentBatch) throw new Error(`Lote ${item.batchId} no encontrado`);

@@ -155,7 +155,7 @@ export const CashTab = ({
                         </td>
                       )}
                       <td className="px-6 py-4">
-                        <Badge variant={item.status === "OPEN" ? "success" : "secondary"}>
+                        <Badge variant="outline" className={item.status === "OPEN" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-zinc-500/10 text-zinc-600 border-zinc-500/20"}>
                           {item.status === "OPEN" ? "Abierta" : "Cerrada"}
                         </Badge>
                       </td>

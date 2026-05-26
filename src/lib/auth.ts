@@ -115,9 +115,9 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.role = user.role
-        token.tenantId = user.tenantId
-        token.tenantName = user.tenantName
-        token.tenantStatus = user.tenantStatus
+        token.tenantId = user.tenantId ?? undefined
+        token.tenantName = user.tenantName ?? undefined
+        token.tenantStatus = user.tenantStatus ?? undefined
         token.branchId = user.branchId
         token.branchName = user.branchName
         token.theme = user.theme

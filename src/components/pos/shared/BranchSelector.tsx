@@ -27,8 +27,9 @@ export const BranchSelector = ({
 }: BranchSelectorProps) => {
   if (!isAdmin || branches.length <= 1) {
     return (
-      <div className="flex items-center gap-2 px-1">
-        <span className="font-bold text-sm text-foreground truncate block">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-xl">
+        <Building2 className="w-4 h-4 text-primary shrink-0" />
+        <span className="font-black uppercase text-[10px] tracking-wider text-primary truncate block max-w-[150px]">
           {customName || "Cargando..."}
         </span>
       </div>
@@ -41,16 +42,17 @@ export const BranchSelector = ({
         value={selectedBranch || ""}
         onValueChange={onBranchChange}
       >
-        <SelectTrigger className="h-auto p-0 border-0 bg-transparent shadow-none hover:bg-transparent focus:ring-0 group">
-          <div className="flex items-center gap-1.5 truncate max-w-[140px]">
-            <span className="font-bold text-sm text-foreground truncate block transition-colors group-hover:text-emerald-500">
+        <SelectTrigger className="h-9 px-3 bg-primary/5 hover:bg-primary/10 border-primary/20 dark:border-primary/10 rounded-xl transition-all shadow-none flex items-center gap-2 group">
+          <div className="flex items-center gap-2 max-w-[150px] text-left">
+            <Building2 className="w-4 h-4 text-primary shrink-0 transition-transform group-hover:scale-110" />
+            <span className="font-black uppercase text-[10px] tracking-wider text-primary truncate">
               {customName || "Seleccionar Sede"}
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 shadow-xl">
           {branches.map((branch) => (
-            <SelectItem key={branch.id} value={branch.id}>
+            <SelectItem key={branch.id} value={branch.id} className="rounded-lg">
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-emerald-500" />
                 <span>{branch.name}</span>

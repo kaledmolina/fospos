@@ -152,9 +152,11 @@ export async function GET(request: NextRequest) {
     if (notifications.length === 0) {
       notifications.push({
         id: "welcome",
-        type: "SYSTEM",
+        type: "SYSTEM" as any,
         title: "Sin novedades",
         message: "Todo está al día por ahora. Aquí verás alertas relevantes.",
+        referenceType: null as any,
+        referenceId: null as any,
         isRead: true,
         createdAt: new Date()
       })

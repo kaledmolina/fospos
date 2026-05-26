@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
           quantity: quantity,
           costPrice: unitCost || 0,
           salePrice: salePrice || 0, // El usuario puede definir el precio de venta específico para este lote
-          expiryDate: expiryDate ? new Date(expiryDate) : null,
+          expiryDate: expiryDate ? new Date(expiryDate) : null as null,
         }
       })
       batchId = batch.id

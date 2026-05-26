@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Ticket, Star, CheckCircle2, UserPlus, Plus, Trash2, Users, Zap, Eye, AlertCircle,
   LayoutGrid, ArrowRightLeft, Minus, Search, Package, RefreshCw, ShoppingBag, 
-  AlertTriangle, Wallet, CreditCard, FileText, DollarSign, Wand2, Clock, Percent
+  AlertTriangle, Wallet, CreditCard, FileText, DollarSign, Wand2, Clock, Percent, Keyboard
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { fadeInUp, staggerContainer } from "@/lib/animations"
 import { formatCurrency } from "@/lib/utils"
+import { toast } from "sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
@@ -81,6 +82,10 @@ interface SaleTabProps {
   onDeleteHeldCart?: (id: string) => void;
   interestRate?: number;
   onInterestRateChange?: (rate: number) => void;
+  cartPayments?: any[];
+  onAddPayment?: (payment: any) => void;
+  onRemovePayment?: (index: number) => void;
+  onUpdatePayment?: (index: number, fields: any) => void;
 }
 
 
@@ -126,9 +131,9 @@ export const SaleTab = ({
   appliedGiftCard,
   onPrintGiftCard,
   cartPayments = [],
-  onAddPayment,
-  onRemovePayment,
-  onUpdatePayment,
+  onAddPayment = () => {},
+  onRemovePayment = () => {},
+  onUpdatePayment = () => {},
   userRole,
   businessSettings,
   currentBranch,
@@ -834,16 +839,16 @@ export const SaleTab = ({
               </ScrollArea>
               
               <div className="mb-2">
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Método de Pago</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Método de Pago</p>
                   <TooltipProvider>
-                    <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+                    <div className="grid grid-cols-3 gap-2 mt-1.5">
                       {[
-                        { id: "CASH", label: "Efectivo", icon: Wallet, tip: "Pago en efectivo" },
-                        { id: "CARD", label: "Tarjeta", icon: CreditCard, tip: "Pago con tarjeta de débito/crédito" },
-                        { id: "TRANSFER", label: "Transf.", icon: RefreshCw, tip: "Transferencia bancaria / QR" },
-                        { id: "CREDIT", label: "Crédito", icon: FileText, tip: "Venta a crédito para el cliente" },
-                        { id: "GIFT_CARD", label: "Regalo", icon: Ticket, tip: "Redimir tarjeta de regalo" },
-                        { id: "MIXED", label: "Mixto", icon: LayoutGrid, tip: "Múltiples medios de pago" }
+                        { id: "CASH", label: "Efectivo", icon: Wallet, tip: "Pago en efectivo", selectedColor: "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20 border-emerald-500/30", outlineColor: "hover:border-emerald-300 hover:text-emerald-500" },
+                        { id: "CARD", label: "Tarjeta", icon: CreditCard, tip: "Pago con tarjeta de débito/crédito", selectedColor: "bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/20 border-blue-500/30", outlineColor: "hover:border-blue-300 hover:text-blue-500" },
+                        { id: "TRANSFER", label: "Transf.", icon: RefreshCw, tip: "Transferencia bancaria / QR", selectedColor: "bg-cyan-500 hover:bg-cyan-600 text-white shadow-cyan-500/20 border-cyan-500/30", outlineColor: "hover:border-cyan-300 hover:text-cyan-500" },
+                        { id: "CREDIT", label: "Crédito", icon: FileText, tip: "Venta a crédito para el cliente", selectedColor: "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20 border-orange-500/30", outlineColor: "hover:border-orange-300 hover:text-orange-500" },
+                        { id: "GIFT_CARD", label: "Regalo", icon: Ticket, tip: "Redimir tarjeta de regalo", selectedColor: "bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20 border-rose-500/30", outlineColor: "hover:border-rose-300 hover:text-rose-500" },
+                        { id: "MIXED", label: "Mixto", icon: LayoutGrid, tip: "Múltiples medios de pago", selectedColor: "bg-purple-500 hover:bg-purple-600 text-white shadow-purple-500/20 border-purple-500/30", outlineColor: "hover:border-purple-300 hover:text-purple-500" }
                       ].filter(m => {
                         const branchMethods = currentBranch?.enabledPaymentMethods?.split(",").filter(Boolean);
                         if (branchMethods && branchMethods.length > 0) {
@@ -852,22 +857,26 @@ export const SaleTab = ({
                         if (!businessSettings?.enabledPaymentMethods) return true;
                         const enabled = businessSettings.enabledPaymentMethods.split(",").filter(Boolean);
                         return enabled.includes(m.id);
-                      }).map(method => (
-                        <Tooltip key={method.id}>
-                          <TooltipTrigger asChild>
-                            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                                <Button
-                                  variant={cartPaymentMethod === method.id ? "default" : "outline"}
-                                  className={`w-full h-8 px-1 text-[11px] font-black uppercase cursor-pointer transition-all duration-200 ${cartPaymentMethod === method.id ? "bg-primary hover:bg-primary shadow-sm" : "hover:border-emerald-300"}`}
-                                  onClick={() => onSetCartPaymentMethod(method.id)}
-                                >
-                                  <method.icon className="w-4 h-4 mr-1" />{method.label}
-                                </Button>
-                            </motion.div>
-                          </TooltipTrigger>
-                          <TooltipContent>{method.tip}</TooltipContent>
-                        </Tooltip>
-                      ))}
+                      }).map(method => {
+                        const isSelected = cartPaymentMethod === method.id;
+                        return (
+                          <Tooltip key={method.id}>
+                            <TooltipTrigger asChild>
+                              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                  <Button
+                                    variant={isSelected ? "default" : "outline"}
+                                    className={`w-full h-10 px-1 text-[10px] font-black uppercase cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-1 rounded-xl border ${isSelected ? method.selectedColor + " shadow-md" : "border-border/60 bg-background " + method.outlineColor}`}
+                                    onClick={() => onSetCartPaymentMethod(method.id)}
+                                  >
+                                    <method.icon className="w-3.5 h-3.5" />
+                                    <span>{method.label}</span>
+                                  </Button>
+                              </motion.div>
+                            </TooltipTrigger>
+                            <TooltipContent>{method.tip}</TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
                     </div>
                   </TooltipProvider>
               </div>
@@ -1145,6 +1154,48 @@ export const SaleTab = ({
           </Card>
         </div>
       </div>
+
+      {/* Floating Keyboard Shortcuts Guide */}
+      <div className="fixed bottom-6 right-6 z-50 print:hidden">
+        <Popover>
+          <PopoverTrigger asChild>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                size="icon" 
+                className="w-12 h-12 rounded-full bg-primary hover:bg-primary shadow-xl shadow-primary/25 cursor-pointer flex items-center justify-center border border-white/20 dark:border-white/10"
+              >
+                <Keyboard className="w-5 h-5 text-primary-foreground" />
+              </Button>
+            </motion.div>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-4 shadow-2xl border-border bg-card/95 backdrop-blur-md rounded-2xl overflow-hidden mr-2" align="end" side="top" sideOffset={10}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Keyboard className="w-4 h-4 text-primary" />
+              </div>
+              <h4 className="font-black text-xs uppercase tracking-wider text-foreground">Atajos de Teclado</h4>
+            </div>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">Buscar Productos</span>
+                <kbd className="px-2 py-1 bg-muted rounded-md text-[10px] font-black border border-border shadow-sm text-foreground">F2</kbd>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">Procesar Venta</span>
+                <kbd className="px-2 py-1 bg-muted rounded-md text-[10px] font-black border border-border shadow-sm text-foreground">F8</kbd>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">Vaciar Carrito</span>
+                <kbd className="px-2 py-1 bg-muted rounded-md text-[10px] font-black border border-border shadow-sm text-foreground">ESC</kbd>
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-border/50 text-[9px] text-muted-foreground italic text-center font-medium">
+              Agiliza tus cobros usando el teclado.
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
     </motion.div>
   )
 }

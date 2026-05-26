@@ -181,7 +181,7 @@ export const POSDashboard = ({
             : 0 
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed lg:relative z-50 flex flex-col h-[calc(100vh-1rem)] m-2 bg-white/40 dark:bg-zinc-900/60 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] overflow-hidden group/sidebar shadow-2xl"
+        className="fixed lg:relative z-50 flex flex-col h-[calc(100vh-1rem)] m-2 bg-gradient-to-b from-white/70 to-white/40 dark:from-zinc-900/80 dark:to-zinc-950/60 backdrop-blur-3xl border border-white/30 dark:border-zinc-800/80 rounded-[2.5rem] overflow-hidden group/sidebar shadow-2xl"
       >
         <div className={`flex items-center ${sidebarOpen ? "justify-between" : "justify-center"} px-5 border-b border-white/10 dark:border-white/5 shrink-0 h-20`}>
           <AnimatePresence mode="wait">

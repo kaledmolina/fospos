@@ -98,6 +98,7 @@ export interface CreditWithDetails {
   status: string
   dueDate?: string | null
   createdAt: string
+  sale?: { id: string; invoiceNumber?: string } | null
 }
 
 // Sale Types
@@ -157,6 +158,9 @@ export interface NotificationData {
   id: string
   title: string
   message: string
+  type?: string
+  referenceType?: string
+  referenceId?: string
   data?: Record<string, unknown>
   createdAt: string
   isRead: boolean

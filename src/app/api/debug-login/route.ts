@@ -8,10 +8,10 @@ export async function POST(request: NextRequest) {
     
     console.log("🔍 Debug login attempt:", { email, password: password?.substring(0, 3) + "***" })
     
-    // Find user
+    // Find user — use `branches` (plural) per schema, not `branch`
     const user = await db.user.findUnique({
       where: { email },
-      include: { tenant: true, branch: true }
+      include: { tenant: true, branches: true }
     })
     
     if (!user) {
@@ -77,6 +77,8 @@ export async function POST(request: NextRequest) {
       })
     }
     
+    const firstBranch = user.branches?.[0]
+    
     return NextResponse.json({
       success: true,
       message: "Login debería funcionar correctamente",
@@ -87,8 +89,8 @@ export async function POST(request: NextRequest) {
         role: user.role,
         tenantId: user.tenantId,
         tenantName: user.tenant?.businessName,
-        branchId: user.branchId,
-        branchName: user.branch?.name
+        branchId: firstBranch?.id ?? null,
+        branchName: firstBranch?.name ?? null
       }
     })
     

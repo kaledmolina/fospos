@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         tenant: {
           select: { businessName: true }
         },
-        branch: {
+        branches: {
           select: { name: true }
         }
       },

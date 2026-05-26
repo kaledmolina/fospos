@@ -52,7 +52,11 @@ export const usePOS = (session: any) => {
     quantity: number; 
     type: "PRODUCT" | "SERVICE"; 
     isSubscription?: boolean;
-    data: any 
+    data: any;
+    batchId?: string | null;
+    batchNumber?: string | null;
+    presentation?: any | null;
+    presentationId?: string | null;
   }[]>([])
   const [cartCustomer, setCartCustomer] = useState<CustomerData | null>(null)
   const [cartPaymentMethod, setCartPaymentMethod] = useState<string>("CASH")
@@ -699,7 +703,7 @@ export const usePOS = (session: any) => {
         setProductForm({ 
           code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
-          expiryDate: "", imageUrl: "", presentations: []
+          expiryDate: "", imageUrl: "", supplierId: "", batchNumber: "", presentations: []
         })
         fetchPOSData()
       } else {
@@ -753,7 +757,7 @@ export const usePOS = (session: any) => {
         setProductForm({ 
           code: "", sku: "", name: "", description: "", costPrice: 0, salePrice: 0, wholesalePrice: 0, 
           stock: 0, minStock: 5, unit: "unidad", categoryId: "", isActive: true,
-          expiryDate: "", imageUrl: "", presentations: []
+          expiryDate: "", imageUrl: "", supplierId: "", batchNumber: "", presentations: []
         })
         fetchPOSData()
       } else {
@@ -1152,7 +1156,6 @@ export const usePOS = (session: any) => {
               unitPrice: item.price // Asegurar que enviamos el precio calculado
             }
           }),
-          paymentMethod: cartPaymentMethod,
           discount: cartDiscount,
           pointsRedeemed: redeemPoints,
           couponCode: appliedCoupon?.code,
@@ -1501,7 +1504,7 @@ export const usePOS = (session: any) => {
         toast.success(editingBranch ? "Sucursal actualizada" : "Sucursal creada")
         setBranchDialog(false)
         setEditingBranch(null)
-        setBranchForm({ name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0, logoUrl: "", themeColor: "#10b981" })
+        setBranchForm({ name: "", address: "", phone: "", city: "", isMain: false, monthlyGoal: 0, logoUrl: "", themeColor: "#10b981", enabledPaymentMethods: "CASH,CARD,TRANSFER,CREDIT,MIXED,GIFT_CARD" })
         fetchBranches()
       } else {
         toast.error(data.error || "Error al procesar sucursal")
@@ -1869,6 +1872,8 @@ export const usePOS = (session: any) => {
     sales, filteredSales, fetchSales,
     selectedBranch, setSelectedBranch, creditFilter, setCreditFilter,
     saleSearch, setSaleSearch,
+    interestRate, setInterestRate, creditSearch, setCreditSearch,
+    fetchGiftCards,
     activityLogs, fetchActivityLogs,
     tenantUsers, cart, setCart, cartCustomer, setCartCustomer,
     cartPaymentMethod, setCartPaymentMethod: handleSetCartPaymentMethod, cartDiscount, setCartDiscount,
@@ -1921,6 +1926,8 @@ export const usePOS = (session: any) => {
     handleAdjustStock,
     categoryForm, setCategoryForm, customerForm, setCustomerForm,
     selectedCredit, setSelectedCredit, paymentAmount, setPaymentAmount,
+    paymentDate, setPaymentDate, paymentNotes, setPaymentNotes,
+    editingCategory, setEditingCategory, handleUpdateCategory, handleDeleteCategory,
     expenseForm, setExpenseForm, branchForm, setBranchForm,
     handleUploadBranchLogo,
     bulkUploadData, setBulkUploadData, editingBranch, setEditingBranch,
@@ -1951,8 +1958,6 @@ export const usePOS = (session: any) => {
     lastSale, setLastSale, receiptDialog, setReceiptDialog,
     cashReportDialog, setCashReportDialog, cashReceived, setCashReceived,
     change, setChange,
-    branches, selectedBranch, setSelectedBranch,
-    editingCategory, setEditingCategory, handleUpdateCategory, handleDeleteCategory,
     unreadNotifications, filteredCredits, fileInputRef,
     overdueCredits: credits.filter(c => c.status === "OVERDUE" || (c.dueDate && new Date(c.dueDate) < new Date() && c.status !== "PAID")),
     dueSoonCredits: credits.filter(c => {

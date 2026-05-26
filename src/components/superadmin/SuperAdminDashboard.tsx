@@ -121,6 +121,10 @@ export const SuperAdminDashboard = ({
   }
 
   const handleStatusChange = async (id: string, status: string) => {
+    if (status === "SUSPENDED") {
+      const confirmSuspend = window.confirm("⚠️ ¿Estás completamente seguro de que deseas suspender este negocio? Esto deshabilitará el acceso de todos sus usuarios y sucursales.");
+      if (!confirmSuspend) return;
+    }
     try {
       const res = await fetch(`/api/tenants/${id}`, {
         method: "PATCH",
