@@ -17,7 +17,7 @@ model Tenant {
   email                 String
   city                  String
   address               String?
-  status                TenantStatus           @default("PENDING")
+  status                TenantStatus           @default(PENDING)
   currency              String                 @default("COP")
   taxRate               Float                  @default(19.0)
   invoicePrefix         String                 @default("FAC")
@@ -90,7 +90,7 @@ model User {
   email              String              @unique
   password           String
   name               String
-  role               UserRole            @default("CASHIER")
+  role               UserRole            @default(CASHIER)
   tenantId           String?
   isActive           Boolean             @default(true)
   phone              String?
@@ -319,8 +319,8 @@ model Sale {
   pointsValue         Float                @default(0)
   total               Float
   totalCost           Float                @default(0)
-  paymentMethod       PaymentMethod        @default("CASH")
-  paymentStatus       PaymentStatus        @default("PAID")
+  paymentMethod       PaymentMethod        @default(CASH)
+  paymentStatus       PaymentStatus        @default(PAID)
   cashReceived        Float?
   change              Float?
   creditId            String?              @unique
@@ -382,7 +382,7 @@ model PurchaseOrder {
   tenantId    String
   supplierId  String
   branchId    String?
-  status      PurchaseOrderStatus @default("PENDING")
+  status      PurchaseOrderStatus @default(PENDING)
   totalAmount Float               @default(0)
   notes       String?
   createdAt   DateTime            @default(now())
@@ -425,7 +425,7 @@ model Credit {
   balance        Float
   interestRate   Float           @default(0)
   interestAmount Float           @default(0)
-  status         CreditStatus    @default("PENDING")
+  status         CreditStatus    @default(PENDING)
   dueDate        DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -443,7 +443,7 @@ model CreditPayment {
   id             String        @id @default(cuid())
   creditId       String
   amount         Float
-  paymentMethod  PaymentMethod @default("CASH")
+  paymentMethod  PaymentMethod @default(CASH)
   notes          String?
   registeredById String?
   receiptNumber  String?       @default("")
@@ -466,7 +466,7 @@ model CashRegister {
   closedAt      DateTime?
   closedBy      String?
   finalCash     Float?
-  status        CashRegisterStatus @default("OPEN")
+  status        CashRegisterStatus @default(OPEN)
   totalSales    Float              @default(0)
   totalCash     Float              @default(0)
   totalCard     Float              @default(0)
@@ -531,7 +531,7 @@ model SubscriptionService {
   imageUrl       String?
   price          Float
   setupFee       Float                  @default(0)
-  billingCycle   BillingCycle           @default("MONTHLY")
+  billingCycle   BillingCycle           @default(MONTHLY)
   billingDays    Int                    @default(30)
   durationMonths Int?
   isActive       Boolean                @default(true)
@@ -557,7 +557,7 @@ model CustomerSubscription {
   endDate         DateTime?
   nextBillingDate DateTime
   lastPaymentDate DateTime?
-  status          SubscriptionStatus    @default("ACTIVE")
+  status          SubscriptionStatus    @default(ACTIVE)
   agreedPrice     Float
   frozenAt        DateTime?
   frozenUntil     DateTime?
@@ -580,10 +580,10 @@ model SubscriptionPayment {
   id             String               @id @default(cuid())
   subscriptionId String
   amount         Float
-  paymentMethod  PaymentMethod        @default("CASH")
+  paymentMethod  PaymentMethod        @default(CASH)
   periodStart    DateTime
   periodEnd      DateTime
-  status         PaymentStatus        @default("PAID")
+  status         PaymentStatus        @default(PAID)
   receiptNumber  String?              @default("")
   notes          String?
   createdAt      DateTime             @default(now())
@@ -613,7 +613,7 @@ model Coupon {
   tenantId    String
   code        String
   description String?
-  type        CouponType @default("FIXED")
+  type        CouponType @default(FIXED)
   value       Float
   minPurchase Float      @default(0)
   maxUses     Int?
@@ -652,7 +652,7 @@ model GiftCard {
   code          String               @unique
   balance       Float
   initialAmount Float
-  status        GiftCardStatus       @default("ACTIVE")
+  status        GiftCardStatus       @default(ACTIVE)
   expiresAt     DateTime?
   isActive      Boolean              @default(true)
   saleId        String?
